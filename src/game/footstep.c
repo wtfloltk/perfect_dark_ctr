@@ -178,7 +178,7 @@ void footstepCheckDefault(struct chrdata *chr)
 						}
 					} else {
 #ifndef PLATFORM_N64 // fix spamming footsteps for 60fps port
-						if ((lvGetSlowMotionType() != SLOWMOTION_OFF && g_Vars.speedpillon == false) || (lvGetSlowMotionType() == SLOWMOTION_OFF && g_Vars.speedpillon == true)) {
+						if (g_Vars.lvupdate240 == LV_SLOMO_TICK_CAP) {
 							s32 roundedframe = (s32)(frame*2);
 							if (roundedframe == (g_FootstepAnims[i].frame1*2) && prevframe < g_FootstepAnims[i].frame1) {
 								chr->footstep = 1;
