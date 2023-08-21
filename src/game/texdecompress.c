@@ -1975,13 +1975,14 @@ void texSwapAltRowBytes(u8 *dst, s32 width, s32 height, s32 format)
 	 */
 }
 
-void texSwapAltRowBytesInternal(u8 *dst, s32 width, s32 height, s32 format)
+void texSwapAltRowBytesInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen)
 #endif
 {
 	s32 x;
 	s32 y;
 	s32 alignedwidth;
 	u32 *row = (u32 *)dst;
+	u32 *end = (u32 *)(dst + dstlen);
 	s32 tmp;
 
 	switch (format) {
@@ -2012,7 +2013,7 @@ void texSwapAltRowBytesInternal(u8 *dst, s32 width, s32 height, s32 format)
 
 	if (format == TEXFORMAT_RGBA32 || format == TEXFORMAT_RGB24) {
 		for (y = 1; y < height; y += 2) {
-			for (x = 0; x < alignedwidth; x += 4) {
+			for (x = 0; x < alignedwidth && row + x < end; x += 4) {
 				tmp = row[x + 0];
 				row[x + 0] = row[x + 2];
 				row[x + 2] = tmp;
@@ -2026,7 +2027,7 @@ void texSwapAltRowBytesInternal(u8 *dst, s32 width, s32 height, s32 format)
 		}
 	} else {
 		for (y = 1; y < height; y += 2) {
-			for (x = 0; x < alignedwidth; x += 2) {
+			for (x = 0; x < alignedwidth && row + x < end; x += 2) {
 				tmp = row[x + 0];
 				row[x + 0] = row[x + 1];
 				row[x + 1] = tmp;

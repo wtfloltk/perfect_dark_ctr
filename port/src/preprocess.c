@@ -191,7 +191,7 @@ static inline void preprocessVtx(Vtx *vtx)
 	PD_SWAP_VAL(vtx->t);
 }
 
-static void preprocessModelGunDL(struct modelrodata_gundl *gundl, u8 *base, u32 ofs)
+static u8 *preprocessModelGunDL(struct modelrodata_gundl *gundl, u8 *base, u32 ofs)
 {
 	PD_SWAP_PTR(gundl->baseaddr);
 	PD_SWAP_PTR(gundl->vertices);
@@ -208,14 +208,25 @@ static void preprocessModelGunDL(struct modelrodata_gundl *gundl, u8 *base, u32 
 		preprocessGfx(PD_PTR_BASEOFS(gundl->opagdl, base, ofs), base, ofs);
 		gundl->opagdl = SEGADDR(gundl->opagdl);
 	}
+
 	if (gundl->xlugdl) {
 		PD_SWAP_PTR(gundl->xlugdl);
 		preprocessGfx(PD_PTR_BASEOFS(gundl->xlugdl, base, ofs), base, ofs);
 		gundl->xlugdl = SEGADDR(gundl->xlugdl);
 	}
+
+	u8 *lowptr = (u8 *)gundl->vertices;
+	if (gundl->opagdl && (u8 *)gundl->opagdl < lowptr) {
+		lowptr = (u8 *)gundl->opagdl;
+	}
+	if (gundl->xlugdl && (u8 *)gundl->xlugdl < lowptr) {
+		lowptr = (u8 *)gundl->xlugdl;
+	}
+
+	return lowptr;
 }
 
-static void preprocessModelDL(struct modelrodata_dl *dl, u8 *base, u32 ofs)
+static u8 *preprocessModelDL(struct modelrodata_dl *dl, u8 *base, u32 ofs)
 {
 	PD_SWAP_PTR(dl->colours);
 	PD_SWAP_PTR(dl->vertices);
@@ -235,15 +246,33 @@ static void preprocessModelDL(struct modelrodata_dl *dl, u8 *base, u32 ofs)
 		preprocessGfx(PD_PTR_BASEOFS(dl->opagdl, base, ofs), base, ofs);
 		dl->opagdl = SEGADDR(dl->opagdl);
 	}
+
 	if (dl->xlugdl) {
 		PD_SWAP_PTR(dl->xlugdl);
 		preprocessGfx(PD_PTR_BASEOFS(dl->xlugdl, base, ofs), base, ofs);
 		dl->xlugdl = SEGADDR(dl->xlugdl);
 	}
+
+	u8 *lowptr = (u8 *)dl->vertices;
+	if (dl->colours && (u8 *)dl->colours < lowptr) {
+		lowptr = (u8 *)dl->colours;
+	}
+	if (dl->opagdl && (u8 *)dl->opagdl < lowptr) {
+		lowptr = (u8 *)dl->opagdl;
+	}
+	if (dl->xlugdl && (u8 *)dl->xlugdl < lowptr) {
+		lowptr = (u8 *)dl->xlugdl;
+	}
+
+	return lowptr;
 }
 
-static void preprocessModelNode(struct modelnode *node, u8 *base, u32 ofs)
+// returns the pointer to the start of the non-texture graphics data (verts, gdls, etc)
+static u8 *preprocessModelNode(struct modelnode *node, u8 *base, u32 ofs)
 {
+	u8 *lowptr = NULL;
+	u8 *tmp = NULL;
+
 	while (node) {
 		PD_SWAP_VAL(node->type);
 		PD_SWAP_PTR(node->child);
@@ -270,7 +299,10 @@ static void preprocessModelNode(struct modelnode *node, u8 *base, u32 ofs)
 					PD_SWAP_VAL(ro->position.mtxindex2);
 					break;
 				case MODELNODETYPE_GUNDL:
-					preprocessModelGunDL(&ro->gundl, base, ofs);
+					tmp = preprocessModelGunDL(&ro->gundl, base, ofs);
+					if (tmp && (!lowptr || tmp < lowptr)) {
+						lowptr = tmp;
+					}
 					break;
 				case MODELNODETYPE_05:
 					break;
@@ -347,6 +379,9 @@ static void preprocessModelNode(struct modelnode *node, u8 *base, u32 ofs)
 						PD_SWAP_PTR(ro->stargunfire.gdl);
 						preprocessGfx(PD_PTR_BASEOFS(ro->stargunfire.gdl, base, ofs), base, ofs);
 						ro->stargunfire.gdl = SEGADDR(ro->stargunfire.gdl);
+						if (!lowptr || (u8 *)ro->stargunfire.gdl < lowptr) {
+							lowptr = (u8 *)ro->stargunfire.gdl;
+						}
 					}
 					if (ro->stargunfire.vertices) {
 						PD_SWAP_PTR(ro->stargunfire.vertices);
@@ -354,13 +389,19 @@ static void preprocessModelNode(struct modelnode *node, u8 *base, u32 ofs)
 						for (s32 i = 0; i < 4 * ro->stargunfire.unk00; ++i, ++vtx) {
 							preprocessVtx(vtx);
 						}
+						if (!lowptr || (u8 *)ro->stargunfire.vertices < lowptr) {
+							lowptr = (u8 *)ro->stargunfire.vertices;
+						}
 					}
 					break;
 				case MODELNODETYPE_HEADSPOT:
 					PD_SWAP_VAL(ro->headspot.rwdataindex);
 					break;
 				case MODELNODETYPE_DL:
-					preprocessModelDL(&ro->dl, base, ofs);
+					tmp = preprocessModelDL(&ro->dl, base, ofs);
+					if (tmp && (!lowptr || tmp < lowptr)) {
+						lowptr = tmp;
+					}
 					break;
 				case 0x19:
 					PD_SWAP_VAL(ro->type19.numvertices);
@@ -390,6 +431,8 @@ static void preprocessModelNode(struct modelnode *node, u8 *base, u32 ofs)
 			}
 		}
 	}
+
+	return (u8 *)UNSEGADDR(lowptr);
 }
 
 static inline void preprocessPadData(u8 *ptr)
@@ -1088,6 +1131,12 @@ void preprocessModel(u8 *base, u32 ofs)
 		}
 	}
 
+	u8 *texturesEnd = NULL;
+	if (mdl->rootnode) {
+		PD_SWAP_PTR(mdl->rootnode);
+		texturesEnd = preprocessModelNode(PD_PTR_BASEOFS(mdl->rootnode, base, ofs), base, ofs);
+	}
+
 	if (mdl->texconfigs) {
 		PD_SWAP_PTR(mdl->texconfigs);
 		struct textureconfig *texconfigs = PD_PTR_BASEOFS(mdl->texconfigs, base, ofs);
@@ -1095,17 +1144,14 @@ void preprocessModel(u8 *base, u32 ofs)
 			PD_SWAP_VAL(texconfigs[i].texturenum);
 			if ((texconfigs[i].texturenum & 0xf000000) == 0x5000000) {
 				// embedded texture; we need to unswizzle this
-				u8 *texdata = PD_PTR_BASEOFS(texconfigs[i].texturenum, base, ofs);
+				u8 *texdata = PD_PTR_BASEOFS(texconfigs[i].textureptr, base, ofs);
+				// figure out the max possible size the texture can have, because sometimes the texconfig is wrong
+				const u32 maxSize = (texturesEnd > texconfigs[i].textureptr) ? (texturesEnd - texconfigs[i].textureptr) : 0;
 				// figure out the format and unswizzle
 				const s32 format = texConfigToFormat(&texconfigs[i]);
-				texSwapAltRowBytesInternal(texdata, texconfigs[i].width, texconfigs[i].height, format);
+				texSwapAltRowBytesInternal(texdata, texconfigs[i].width, texconfigs[i].height, format, maxSize);
 			}
 		}
-	}
-
-	if (mdl->rootnode) {
-		PD_SWAP_PTR(mdl->rootnode);
-		preprocessModelNode(PD_PTR_BASEOFS(mdl->rootnode, base, ofs), base, ofs);
 	}
 }
 

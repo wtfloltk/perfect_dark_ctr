@@ -36,7 +36,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool arg2);
 void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct texpool *pool, s32 arg3);
 void texLoadFromTextureNum(u32 arg0, struct texpool *pool);
 #ifndef PLATFORM_N64
-void texSwapAltRowBytesInternal(u8 *dst, s32 width, s32 height, s32 format);
+void texSwapAltRowBytesInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen);
 s32 texConfigToFormat(const struct textureconfig *tex);
 #endif
 
