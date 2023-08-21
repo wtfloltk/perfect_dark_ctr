@@ -72,7 +72,7 @@ struct RGBA {
 struct NormalColor {
     union {
         struct { uint8_t r, g, b, a; };
-        struct { uint8_t x, y, z, w; };
+        struct { int8_t x, y, z, w; };
     };
 };
 
