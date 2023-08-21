@@ -210,7 +210,7 @@
 {                                                      \
     Gfx *_g = (Gfx *)(pkt);                            \
                                                        \
-    _g->words.w0 = _SHIFTL(G_INVALTEXCACHE_EXT, 24, 8) \
+    _g->words.w0 = _SHIFTL(G_INVALTEXCACHE_EXT, 24, 8);\
     _g->words.w1 = (uintptr_t)(addr);                  \
 }
 

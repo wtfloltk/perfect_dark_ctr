@@ -503,11 +503,14 @@ static struct ColorCombiner* gfx_lookup_or_create_color_combiner(const ColorComb
 }
 
 void gfx_texture_cache_clear() {
+    gfx_flush();
     for (const auto& entry : gfx_texture_cache.map) {
         gfx_texture_cache.free_texture_ids.push_back(entry.second.texture_id);
     }
     gfx_texture_cache.map.clear();
     gfx_texture_cache.lru.clear();
+    rdp.textures_changed[0] = rdp.textures_changed[1] = true;
+    memset(rendering_state.textures, 0, sizeof(rendering_state.textures));
 }
 
 static bool gfx_texture_cache_lookup(int i, const TextureCacheKey& key) {
@@ -550,6 +553,8 @@ static bool gfx_texture_cache_lookup(int i, const TextureCacheKey& key) {
 }
 
 static void gfx_texture_cache_delete(const uint8_t* orig_addr) {
+    gfx_flush();
+    rdp.textures_changed[0] = rdp.textures_changed[1] = true;
     while (gfx_texture_cache.map.bucket_count() > 0) {
         TextureCacheKey key = { orig_addr, { 0 }, 0, 0 }; // bucket index only depends on the address
         size_t bucket = gfx_texture_cache.map.bucket(key);
@@ -1368,14 +1373,16 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
                 cmt &= ~G_TX_CLAMP;
             }
 
-            bool linear_filter = (rdp.other_mode_h & (3U << G_MDSFT_TEXTFILT)) != G_TF_POINT;
-            if (linear_filter != rendering_state.textures[i]->second.linear_filter ||
-                cms != rendering_state.textures[i]->second.cms || cmt != rendering_state.textures[i]->second.cmt) {
-                gfx_flush();
-                gfx_rapi->set_sampler_parameters(i, linear_filter, cms, cmt);
-                rendering_state.textures[i]->second.linear_filter = linear_filter;
-                rendering_state.textures[i]->second.cms = cms;
-                rendering_state.textures[i]->second.cmt = cmt;
+            if (rendering_state.textures[i]) {
+                bool linear_filter = (rdp.other_mode_h & (3U << G_MDSFT_TEXTFILT)) != G_TF_POINT;
+                if (linear_filter != rendering_state.textures[i]->second.linear_filter ||
+                    cms != rendering_state.textures[i]->second.cms || cmt != rendering_state.textures[i]->second.cmt) {
+                    gfx_flush();
+                    gfx_rapi->set_sampler_parameters(i, linear_filter, cms, cmt);
+                    rendering_state.textures[i]->second.linear_filter = linear_filter;
+                    rendering_state.textures[i]->second.cms = cms;
+                    rendering_state.textures[i]->second.cmt = cmt;
+                }
             }
         }
     }
