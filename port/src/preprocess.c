@@ -282,6 +282,9 @@ static u8 *preprocessModelNode(struct modelnode *node, u8 *base, u32 ofs)
 
 		if (node->rodata) {
 			union modelrodata* ro = PD_PTR_BASEOFS(node->rodata, base, ofs);
+			if (!lowptr || ((u8 *)node->rodata < lowptr)) {
+				lowptr = (u8 *)node->rodata;
+			}
 
 			switch (node->type & 0xff) {
 				case MODELNODETYPE_CHRINFO:
