@@ -2950,7 +2950,19 @@
 #define MPWEAPON_COMBATBOOST      (VERSION == VERSION_JPN_FINAL ? 0x23 : 0x24)
 #define MPWEAPON_SHIELD           (VERSION == VERSION_JPN_FINAL ? 0x24 : 0x25)
 #define MPWEAPON_DISABLED         (VERSION == VERSION_JPN_FINAL ? 0x25 : 0x26)
+#ifdef PLATFORM_N64
 #define NUM_MPWEAPONS             (VERSION == VERSION_JPN_FINAL ? 0x26 : 0x27)
+#else // add all classic weapons to multiplayer
+#define MPWEAPON_PP9I             (VERSION == VERSION_JPN_FINAL ? 0x26 : 0x27)
+#define MPWEAPON_CC13             (VERSION == VERSION_JPN_FINAL ? 0x27 : 0x28)
+#define MPWEAPON_KL01313          (VERSION == VERSION_JPN_FINAL ? 0x28 : 0x29)
+#define MPWEAPON_KF7SPECIAL       (VERSION == VERSION_JPN_FINAL ? 0x29 : 0x2a)
+#define MPWEAPON_ZZT              (VERSION == VERSION_JPN_FINAL ? 0x2a : 0x2b)
+#define MPWEAPON_DMC              (VERSION == VERSION_JPN_FINAL ? 0x2b : 0x2c)
+#define MPWEAPON_AR53             (VERSION == VERSION_JPN_FINAL ? 0x2c : 0x2d)
+#define MPWEAPON_RCP45            (VERSION == VERSION_JPN_FINAL ? 0x2d : 0x2e)
+#define NUM_MPWEAPONS             (VERSION == VERSION_JPN_FINAL ? 0x2e : 0x2f)
+#endif
 
 #define MUSICEVENTTYPE_PLAY        1
 #define MUSICEVENTTYPE_STOP        2
