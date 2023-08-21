@@ -2063,11 +2063,19 @@ f32 playerGetZoomFovY(void)
 
 void playerTweenFovY(f32 targetfovy)
 {
+	f32 speed = 15.0f / 30.0f;
+
+#ifndef PLATFORM_N64
+	if (videoGetPlayerFovY() > 60.0f) { // adjust zoom speed depending on non-default fov setting (higher fov == faster zoom)
+		speed /= videoGetPlayerFovY() / 60.0f;
+	}
+#endif
+
 	if (playerGetZoomFovY() != targetfovy) {
 		if (g_Vars.currentplayer->zoominfovy > targetfovy) {
-			playerSetZoomFovY(targetfovy, (g_Vars.currentplayer->zoominfovy - targetfovy) * 15.0f / 30.0f);
+			playerSetZoomFovY(targetfovy, (g_Vars.currentplayer->zoominfovy - targetfovy) * speed);
 		} else {
-			playerSetZoomFovY(targetfovy, (targetfovy - g_Vars.currentplayer->zoominfovy) * 15.0f / 30.0f);
+			playerSetZoomFovY(targetfovy, (targetfovy - g_Vars.currentplayer->zoominfovy) * speed);
 		}
 	}
 }
