@@ -1543,6 +1543,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 					}
 
 					// Handle mine detonation
+					#ifdef PLATFORM_N64
 					if ((((c1buttons & invbuttons) && (c1buttonsthisframe & B_BUTTON))
 							|| ((c1buttons & B_BUTTON) && (c1buttonsthisframe & invbuttons)))
 							&& weaponnum == WEAPON_REMOTEMINE) {
@@ -1553,6 +1554,30 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						g_Vars.currentplayer->invdowntime = -2;
 						g_Vars.currentplayer->usedowntime = -2;
 					}
+					#else
+					if ((((c1buttons & BUTTON_RADIAL) && (c1buttonsthisframe & BUTTON_CANCEL_USE))
+							|| ((c1buttons & BUTTON_CANCEL_USE) && (c1buttonsthisframe & BUTTON_RADIAL)))
+							&& weaponnum == WEAPON_REMOTEMINE) {
+						movedata.detonating = true;
+						movedata.weaponbackoffset = 0;
+						movedata.weaponforwardoffset = 0;
+						movedata.btapcount = 0;
+						amClose();
+						g_Vars.currentplayer->invdowntime = -2;
+						g_Vars.currentplayer->usedowntime = -2;
+						g_Vars.currentplayer->amdowntime = 0;
+					}
+					if ((((c1buttons & BUTTON_WPNBACK) && (c1buttonsthisframe & BUTTON_CANCEL_USE))
+							|| ((c1buttons & BUTTON_CANCEL_USE) && (c1buttonsthisframe & BUTTON_WPNBACK)))
+							&& weaponnum == WEAPON_REMOTEMINE) {
+						movedata.detonating = true;
+						movedata.weaponbackoffset = 0;
+						movedata.weaponforwardoffset = 0;
+						movedata.btapcount = 0;
+						g_Vars.currentplayer->invdowntime = -2;
+						g_Vars.currentplayer->usedowntime = -2;
+					}
+					#endif
 				}
 
 				movedata.aiming = g_Vars.currentplayer->insightaimmode;
