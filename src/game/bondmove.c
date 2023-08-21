@@ -903,14 +903,15 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						} else {
 							for (i = 0; i < numsamples; i++) {
-								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & L_JPAD)) {
+								#ifndef PLATFORM_N64
+								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & BUTTON_WPNFORWARD)) {
 									movedata.weaponforwardoffset++;
 									g_Vars.currentplayer->invdowntime = -1;
-								} else
-								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & R_JPAD)) {
+								} else if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & BUTTON_WPNBACK)) {
 									movedata.weaponbackoffset++;
 									g_Vars.currentplayer->invdowntime = -1;
 								}
+								#else
 								if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & A_BUTTON)
 										|| joyGetButtonsOnSample(i, contpad2, c2allowedbuttons & A_BUTTON)) {
 									if (g_Vars.currentplayer->invdowntime > -2) {
@@ -937,10 +938,12 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 									g_Vars.currentplayer->invdowntime = 0;
 								}
+								#endif
 							}
 						}
 					}
 
+					#ifdef PLATFORM_N64
 					// Handle B button activation
 					if (allowc1buttons) {
 						for (i = 0; i < numsamples; i++) {
@@ -982,6 +985,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						}
 					}
+				#endif
 
 					// Handle manual zoom in and out (sniper, farsight and horizon scanner)
 					if (canmanualzoom && g_Vars.currentplayer->insightaimmode) {
@@ -1283,14 +1287,15 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						} else {
 							for (i = 0; i < numsamples; i++) {
-								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & L_JPAD)) {
+								#ifndef PLATFORM_N64
+								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & BUTTON_WPNFORWARD)) {
 									movedata.weaponforwardoffset++;
 									g_Vars.currentplayer->invdowntime = -1;
-								} else
-								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & R_JPAD)) {
+								} else if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & BUTTON_WPNBACK)) {
 									movedata.weaponbackoffset++;
 									g_Vars.currentplayer->invdowntime = -1;
 								}
+								#else
 								if (joyGetButtonsOnSample(i, contpad1, invbuttons & c1allowedbuttons)) {
 									if (g_Vars.currentplayer->invdowntime > -2) {
 										if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)) {
@@ -1318,10 +1323,12 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 									g_Vars.currentplayer->invdowntime = 0;
 								}
+								#endif
 							}
 						}
 					}
 
+					#ifdef PLATFORM_N64
 					// Handle B button
 					if (allowc1buttons) {
 						for (i = 0; i < numsamples; i++) {
@@ -1364,75 +1371,92 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						}
 					}
+					#endif
 
 
-					// handle L button
-					for (i = 0; i< numsamples; i++) {
-						if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & L_TRIG)) {
-							if (g_Vars.currentplayer->altdowntime >= -1) {
-								if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)
-										&& g_Vars.currentplayer->altdowntime >= 0
-										&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, true, false, true) != USETIMER_CONTINUE) {
-									g_Vars.currentplayer->altdowntime = -3;
+					#ifndef PLATFORM_N64
+					if (allowc1buttons) {
+						// handle B / A: cancel_use
+						for (i = 0; i < numsamples; i++) {
+							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE))) {
+								g_Vars.currentplayer->usedowntime++;
+							} else {
+								if (g_Vars.currentplayer->usedowntime > 0) {
+									movedata.btapcount++;
+									g_Vars.currentplayer->usedowntime = 0;
 								}
+							}
 
-								if (g_Vars.currentplayer->altdowntime != -4) {
-									if (g_Vars.currentplayer->altdowntime <= 0) {
-										g_Vars.currentplayer->altdowntime++;
+						}
+						// handle L button : alt switching
+						for (i = 0; i< numsamples; i++) {
+							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & BUTTON_ALTMODE)) {
+								if (g_Vars.currentplayer->altdowntime >= -1) {
+									if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)
+											&& g_Vars.currentplayer->altdowntime >= 0
+											&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, true, false, true) != USETIMER_CONTINUE) {
+										g_Vars.currentplayer->altdowntime = -3;
 									}
-								}
-							} else  {
-								if (g_Vars.currentplayer->altdowntime == -2) {
-									bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, false, false, true);
-									g_Vars.currentplayer->altdowntime = -4;
-								}
-							}
-						} else {
-							// Released L
-							if (g_Vars.currentplayer->altdowntime != 0) {
-								s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, (g_Vars.currentplayer->altdowntime == -3 ? true: false), false, true);
 
-								if (result == USETIMER_STOP) {
-									g_Vars.currentplayer->altdowntime = -1;
-								} else if (result == USETIMER_REPEAT) {
-									g_Vars.currentplayer->altdowntime = -2;
-								}
-							}
-							g_Vars.currentplayer->altdowntime = 0;
-						}
-					}
-
-					// Handle ALT1 / MI Reload Hack
-					for (i = 0; i < numsamples; i++) {
-						if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & X_BUTTON)) {
-							movedata.alt1tapcount++;
-						}
-					}
-
-
-					// Handle radial menu (D-Down)
-					for (i = 0; i < numsamples; i++) {
-						if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & D_JPAD)) {
-							if (g_Vars.currentplayer->amdowntime < -2) {
-								g_Vars.currentplayer->amdowntime += numsamples;
-
-								if (g_Vars.currentplayer->amdowntime > -3) {
-									g_Vars.currentplayer->amdowntime = 0;
+									if (g_Vars.currentplayer->altdowntime != -4) {
+										if (g_Vars.currentplayer->altdowntime <= 0) {
+											g_Vars.currentplayer->altdowntime++;
+										}
+									}
+								} else  {
+									if (g_Vars.currentplayer->altdowntime == -2) {
+										bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, false, false, true);
+										g_Vars.currentplayer->altdowntime = -4;
+									}
 								}
 							} else {
-								if (g_Vars.currentplayer->amdowntime >= 0) {
-									if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & D_JPAD)) {
-										amOpen();
-										g_Vars.currentplayer->amdowntime = -1;
-									} else {
-										g_Vars.currentplayer->amdowntime++;
+								// Released L
+								if (g_Vars.currentplayer->altdowntime != 0) {
+									s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, (g_Vars.currentplayer->altdowntime == -3 ? true: false), false, true);
+
+									if (result == USETIMER_STOP) {
+										g_Vars.currentplayer->altdowntime = -1;
+									} else if (result == USETIMER_REPEAT) {
+										g_Vars.currentplayer->altdowntime = -2;
 									}
 								}
+								g_Vars.currentplayer->altdowntime = 0;
 							}
-						} else {
-							g_Vars.currentplayer->amdowntime = 0;
+						}
+
+						// Handle ALT1 / MI Reload Hack
+						for (i = 0; i < numsamples; i++) {
+							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & BUTTON_RELOAD)) {
+								movedata.alt1tapcount++;
+							}
+						}
+
+
+						// Handle radial menu (D-Down)
+						for (i = 0; i < numsamples; i++) {
+							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & BUTTON_RADIAL)) {
+								if (g_Vars.currentplayer->amdowntime < -2) {
+									g_Vars.currentplayer->amdowntime += numsamples;
+
+									if (g_Vars.currentplayer->amdowntime > -3) {
+										g_Vars.currentplayer->amdowntime = 0;
+									}
+								} else {
+									if (g_Vars.currentplayer->amdowntime >= 0) {
+										if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & BUTTON_RADIAL)) {
+											amOpen();
+											g_Vars.currentplayer->amdowntime = -1;
+										} else {
+											g_Vars.currentplayer->amdowntime++;
+										}
+									}
+								}
+							} else {
+								g_Vars.currentplayer->amdowntime = 0;
+							}
 						}
 					}
+					#endif
 
 					// Handle manual zoom in and out (sniper, farsight and horizon scanner)
 					if (canmanualzoom && g_Vars.currentplayer->insightaimmode) {

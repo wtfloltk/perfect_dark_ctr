@@ -752,8 +752,13 @@ void eyespyProcessInput(bool allowbuttons)
 			shootpressed = c1buttons & Z_TRIG;
 		}
 
+		#ifdef PLATFORM_N64
 		exitpressed = (c1buttons | c2buttons) & A_BUTTON;
 		activatepressed = (c1buttons | c2buttons) & B_BUTTON;
+		#else 
+		exitpressed = (c1buttons | c2buttons) & BUTTON_ACCEPT_USE;
+		activatepressed = (c1buttons | c2buttons) & BUTTON_CANCEL_USE;
+		#endif
 	}
 
 	// Apply safe zone for c1stickx
