@@ -4626,7 +4626,35 @@ enum weaponnum {
 #define BODY_DARK_LEATHER     0x95
 #define BODY_DARK_NEGOTIATOR  0x96
 
-#endif
-
 #define JO_ACTION_ACTIVATE           0x0001
 #define JO_ACTION_RELOAD             0x0002
+
+
+#ifdef PLATFORM_N64
+
+#define BUTTON_ACCEPT_WPNFORWARD CONT_A
+#define BUTTON_CANCEL_USE CONT_B
+
+#define BUTTON_USE BUTTON_CANCEL_USE
+#define BUTTON_CANCEL BUTTON_CANCEL_USE
+#define BUTTON_RELOAD BUTTON_USE
+#define BUTTON_ACCEPT BUTTON_ACCEPT_WPNFORWARD
+#define BUTTON_WPNFORWARD BUTTON_ACCEPT_WPNFORWARD
+
+#else
+
+// xbla behavior
+#define BUTTON_ACCEPT_USE     A_BUTTON
+// 1964 behavior
+#define BUTTON_CANCEL_USE     B_BUTTON
+
+#define BUTTON_RELOAD         X_BUTTON
+// dedicated button for mousewheel / xbla parity
+#define BUTTON_WPNBACK        L_JPAD
+// dedicated button for mousewheel / xbla parity
+#define BUTTON_WPNFORWARD     Y_BUTTON
+#define BUTTON_RADIAL         D_JPAD
+#define BUTTON_ALTMODE        L_TRIG
+#endif
+
+#endif
