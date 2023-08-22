@@ -46,6 +46,7 @@
 #ifndef PLATFORM_N64
 #include "preprocess.h"
 #include "system.h"
+#include "video.h"
 #endif
 
 #define BGCMD_END                               0x00
@@ -2221,6 +2222,19 @@ Gfx *bgScissorWithinViewportF(Gfx *gdl, f32 viewleft, f32 viewtop, f32 viewright
 
 Gfx *bgScissorWithinViewport(Gfx *gdl, s32 viewleft, s32 viewtop, s32 viewright, s32 viewbottom)
 {
+#ifndef PLATFORM_N64
+	const s32 xmargin = videoGetWidth() / SCREEN_320 - 1;
+	const s32 ymargin = videoGetHeight() / SCREEN_240 - 1;
+	if (xmargin > 0) {
+		viewleft -= xmargin;
+		viewright += xmargin;
+	}
+	if (ymargin > 0) {
+		viewtop -= ymargin;
+		viewbottom += ymargin;
+	}
+#endif
+
 	if (viewleft < g_Vars.currentplayer->viewleft) {
 		viewleft = g_Vars.currentplayer->viewleft;
 	}
