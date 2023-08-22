@@ -185,9 +185,11 @@
 /* Extended RDP commands */
 
 #define G_SETFB_EXT         0x21
-#define G_COPYFB_EXT        0x41
 #define G_SETTIMG_FB_EXT    0x23
 #define G_INVALTEXCACHE_EXT 0x34
+#define G_SETGRAYSCALE_EXT  0x39
+#define G_SETINTENSITY_EXT  0x40
+#define G_COPYFB_EXT        0x41
 
 /* Extended RDP command macros */
 
@@ -213,6 +215,16 @@
     _g->words.w0 = _SHIFTL(G_INVALTEXCACHE_EXT, 24, 8);\
     _g->words.w1 = (uintptr_t)(addr);                  \
 }
+
+#define gDPGrayscaleEXT(pkt, state)                    \
+{                                                      \
+    Gfx* _g = (Gfx*)(pkt);                             \
+                                                       \
+    _g->words.w0 = _SHIFTL(G_SETGRAYSCALE_EXT, 24, 8); \
+    _g->words.w1 = state;                              \
+}
+
+#define gDPSetGrayscaleColorEXT(pkt, r, g, b, lerp) DPRGBColor(pkt, G_SETINTENSITY_EXT, r, g, b, lerp)
 
 #endif
 

@@ -2398,6 +2398,9 @@ static void gfx_run_dl(Gfx* cmd) {
                 rdp.textures_changed[0] = false;
                 rdp.textures_changed[1] = false;
                 break;
+            case G_SETGRAYSCALE_EXT:
+                rdp.grayscale = cmd->words.w1;
+                break;
             case G_LOADBLOCK:
                 gfx_dp_load_block(C1(24, 3), C0(12, 12), C0(0, 12), C1(12, 12), C1(0, 12));
                 break;
@@ -2425,6 +2428,9 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             case G_SETFILLCOLOR:
                 gfx_dp_set_fill_color(cmd->words.w1);
+                break;
+            case G_SETINTENSITY_EXT:
+                gfx_dp_set_grayscale_color(C1(24, 8), C1(16, 8), C1(8, 8), C1(0, 8));
                 break;
             case G_SETCOMBINE:
                 gfx_dp_set_combine_mode(color_comb(C0(20, 4), C1(28, 4), C0(15, 5), C1(15, 3)),

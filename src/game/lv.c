@@ -1185,6 +1185,9 @@ Gfx *lvRender(Gfx *gdl)
 				}
 
 				gdl = viRenderViewportEdges(gdl);
+#ifndef PLATFORM_N64
+				gdl = playerSetVisionMode(gdl);
+#endif
 				gdl = skyRender(gdl);
 				bgTick();
 				lightsTick();
@@ -1306,6 +1309,7 @@ Gfx *lvRender(Gfx *gdl)
 				}
 
 				propsTestForPickup();
+
 				gdl = bgRender(gdl);
 				chr0f028498(var80075d68 == 15 || g_AnimHostEnabled);
 				gdl = propsRenderBeams(gdl);
