@@ -97,14 +97,6 @@
 #include "lib/vi.h"
 #include "types.h"
 
-#ifdef PLATFORM_N64
-// game runs at ~30, so slomo = 1/2 of 30fps
-#define LV_SLOMO_TICK_CAP TICKS(4)
-#else
-// game runs at 60+, so slomo = 1/2 of 60fps
-#define LV_SLOMO_TICK_CAP TICKS(2)
-#endif
-
 struct sndstate *g_MiscSfxAudioHandles[3];
 u32 var800aa5bc;
 s32 g_MiscSfxActiveTypes[3];
