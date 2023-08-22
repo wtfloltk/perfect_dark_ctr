@@ -8,7 +8,6 @@
 
 #define CONFIG_MAX_STR 512
 #define CONFIG_MAX_SECNAME 128
-#define CONFIG_FNAME "./pd.ini"
 
 enum configtype {
 	CONFIG_END,

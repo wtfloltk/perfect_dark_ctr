@@ -52,6 +52,12 @@ void bootCreateSched(void)
 	}
 }
 
+static void cleanup(void)
+{
+	configSave(CONFIG_FNAME);
+	// TODO: actually shut down all subsystems
+}
+
 int main(int argc, const char **argv)
 {
 	fsInit();
@@ -60,6 +66,8 @@ int main(int argc, const char **argv)
 	inputInit();
 	audioInit();
 	romdataInit();
+
+	atexit(cleanup);
 
 	bootCreateSched();
 
