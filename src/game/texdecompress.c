@@ -1832,9 +1832,9 @@ s32 texInflateLookupFromBuffer(u8 *src, s32 width, s32 height, u8 *dst, u8 *look
 		for (y = 0; y < height; y++) {
 			for (x = 0; x < width; x++) {
 				if (numcolours <= 256) {
-					dst16[x] = lookup16[src8[x]];
+					dst16[x] = PD_BE16(lookup16[src8[x]]);
 				} else {
-					dst16[x] = lookup16[src16[x]];
+					dst16[x] = PD_BE16(lookup16[src16[x]]);
 				}
 			}
 
@@ -1848,9 +1848,9 @@ s32 texInflateLookupFromBuffer(u8 *src, s32 width, s32 height, u8 *dst, u8 *look
 		for (y = 0; y < height; y++) {
 			for (x = 0; x < width; x++) {
 				if (numcolours <= 256) {
-					dst16[x] = lookup16[src8[x]] << 1 | 1;
+					dst16[x] = PD_BE16(lookup16[src8[x]] << 1 | 1);
 				} else {
-					dst16[x] = lookup16[src16[x]] << 1 | 1;
+					dst16[x] = PD_BE16(lookup16[src16[x]] << 1 | 1);
 				}
 			}
 
