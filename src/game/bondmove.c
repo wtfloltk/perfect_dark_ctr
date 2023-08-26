@@ -1421,6 +1421,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 									}
 								}
 								g_Vars.currentplayer->altdowntime = 0;
+								bgun0f0a8c50();
 							}
 						}
 
