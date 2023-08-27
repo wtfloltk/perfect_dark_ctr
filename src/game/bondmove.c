@@ -1328,21 +1328,21 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 					}
 
-					#ifdef PLATFORM_N64
 					// Handle B button
 					if (allowc1buttons) {
 						for (i = 0; i < numsamples; i++) {
-							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & B_BUTTON)) {
+							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & (B_BUTTON | BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE))) {
 								if (g_Vars.currentplayer->usedowntime >= -1) {
-									if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)
-											&& g_Vars.currentplayer->usedowntime >= 0
-											&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, true, false, 0) != USETIMER_CONTINUE) {
-										g_Vars.currentplayer->usedowntime = -3;
-									}
+									// if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)
+									// 		&& g_Vars.currentplayer->usedowntime >= 0
+									// 		&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, true, false, 0) != USETIMER_CONTINUE) {
+									// 	g_Vars.currentplayer->usedowntime = -3;
+									// }
 
 									if (g_Vars.currentplayer->usedowntime >= 0) {
 										if (g_Vars.currentplayer->usedowntime > TICKS(25)) {
-											s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
+											// s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
+											s32 result = USETIMER_CONTINUE;
 
 											if (result == USETIMER_STOP) {
 												g_Vars.currentplayer->usedowntime = -1;
@@ -1356,9 +1356,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 										}
 									}
 								} else {
-									if (g_Vars.currentplayer->usedowntime >= -2) {
-										bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
-									}
+									// if (g_Vars.currentplayer->usedowntime >= -2) {
+									// 	bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
+									// }
 								}
 							} else {
 								// Released B
@@ -1371,23 +1371,10 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						}
 					}
-					#endif
 
 
 					#ifndef PLATFORM_N64
 					if (allowc1buttons) {
-						// handle B / A: cancel_use
-						for (i = 0; i < numsamples; i++) {
-							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE))) {
-								g_Vars.currentplayer->usedowntime++;
-							} else {
-								if (g_Vars.currentplayer->usedowntime > 0) {
-									movedata.btapcount++;
-									g_Vars.currentplayer->usedowntime = 0;
-								}
-							}
-
-						}
 						// handle L button : alt switching
 						for (i = 0; i< numsamples; i++) {
 							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & BUTTON_ALTMODE)) {

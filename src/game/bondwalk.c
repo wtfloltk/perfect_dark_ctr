@@ -1280,7 +1280,7 @@ void bwalkUpdatePrevPos(void)
 void bwalkHandleActivate(void)
 {
 	if (g_Vars.currentplayer->walkinitmove) {
-		// g_Vars.currentplayer->bondactivateorreload = 0;
+		g_Vars.currentplayer->bondactivateorreload = 0;
 	}
 }
 

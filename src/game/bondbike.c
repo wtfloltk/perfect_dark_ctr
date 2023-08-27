@@ -192,7 +192,7 @@ void bbikeHandleActivate(void)
 			bmoveSetMode(MOVEMODE_WALK);
 		}
 
-		// g_Vars.currentplayer->bondactivateorreload = 0;
+		g_Vars.currentplayer->bondactivateorreload = 0;
 	}
 }
 

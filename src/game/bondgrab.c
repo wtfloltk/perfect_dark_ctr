@@ -891,9 +891,9 @@ void bgrabUpdateVertical(void)
 void bgrabHandleActivate(void)
 {
 	if (currentPlayerTryMountHoverbike(g_Vars.currentplayer->grabbedprop)) {
-		// g_Vars.currentplayer->bondactivateorreload = 0;
+		g_Vars.currentplayer->bondactivateorreload = 0;
 	} else {
-		// g_Vars.currentplayer->bondactivateorreload = 0;
+		g_Vars.currentplayer->bondactivateorreload = 0;
 		bmoveSetMode(MOVEMODE_WALK);
 	}
 }
