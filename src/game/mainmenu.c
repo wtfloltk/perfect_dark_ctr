@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/bondgun.h"
 #include "game/bossfile.h"
@@ -2236,6 +2237,15 @@ MenuItemHandlerResult menuhandlerChangeAgent(s32 operation, struct menuitem *ite
 	return 0;
 }
 
+MenuItemHandlerResult menuhandlerExitGame(s32 operation, struct menuitem *item)
+{
+	if (operation == MENUOP_SET) {
+		exit(0);
+	}
+
+	return 0;
+}
+
 struct menuitem g_2PMissionControlStyleMenuItems[] = {
 	{
 		MENUITEMTYPE_LIST,
@@ -3402,6 +3412,43 @@ struct menudialogdef g_ChangeAgentMenuDialog = {
 	MENUDIALOGTYPE_DANGER,
 	L_OPTIONS_188, // "Warning"
 	g_ChangeAgentMenuItems,
+	NULL,
+	0,
+	NULL,
+};
+
+struct menuitem g_ExitGameMenuItems[] = {
+	{
+		MENUITEMTYPE_LABEL,
+		0,
+		MENUITEMFLAG_00000002 | MENUITEMFLAG_LESSLEFTPADDING,
+		L_OPTIONS_110, // "Are you sure you want to exit the game?"
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		0,
+		L_OPTIONS_190, // "Yes"
+		0,
+		menuhandlerExitGame,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_191, // "No"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+struct menudialogdef g_ExitGameMenuDialog = {
+	MENUDIALOGTYPE_DANGER,
+	L_OPTIONS_188, // "Warning"
+	g_ExitGameMenuItems,
 	NULL,
 	0,
 	NULL,
@@ -4825,6 +4872,14 @@ struct menuitem g_MainMenuMenuItems[] = {
 		L_OPTIONS_187, // "Change Agent..."
 		0x00000006,
 		(void *)&g_ChangeAgentMenuDialog,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_BIGFONT,
+		L_OPTIONS_110, // "Exit Game"
+		0x00000007,
+		(void *)&g_ExitGameMenuDialog,
 	},
 	{ MENUITEMTYPE_END },
 };
