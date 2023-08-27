@@ -32,6 +32,25 @@ You must already have a Perfect Dark ROM to run the game, as specified above.
 2. Put your Perfect Dark ROM named `pd.ntsc-final.z64` into it.
 3. Run `pd.exe`.
 
+
+## Bindings
+
+1964-style and Xbox-style bindings are partially implemented.
+
+N64 controller literal X and Y refer to the RESERVED buttons which was previously leveraged by 1964.
+
+
+| Action     | keyboard | xbox  | N64 literal |
+|- | - | - | - |
+| Use / Cancel Menu | e   | n/a | b |
+| Use / Accept Menu | n/a | a | a |
+| reload | r | x | x `(0x40)` |
+| weapon-back | Mousewheel-Forward | b | D-Left |
+| weapon-forward | Mousewheel-Back | y | y `(0x80)` |
+| radial menu | q | LB | D-Down |
+| alt mode | f | RB | L-trigger |
+| quick-detonate | e + q | a + b | a + D-Left |
+
 ## Building
 
 ### Windows
