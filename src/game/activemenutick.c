@@ -12,6 +12,10 @@
 #include "lib/str.h"
 #include "data.h"
 #include "types.h"
+#include "input.h"
+
+f32 menuMX;
+f32 menuMY;
 
 void amTick(void)
 {
@@ -43,8 +47,30 @@ void amTick(void)
 
 			for (j = 0; j < numsamples; j++) {
 				s8 gotonextscreen = false;
-				s8 cstickx = joyGetStickXOnSample(j, contpadnum);
-				s8 csticky = joyGetStickYOnSample(j, contpadnum);
+                s8 cstickx = joyGetStickXOnSample(j, contpadnum);
+                s8 csticky = joyGetStickYOnSample(j, contpadnum);
+
+#ifndef PLATFORM_N64
+                if (inputGetCurrentUsedDevice(i) == CURDEV_MNK) {
+                    f32 dx, dy;
+                    inputMouseGetScaledDelta(&dx, &dy);
+
+                    menuMX += dx;
+                    menuMY += dy;
+
+                    f32 sc = 8.f;
+
+                    s8 signx = (menuMX >= 0) ? 1 : -1;
+                    s8 signy = (menuMY >= 0) ? 1 : -1;
+
+                    s32 lim = 100;
+                    menuMX = fabsf(menuMX * sc) >= lim ? (menuMX - dx) : menuMX;
+                    menuMY = fabsf(menuMY * sc) >= lim ? (menuMY - dy) : menuMY;
+
+                    cstickx = (s8)  (menuMX * sc);
+                    csticky = (s8) -(menuMY * sc);
+                }
+#endif
 				s8 absstickx;
 				s8 abssticky;
 				u16 buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffff);

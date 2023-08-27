@@ -56,6 +56,9 @@ const u8 g_AmMapping[] = {
 	2, // unused
 };
 
+extern f32 menuMX;
+extern f32 menuMY;
+
 struct chrdata *currentPlayerGetCommandingAibot(void)
 {
 	return g_Vars.currentplayer->commandingaibot;
@@ -754,6 +757,10 @@ void amOpen(void)
 		g_AmMenus[g_AmIndex].origscreennum = 0;
 		g_AmMenus[g_AmIndex].prevallbots = 0;
 		g_AmMenus[g_AmIndex].allbots = false;
+
+#ifndef PLATFORM_N64
+        menuMX = menuMY = 0;
+#endif
 	}
 }
 

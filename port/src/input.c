@@ -8,6 +8,7 @@
 #include "input.h"
 #include "video.h"
 #include "config.h"
+#include "constants.h"
 
 #define MAX_BINDS 4
 #define TRIG_THRESHOLD (30 * 256)
@@ -129,6 +130,8 @@ static const char *vkJoyNames[] = {
 };
 
 static char vkNames[VK_TOTAL_COUNT][64];
+
+static u8 currentUsedDevice[MAX_PLAYERS];
 
 void inputSetDefaultKeyBinds(void)
 {
@@ -479,7 +482,8 @@ static inline s32 inputAxisScale(s32 x, const s32 deadzone, const f32 scale)
 	if (abs(x) < deadzone) {
 		return 0;
 	} else {
-		// rescale to fit the non-deadzone range
+	 	// rescale to fit the non-deadzone range
+        currentUsedDevice[0] = CURDEV_CONTR;
 		if (x < 0) {
 			x += deadzone;
 		} else {
@@ -503,6 +507,7 @@ s32 inputReadController(s32 idx, OSContPad *npad)
 	for (u32 i = 0; i < CONT_NUM_BUTTONS; ++i) {
 		if (inputBindPressed(idx, i)) {
 			npad->button |= 1U << i;
+            currentUsedDevice[0] = CURDEV_CONTR;
 		}
 	}
 
@@ -555,14 +560,18 @@ static inline void inputUpdateMouse(void)
 
 	if (mouseWheel > 0) {
 		mouseButtons |= WHEEL_UP_MASK;
+        currentUsedDevice[0] = CURDEV_MNK;
 	} else if (mouseWheel < 0) {
 		mouseButtons |= WHEEL_DN_MASK;
+        currentUsedDevice[0] = CURDEV_MNK;
 	}
 
 	mouseWheel = 0;
 
 	if (mouseLocked) {
 		SDL_GetRelativeMouseState(&mouseDX, &mouseDY);
+        if (mouseDX || mouseDY)
+            currentUsedDevice[0] = CURDEV_MNK;
 	} else {
 		mouseDX = mx - mouseX;
 		mouseDY = my - mouseY;
@@ -651,8 +660,10 @@ s32 inputKeyPressed(u32 vk)
 {
 	if (vk >= VK_KEYBOARD_BEGIN && vk < VK_MOUSE_BEGIN) {
 		const u8 *state = SDL_GetKeyboardState(NULL);
+        currentUsedDevice[0] = CURDEV_MNK;
 		return state[vk - VK_KEYBOARD_BEGIN];
 	} else if (vk >= VK_MOUSE_BEGIN && vk < VK_JOY_BEGIN) {
+        currentUsedDevice[0] = CURDEV_MNK;
 		return mouseButtons & SDL_BUTTON(vk - VK_MOUSE_BEGIN + 1);
 	} else if (vk >= VK_JOY_BEGIN && vk < VK_TOTAL_COUNT) {
 		vk -= VK_JOY_BEGIN;
@@ -788,4 +799,9 @@ s32 inputGetKeyByName(const char *name)
 	fprintf(stderr, "unknown key name: `%s`\n", name);
 
 	return -1;
+}
+
+u8 inputGetCurrentUsedDevice(u8 playerNum)
+{
+    return currentUsedDevice[playerNum];
 }

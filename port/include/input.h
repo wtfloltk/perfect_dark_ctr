@@ -14,6 +14,9 @@
 
 #define CONT_NUM_BUTTONS 16 // not including the stick axes
 
+#define CURDEV_MNK      0x01
+#define CURDEV_CONTR    0x02
+
 enum virtkey {
   /* same order as SDL scancodes */
   VK_KEYBOARD_BEGIN = 0,
@@ -127,5 +130,9 @@ void inputUpdate(void);
 
 // call this before configSave()
 void inputSaveConfig(void);
+
+// returns the current used device (mouse+kb/controller) for the specified player
+// TODO: in the future when the input system can differentiate inputs from different players, will need to update this
+u8 inputGetCurrentUsedDevice(u8 playerNum);
 
 #endif
