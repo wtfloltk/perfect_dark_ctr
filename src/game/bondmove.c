@@ -1328,21 +1328,26 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 					}
 
-					// Handle B button
+					// Handle B and use-like button
 					if (allowc1buttons) {
 						for (i = 0; i < numsamples; i++) {
 							if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & (B_BUTTON | BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE))) {
 								if (g_Vars.currentplayer->usedowntime >= -1) {
-									// if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)
-									// 		&& g_Vars.currentplayer->usedowntime >= 0
-									// 		&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, true, false, 0) != USETIMER_CONTINUE) {
-									// 	g_Vars.currentplayer->usedowntime = -3;
-									// }
+									#ifdef PLATFORM_N64
+									if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)
+											&& g_Vars.currentplayer->usedowntime >= 0
+											&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, true, false, 0) != USETIMER_CONTINUE) {
+										g_Vars.currentplayer->usedowntime = -3;
+									}
+									#endif
 
 									if (g_Vars.currentplayer->usedowntime >= 0) {
 										if (g_Vars.currentplayer->usedowntime > TICKS(25)) {
-											// s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
+											#ifdef PLATFORM_N64
+											s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
+											#else
 											s32 result = USETIMER_CONTINUE;
+										    #endif
 
 											if (result == USETIMER_STOP) {
 												g_Vars.currentplayer->usedowntime = -1;
@@ -1356,9 +1361,11 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 										}
 									}
 								} else {
-									// if (g_Vars.currentplayer->usedowntime >= -2) {
-									// 	bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
-									// }
+									#ifdef PLATFORM_N64
+									if (g_Vars.currentplayer->usedowntime >= -2) {
+										bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
+									}
+									#endif
 								}
 							} else {
 								// Released B
