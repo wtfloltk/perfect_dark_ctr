@@ -46,8 +46,8 @@ void amTick(void)
 
 			for (j = 0; j < numsamples; j++) {
 				s8 gotonextscreen = false;
-                s8 cstickx = joyGetStickXOnSample(j, contpadnum);
-                s8 csticky = joyGetStickYOnSample(j, contpadnum);
+				s8 cstickx = joyGetStickXOnSample(j, contpadnum);
+				s8 csticky = joyGetStickYOnSample(j, contpadnum);
 
 				s8 absstickx;
 				s8 abssticky;
