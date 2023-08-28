@@ -12,10 +12,9 @@
 #include "lib/str.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
 #include "input.h"
-
-f32 menuMX;
-f32 menuMY;
+#endif
 
 void amTick(void)
 {
@@ -50,27 +49,6 @@ void amTick(void)
                 s8 cstickx = joyGetStickXOnSample(j, contpadnum);
                 s8 csticky = joyGetStickYOnSample(j, contpadnum);
 
-#ifndef PLATFORM_N64
-                if (inputGetCurrentUsedDevice(i) == CURDEV_MNK) {
-                    f32 dx, dy;
-                    inputMouseGetScaledDelta(&dx, &dy);
-
-                    menuMX += dx;
-                    menuMY += dy;
-
-                    f32 sc = 8.f;
-
-                    s8 signx = (menuMX >= 0) ? 1 : -1;
-                    s8 signy = (menuMY >= 0) ? 1 : -1;
-
-                    s32 lim = 100;
-                    menuMX = fabsf(menuMX * sc) >= lim ? (menuMX - dx) : menuMX;
-                    menuMY = fabsf(menuMY * sc) >= lim ? (menuMY - dy) : menuMY;
-
-                    cstickx = (s8)  (menuMX * sc);
-                    csticky = (s8) -(menuMY * sc);
-                }
-#endif
 				s8 absstickx;
 				s8 abssticky;
 				u16 buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffff);
@@ -88,6 +66,24 @@ void amTick(void)
 				toggle = false;
 
 				g_AmMenus[g_AmIndex].allbots = false;
+
+#ifndef PLATFORM_N64
+                if (j == 0 && g_Vars.currentplayernum == 0 && inputMouseIsLocked()) {
+                    f32 mdx, mdy;
+                    struct activemenu *am = &g_AmMenus[g_AmIndex];
+                    inputMouseGetScaledDelta(&mdx, &mdy);
+                    if (mdx || mdy) {
+                        am->mousex += mdx * 4.f;
+                        am->mousey += mdy * 4.f;
+                        am->mousex = (am->mousex > 127.f) ? 127.f : (am->mousex < -128.f) ? -128.f : am->mousex;
+                        am->mousey = (am->mousey > 127.f) ? 127.f : (am->mousey < -128.f) ? -128.f : am->mousey;
+                    }
+                    const s32 newstickx = (s32)cstickx + (s32)am->mousex;
+                    const s32 newsticky = (s32)csticky - (s32)am->mousey;
+                    cstickx = (newstickx < -128) ? -128 : (newstickx > 127) ? 127 : newstickx;
+                    csticky = (newsticky < -128) ? -128 : (newsticky > 127) ? 127 : newsticky;
+                }
+#endif
 
 				if (g_Vars.currentplayer->activemenumode == AMMODE_EDIT) {
 					buttonsstate = buttonsstate & D_JPAD;
@@ -363,6 +359,12 @@ void amTick(void)
 				}
 			}
 		}
+#ifndef PLATFORM_N64
+        else {
+            g_AmMenus[g_AmIndex].mousex = 0.f;
+            g_AmMenus[g_AmIndex].mousey = 0.f;
+        }
+#endif
 
 		if (g_Vars.currentplayer->activemenumode != AMMODE_EDIT) {
 			s16 dist;

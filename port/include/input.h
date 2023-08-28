@@ -131,8 +131,4 @@ void inputUpdate(void);
 // call this before configSave()
 void inputSaveConfig(void);
 
-// returns the current used device (mouse+kb/controller) for the specified player
-// TODO: in the future when the input system can differentiate inputs from different players, will need to update this
-u8 inputGetCurrentUsedDevice(u8 playerNum);
-
 #endif
