@@ -14,9 +14,6 @@
 
 #define CONT_NUM_BUTTONS 16 // not including the stick axes
 
-#define CURDEV_MNK      0x01
-#define CURDEV_CONTR    0x02
-
 enum virtkey {
   /* same order as SDL scancodes */
   VK_KEYBOARD_BEGIN = 0,
