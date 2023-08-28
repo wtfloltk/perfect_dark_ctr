@@ -1079,7 +1079,7 @@ void creditsResetSlides(void)
 
 		g_CreditsData->coreteammap[i + 1] = pool[index];
 
-		while (index < NUM_CORE_TEAM - i) {
+		while (index < NUM_CORE_TEAM - i - 1) {
 			pool[index] = pool[index + 1];
 			index++;
 		}
