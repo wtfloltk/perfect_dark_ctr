@@ -947,6 +947,9 @@
 #define FILETYPE_MPPLAYER 2
 #define FILETYPE_CAMERA   3
 
+#define FINDPROPCONTEXT_QUERY 0
+#define FINDPROPCONTEXT_SHOOT 2
+
 #define FLOORTYPE_DEFAULT 0
 #define FLOORTYPE_WOOD    1
 #define FLOORTYPE_STONE   2
@@ -1682,6 +1685,25 @@
 #define MENUITEMTYPE_18          0x18
 #define MENUITEMTYPE_CONTROLLER  0x19
 #define MENUITEMTYPE_END         0x1a
+
+#define MENUMODELFLAG_HASSCALE    0x01
+#define MENUMODELFLAG_HASPOSITION 0x02
+#define MENUMODELFLAG_HASROTATION 0x04
+
+#define MENUMODELPARAMS_HAS_MASTER_HEADBODY(params)           (((params) & 0x80000000) != 0)
+#define MENUMODELPARAMS_GET_MASTER_HEADNUM(params)            ((params) & 0x3ff)
+#define MENUMODELPARAMS_GET_MASTER_BODYNUM(params)            (((params) & 0xffc00) >> 10)
+#define MENUMODELPARAMS_GET_MP_HEADNUM(params)                (((params) >> 16) & 0xff)
+#define MENUMODELPARAMS_GET_MP_BODYNUM(params)                (((params) >> 24) & 0xff)
+#define MENUMODELPARAMS_GET_FILENUM(params)                   ((params) & 0xffff)
+#define MENUMODELPARAMS_SET_FILENUM(filenum)                  (filenum)
+#define MENUMODELPARAMS_SET_MP_HEADBODY(mpheadnum, mpbodynum) (0xffff | ((mpheadnum) << 16) | ((mpbodynum) << 24))
+
+#define MENUMODELTYPE_DEFAULT     0
+#define MENUMODELTYPE_HUDPIECE    1
+#define MENUMODELTYPE_2           2
+#define MENUMODELTYPE_3           3
+#define MENUMODELTYPE_CREDITSLOGO 4
 
 #define MENUOP_GETOPTIONCOUNT      1
 #define MENUOP_GETOPTGROUPCOUNT    2
@@ -4626,7 +4648,35 @@ enum weaponnum {
 #define BODY_DARK_LEATHER     0x95
 #define BODY_DARK_NEGOTIATOR  0x96
 
-#endif
-
 #define JO_ACTION_ACTIVATE           0x0001
 #define JO_ACTION_RELOAD             0x0002
+
+
+#ifdef PLATFORM_N64
+
+#define BUTTON_ACCEPT_WPNFORWARD CONT_A
+#define BUTTON_CANCEL_USE CONT_B
+
+#define BUTTON_USE BUTTON_CANCEL_USE
+#define BUTTON_CANCEL BUTTON_CANCEL_USE
+#define BUTTON_RELOAD BUTTON_USE
+#define BUTTON_ACCEPT BUTTON_ACCEPT_WPNFORWARD
+#define BUTTON_WPNFORWARD BUTTON_ACCEPT_WPNFORWARD
+
+#else
+
+// xbla behavior
+#define BUTTON_ACCEPT_USE     A_BUTTON
+// 1964 behavior
+#define BUTTON_CANCEL_USE     B_BUTTON
+
+#define BUTTON_RELOAD         X_BUTTON
+// dedicated button for mousewheel / xbla parity
+#define BUTTON_WPNBACK        L_JPAD
+// dedicated button for mousewheel / xbla parity
+#define BUTTON_WPNFORWARD     Y_BUTTON
+#define BUTTON_RADIAL         D_JPAD
+#define BUTTON_ALTMODE        L_TRIG
+#endif
+
+#endif
