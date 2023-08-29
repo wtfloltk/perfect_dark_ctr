@@ -480,7 +480,7 @@ static inline s32 inputAxisScale(s32 x, const s32 deadzone, const f32 scale)
 	if (abs(x) < deadzone) {
 		return 0;
 	} else {
-	 	// rescale to fit the non-deadzone range
+		// rescale to fit the non-deadzone range
 		if (x < 0) {
 			x += deadzone;
 		} else {

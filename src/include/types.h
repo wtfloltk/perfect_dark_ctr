@@ -4308,8 +4308,8 @@ struct activemenu {
 	/*0x34*/ s8 origscreennum; // original screen number before using allbots
 
 #ifndef PLATFORM_N64
-    /*    */ f32 mousex;
-    /*    */ f32 mousey;
+	/*    */ f32 mousex;
+	/*    */ f32 mousey;
 #endif
 };
 
