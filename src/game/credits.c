@@ -1079,7 +1079,12 @@ void creditsResetSlides(void)
 
 		g_CreditsData->coreteammap[i + 1] = pool[index];
 
+#ifdef AVOID_UB
+		// don't overflow `pool`
+		while (index < NUM_CORE_TEAM - i - 1) {
+#else
 		while (index < NUM_CORE_TEAM - i) {
+#endif
 			pool[index] = pool[index + 1];
 			index++;
 		}
