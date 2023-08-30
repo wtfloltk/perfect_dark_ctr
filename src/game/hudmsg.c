@@ -281,6 +281,12 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
 	x2 = x + textwidth;
 	y2 = y + textheight;
 
+#ifndef PLATFORM_N64
+	if (playercount == 1) {
+		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+	}
+#endif
+
 	gdl = text0f1538e4(gdl, &x, &y, &x2, &y2);
 	gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, colour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
 
@@ -307,6 +313,10 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
 
 	gdl = text0f1538e4(gdl, &x, &y, &x2, &y2);
 	gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, colour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
+
+#ifndef PLATFORM_N64
+	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	return gdl;
 }
