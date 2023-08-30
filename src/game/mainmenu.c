@@ -2237,7 +2237,8 @@ MenuItemHandlerResult menuhandlerChangeAgent(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerExitGame(s32 operation, struct menuitem *item)
+#ifndef PLATFORM_N64
+MenuItemHandlerResult menuhandlerExitGame(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		exit(0);
@@ -2245,6 +2246,7 @@ MenuItemHandlerResult menuhandlerExitGame(s32 operation, struct menuitem *item)
 
 	return 0;
 }
+#endif
 
 struct menuitem g_2PMissionControlStyleMenuItems[] = {
 	{
@@ -3417,12 +3419,14 @@ struct menudialogdef g_ChangeAgentMenuDialog = {
 	NULL,
 };
 
+#ifndef PLATFORM_N64
+
 struct menuitem g_ExitGameMenuItems[] = {
 	{
 		MENUITEMTYPE_LABEL,
 		0,
 		MENUITEMFLAG_00000002 | MENUITEMFLAG_LESSLEFTPADDING,
-		L_OPTIONS_110, // "Are you sure you want to exit the game?"
+		L_OPTIONS_110, // "Exit"
 		0,
 		NULL,
 	},
@@ -3453,6 +3457,8 @@ struct menudialogdef g_ExitGameMenuDialog = {
 	0,
 	NULL,
 };
+
+#endif
 
 struct menuitem g_SoloMissionOptionsMenuItems[] = {
 	{
@@ -4872,6 +4878,7 @@ struct menuitem g_MainMenuMenuItems[] = {
 		0x00000006,
 		(void *)&g_ChangeAgentMenuDialog,
 	},
+#ifndef PLATFORM_N64
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -4880,6 +4887,7 @@ struct menuitem g_MainMenuMenuItems[] = {
 		0x00000007,
 		(void *)&g_ExitGameMenuDialog,
 	},
+#endif
 	{ MENUITEMTYPE_END },
 };
 
