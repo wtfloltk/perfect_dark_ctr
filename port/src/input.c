@@ -8,6 +8,7 @@
 #include "input.h"
 #include "video.h"
 #include "config.h"
+#include "constants.h"
 
 #define MAX_BINDS 4
 #define TRIG_THRESHOLD (30 * 256)
