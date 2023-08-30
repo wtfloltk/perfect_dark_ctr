@@ -48,7 +48,6 @@ void amTick(void)
 				s8 gotonextscreen = false;
 				s8 cstickx = joyGetStickXOnSample(j, contpadnum);
 				s8 csticky = joyGetStickYOnSample(j, contpadnum);
-
 				s8 absstickx;
 				s8 abssticky;
 				u16 buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffff);
