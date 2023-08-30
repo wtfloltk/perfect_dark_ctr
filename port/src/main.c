@@ -62,9 +62,10 @@ static void cleanup(void)
 
 static void gameLoadConfig(void)
 {
-	osMemSize = configGetInt("Game.MemorySize", 16) * 1024 * 1024;
-	g_PlayerCrosshairSway = configGetFloat("Game.CrosshairSway", g_PlayerCrosshairSway);
-	g_PlayerDefaultFovY = configGetFloat("Game.FovY", g_PlayerDefaultFovY);
+	osMemSize = configGetIntClamped("Game.MemorySize", 16, 4, 2048) * 1024 * 1024;
+	g_PlayerCrosshairSway = configGetFloatClamped("Game.CrosshairSway", g_PlayerCrosshairSway, 0.f, 10.f);
+	g_PlayerDefaultFovY = configGetFloatClamped("Game.FovY", g_PlayerDefaultFovY, 5.f, 175.f);
+	g_PlayerMouseAimMode = configGetIntClamped("Game.MouseAimMode", g_PlayerMouseAimMode, 0, 1);
 }
 
 int main(int argc, const char **argv)
