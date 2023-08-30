@@ -5040,11 +5040,6 @@ void bgunSwivel(f32 screenx, f32 screeny, f32 crossdamp, f32 aimdamp)
 	struct coord sp94;
 	f32 sp8c[2];
 
-#ifndef PLATFORM_N64
-	player->swivelpos[0] = screenx;
-	player->swivelpos[1] = screeny;
-#endif
-
 	x[HAND_RIGHT] = x[HAND_LEFT] = screenx;
 	y[HAND_RIGHT] = y[HAND_LEFT] = screeny;
 
