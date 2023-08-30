@@ -528,5 +528,9 @@ extern struct menudialogdef g_HtDetailsMenuDialog;
 extern struct menudialogdef g_HtFailedMenuDialog;
 extern struct menudialogdef g_HtCompletedMenuDialog;
 extern struct menudialogdef g_HangarListMenuDialog;
+#ifndef PLATFORM_N64
+extern f32 g_PlayerCrosshairSway;
+extern f32 g_PlayerDefaultFovY;
+#endif
 
 #endif

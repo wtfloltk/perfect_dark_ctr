@@ -130,8 +130,6 @@ static const char *vkJoyNames[] = {
 
 static char vkNames[VK_TOTAL_COUNT][64];
 
-f32 crosshairSway = 1.f;
-
 void inputSetDefaultKeyBinds(void)
 {
 	// TODO: make VK constants for all these
@@ -460,8 +458,6 @@ s32 inputInit(void)
 	}
 
 	inputLoadBinds();
-
-	crosshairSway = configGetFloat("Input.CrosshairSway", 1.f);
 
 	return connectedMask;
 }

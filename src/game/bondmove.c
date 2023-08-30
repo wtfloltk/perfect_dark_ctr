@@ -1653,7 +1653,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #ifdef PLATFORM_N64
 		zoomfov = 60;
 #else
-		zoomfov = videoGetPlayerFovY();
+		zoomfov = g_PlayerDefaultFovY;
 #endif
 
 		// FarSight in secondary function
@@ -1668,8 +1668,8 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				eraserfov = 60;
 			}
 #else
-			if (eraserfov > videoGetPlayerFovY()) {
-				eraserfov = videoGetPlayerFovY();
+			if (eraserfov > g_PlayerDefaultFovY) {
+				eraserfov = g_PlayerDefaultFovY;
 			}
 #endif
 
@@ -1711,7 +1711,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 		}
 #else
 		if (zoomfov <= 0) {
-			zoomfov = videoGetPlayerFovY();
+			zoomfov = g_PlayerDefaultFovY;
 		}
 #endif
 
@@ -1999,8 +1999,8 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				xscale = 1.f;
 				yscale = 1.f;
 			}
-			x = g_Vars.currentplayer->speedtheta * 0.3f * crosshairSway * xscale + g_Vars.currentplayer->gunextraaimx;
-			y = -g_Vars.currentplayer->speedverta * 0.1f * crosshairSway * yscale + g_Vars.currentplayer->gunextraaimy;
+			x = g_Vars.currentplayer->speedtheta * 0.3f * g_PlayerCrosshairSway * xscale + g_Vars.currentplayer->gunextraaimx;
+			y = -g_Vars.currentplayer->speedverta * 0.1f * g_PlayerCrosshairSway * yscale + g_Vars.currentplayer->gunextraaimy;
 #endif
 
 			bgunSwivelWithDamp(x, y, PAL ? 0.955f : 0.963f);
