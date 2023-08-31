@@ -1291,13 +1291,19 @@ Gfx *lvRender(Gfx *gdl)
 
 				// Handle opening doors and reloading
 				if (g_Vars.currentplayer->bondactivateorreload & JO_ACTION_RELOAD) {
-					if (g_Vars.currentplayer->hands[HAND_RIGHT].state != HANDSTATE_RELOAD){
+					struct hand* hand = &g_Vars.currentplayer->hands[HAND_RIGHT];
+					struct weaponfunc* func = weaponGetFunction(&hand->gset, hand->gset.weaponfunc);
+					// ignore the player's request to reload here if the last bullet in the clip was just fired
+					if (hand->state != HANDSTATE_RELOAD && !(hand->state == HANDSTATE_ATTACK && hand->loadedammo[func->ammoindex] == 0)) {
 						bgunReloadIfPossible(HAND_RIGHT);
-
 					}
-					if (g_Vars.currentplayer->hands[HAND_LEFT].state != HANDSTATE_RELOAD) {
+
+					hand = &g_Vars.currentplayer->hands[HAND_LEFT];
+					func = weaponGetFunction(&hand->gset, hand->gset.weaponfunc);
+					if (hand->state != HANDSTATE_RELOAD && !(hand->state == HANDSTATE_ATTACK && hand->loadedammo[func->ammoindex] == 0)) {
 						bgunReloadIfPossible(HAND_LEFT);
 					}
+
 					g_Vars.currentplayer->bondactivateorreload = (g_Vars.currentplayer->bondactivateorreload & ~JO_ACTION_RELOAD) | (g_Vars.currentplayer->bondactivateorreload & 0x0);
 				}
 				if (g_Vars.currentplayer->bondactivateorreload & JO_ACTION_ACTIVATE) {
