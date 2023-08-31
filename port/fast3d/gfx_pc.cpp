@@ -878,7 +878,7 @@ static void import_texture(int i, int tile, bool importReplacement) {
         } else if (siz == G_IM_SIZ_32b) {
             import_texture_rgba32(tile, importReplacement);
         } else {
-            sysFatalError("Bad size for RGBA texture in tile %d: %02x", siz, tile);
+            sysFatalError("Bad size for RGBA texture in tile %d: %02x", tile, siz);
         }
     } else if (fmt == G_IM_FMT_IA) {
         if (siz == G_IM_SIZ_4b) {
@@ -888,7 +888,7 @@ static void import_texture(int i, int tile, bool importReplacement) {
         } else if (siz == G_IM_SIZ_16b) {
             import_texture_ia16(tile, importReplacement);
         } else {
-            sysFatalError("Bad size for IA texture in tile %d: %02x", siz, tile);
+            sysFatalError("Bad size for IA texture in tile %d: %02x", tile, siz);
         }
     } else if (fmt == G_IM_FMT_CI) {
         if (siz == G_IM_SIZ_4b) {
@@ -896,7 +896,7 @@ static void import_texture(int i, int tile, bool importReplacement) {
         } else if (siz == G_IM_SIZ_8b) {
             import_texture_ci8(tile, importReplacement);
         } else {
-            sysFatalError("Bad size for CI texture in tile %d: %02x", siz, tile);
+            sysFatalError("Bad size for CI texture in tile %d: %02x", tile, siz);
         }
     } else if (fmt == G_IM_FMT_I) {
         if (siz == G_IM_SIZ_4b) {
@@ -904,10 +904,10 @@ static void import_texture(int i, int tile, bool importReplacement) {
         } else if (siz == G_IM_SIZ_8b) {
             import_texture_i8(tile, importReplacement);
         } else {
-            sysFatalError("Bad size for I texture in tile %d: %02x", siz, tile);
+            sysFatalError("Bad size for I texture in tile %d: %02x", tile, siz);
         }
     } else {
-        sysFatalError("Bad texture format in tile %d: %02x", fmt, tile);
+        sysFatalError("Bad texture format in tile %d: %02x %02x", tile, fmt, siz);
     }
 }
 
