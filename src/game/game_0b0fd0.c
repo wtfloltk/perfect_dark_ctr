@@ -212,7 +212,12 @@ f32 currentPlayerGetGunZoomFov(void)
 #ifdef PLATFORM_N64
 		return fov;
 #else
-		return fov * (g_PlayerDefaultFovY / 60.0f);
+		if (g_PlayerFovAffectsZoom) {
+			return fov * (g_PlayerDefaultFovY / 60.0f);
+		}
+		else {
+			return fov;
+		}
 #endif
 	}
 
