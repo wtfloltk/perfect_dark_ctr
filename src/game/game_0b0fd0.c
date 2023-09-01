@@ -209,11 +209,7 @@ f32 currentPlayerGetGunZoomFov(void)
 
 	if (weapon) {
 		f32 fov = weapon->aimsettings->zoomfov;
-#ifdef PLATFORM_N64
-		return fov;
-#else
-		return fov * g_PlayerFovZoomMultiplier;
-#endif
+		return ADJUST_ZOOM_FOV(fov);
 	}
 
 	return 0;
@@ -244,15 +240,9 @@ void currentPlayerZoomOut(f32 fovpersec)
 
 		g_Vars.currentplayer->gunzoomfovs[index] *= 1.0f + amount * 0.1f;
 
-#if PLATFORM_N64
-		if (g_Vars.currentplayer->gunzoomfovs[index] > 60) {
-			g_Vars.currentplayer->gunzoomfovs[index] = 60;
+		if (g_Vars.currentplayer->gunzoomfovs[index] > ADJUST_ZOOM_FOV(60)) {
+			g_Vars.currentplayer->gunzoomfovs[index] = ADJUST_ZOOM_FOV(60);
 		}
-#else
-		if (g_Vars.currentplayer->gunzoomfovs[index] > 60 * g_PlayerFovZoomMultiplier) {
-			g_Vars.currentplayer->gunzoomfovs[index] = 60 * g_PlayerFovZoomMultiplier;
-		}
-#endif
 	}
 }
 
@@ -281,15 +271,9 @@ void currentPlayerZoomIn(f32 fovpersec)
 
 		g_Vars.currentplayer->gunzoomfovs[index] /= 1 + amount * 0.1f;
 
-#ifdef PLATFORM_N64
-		if (g_Vars.currentplayer->gunzoomfovs[index] < 2) {
-			g_Vars.currentplayer->gunzoomfovs[index] = 2;
+		if (g_Vars.currentplayer->gunzoomfovs[index] < ADJUST_ZOOM_FOV(2)) {
+			g_Vars.currentplayer->gunzoomfovs[index] = ADJUST_ZOOM_FOV(2);
 		}
-#else
-		if (g_Vars.currentplayer->gunzoomfovs[index] < 2 * g_PlayerFovZoomMultiplier) {
-			g_Vars.currentplayer->gunzoomfovs[index] = 2 * g_PlayerFovZoomMultiplier;
-		}
-#endif
 	}
 }
 

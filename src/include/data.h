@@ -538,4 +538,10 @@ extern s32 g_PlayerFovAffectsZoom;
 extern f32 g_PlayerFovZoomMultiplier;
 #endif
 
+#ifdef PLATFORM_N64
+#define ADJUST_ZOOM_FOV(x) (x)
+#else
+#define ADJUST_ZOOM_FOV(x) ((x) * g_PlayerFovZoomMultiplier)
+#endif
+
 #endif

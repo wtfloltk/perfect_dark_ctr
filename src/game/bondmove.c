@@ -1705,15 +1705,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			}
 #endif
 
-#ifdef PLATFORM_N64
-			if (eraserfov < 2) {
-				eraserfov = 2;
+			if (eraserfov < ADJUST_ZOOM_FOV(2)) {
+				eraserfov = ADJUST_ZOOM_FOV(2);
 			}
-#else
-			if (eraserfov < 2 * g_PlayerFovZoomMultiplier) {
-				eraserfov = 2 * g_PlayerFovZoomMultiplier;
-			}
-#endif
 
 			g_Vars.currentplayer->gunzoomfovs[1] = eraserfov;
 
