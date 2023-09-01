@@ -1710,15 +1710,8 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				eraserfov = 2;
 			}
 #else
-			if (g_PlayerFovAffectsZoom) { 
-				if (eraserfov < 2 * (g_PlayerDefaultFovY / 60.0f)) {
-					eraserfov = 2 * (g_PlayerDefaultFovY / 60.0f);
-				}
-			}
-			else {
-				if (eraserfov < 2) {
-					eraserfov = 2;
-				}
+			if (eraserfov < 2 * g_PlayerFovZoomMultiplier) {
+				eraserfov = 2 * g_PlayerFovZoomMultiplier;
 			}
 #endif
 

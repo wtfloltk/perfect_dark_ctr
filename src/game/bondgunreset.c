@@ -244,16 +244,9 @@ void bgunReset(void)
 	g_Vars.currentplayer->gunzoomfovs[1] = 60;
 	g_Vars.currentplayer->gunzoomfovs[2] = 30;
 #else
-	if (g_PlayerFovAffectsZoom) {
-		g_Vars.currentplayer->gunzoomfovs[0] = 15 * (g_PlayerDefaultFovY / 60.0f);
-		g_Vars.currentplayer->gunzoomfovs[1] = 60 * (g_PlayerDefaultFovY / 60.0f);
-		g_Vars.currentplayer->gunzoomfovs[2] = 30 * (g_PlayerDefaultFovY / 60.0f);
-	}
-	else {
-		g_Vars.currentplayer->gunzoomfovs[0] = 15;
-		g_Vars.currentplayer->gunzoomfovs[1] = 60;
-		g_Vars.currentplayer->gunzoomfovs[2] = 30;
-	}
+	g_Vars.currentplayer->gunzoomfovs[0] = 15 * g_PlayerFovZoomMultiplier;
+	g_Vars.currentplayer->gunzoomfovs[1] = 60 * g_PlayerFovZoomMultiplier;
+	g_Vars.currentplayer->gunzoomfovs[2] = 30 * g_PlayerFovZoomMultiplier;
 #endif
 
 	if (stageGetIndex(g_Vars.stagenum) == STAGEINDEX_AIRBASE) {
