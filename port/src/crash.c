@@ -58,7 +58,7 @@ static void crashStackTrace(char *msg, PEXCEPTION_POINTERS exinfo)
 	stackframe.AddrStack.Offset = context.Rsp;
 	stackframe.AddrStack.Mode = AddrModeFlat;
 #else
-	sysLogPrintf(LOG_ERROR, "no stack trace available on this arch");
+	snprintf(msg, CRASH_MAX_MSG, "no stack trace available on this arch\n");
 	return;
 #endif
 
