@@ -3011,7 +3011,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 				textMeasure(&textheight, &textwidth, title, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
-				x = dialogleft - 1;
+				x = dialogleft - 2;
 				y = (dialogtop + dialogbottom) / 2 - textwidth - 3;
 
 				if (y < dialogtop) {
