@@ -280,9 +280,22 @@ void currentPlayerZoomIn(f32 fovpersec)
 
 		g_Vars.currentplayer->gunzoomfovs[index] /= 1 + amount * 0.1f;
 
+#ifdef PLATFORM_N64
 		if (g_Vars.currentplayer->gunzoomfovs[index] < 2) {
 			g_Vars.currentplayer->gunzoomfovs[index] = 2;
 		}
+#else
+		if (g_PlayerFovAffectsZoom) {
+			if (g_Vars.currentplayer->gunzoomfovs[index] < 2 * (g_PlayerDefaultFovY / 60.0f)) {
+				g_Vars.currentplayer->gunzoomfovs[index] = 2 * (g_PlayerDefaultFovY / 60.0f);
+			}
+		}
+		else {
+			if (g_Vars.currentplayer->gunzoomfovs[index] < 2) {
+				g_Vars.currentplayer->gunzoomfovs[index] = 2;
+			}
+		}
+#endif
 	}
 }
 
