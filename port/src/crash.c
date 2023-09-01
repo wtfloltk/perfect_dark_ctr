@@ -204,7 +204,7 @@ static void crashStackTrace(char *msg, s32 sig, void *pc)
 	CRASH_MSG("PC: ");
 	if (pc) {
 		CRASH_MSG("%p\n", pc);
-	} if (strings) {
+	} else if (strings) {
 		CRASH_MSG("%s\n", strings[0]);
 	} else {
 		CRASH_MSG("%p\n", frames[0]);
