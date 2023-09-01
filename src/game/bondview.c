@@ -2377,7 +2377,11 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	if (fovy == 0 || fovy == 60.0f) {
 		fovy = 1;
 	} else {
+#ifdef PLATFORM_N64
 		fovy = 60.0f / fovy + 1;
+#else
+		fovy = 60.0f / fovy * g_PlayerFovZoomMultiplier + 1;
+#endif
 	}
 
 	sprintf(zoomtext, "%s %s%s%4.2fX", arrows, "", "", fovy);
