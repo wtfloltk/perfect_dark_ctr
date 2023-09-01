@@ -244,9 +244,15 @@ void currentPlayerZoomOut(f32 fovpersec)
 
 		g_Vars.currentplayer->gunzoomfovs[index] *= 1.0f + amount * 0.1f;
 
+#if PLATFORM_N64
 		if (g_Vars.currentplayer->gunzoomfovs[index] > 60) {
 			g_Vars.currentplayer->gunzoomfovs[index] = 60;
 		}
+#else
+		if (g_Vars.currentplayer->gunzoomfovs[index] > 60 * g_PlayerFovZoomMultiplier) {
+			g_Vars.currentplayer->gunzoomfovs[index] = 60 * g_PlayerFovZoomMultiplier;
+		}
+#endif
 	}
 }
 
