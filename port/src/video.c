@@ -20,7 +20,7 @@ static u32 dlcount = 0;
 static u32 frames = 0;
 static u32 framesPerSec = 0;
 static f64 startTime, endTime, fpsTime;
-static u32 fontTextureFilter = 1;
+static u32 texFilter2D = 1;
 
 s32 videoInit(void)
 {
@@ -47,7 +47,7 @@ s32 videoInit(void)
 	if (filter > FILTER_THREE_POINT) filter = FILTER_THREE_POINT;
 	renderingAPI->set_texture_filter((enum FilteringMode)filter);
 
-	fontTextureFilter = configGetInt("Video.FontTextureFilter", 1);
+	texFilter2D = configGetIntClamped("Video.TextureFilter2D", 1, 0, 1);
 
 	initDone = true;
 	return 0;
@@ -137,9 +137,9 @@ f32 videoGetAspect(void)
 	return gfx_current_dimensions.aspect_ratio;
 }
 
-u32 videoGetFontTextureFilter(void)
+u32 videoGetTextureFilter2D(void)
 {
-	return fontTextureFilter;
+	return texFilter2D;
 }
 
 s32 videoCreateFramebuffer(u32 w, u32 h)
