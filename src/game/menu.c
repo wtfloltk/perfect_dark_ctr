@@ -3011,7 +3011,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 				textMeasure(&textheight, &textwidth, title, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
-				x = dialogleft - 1;
+				x = dialogleft - 2;
 				y = (dialogtop + dialogbottom) / 2 - textwidth - 3;
 
 				if (y < dialogtop) {
@@ -3411,8 +3411,14 @@ void menuClose(void)
 
 void func0f0f8120(void)
 {
+#ifdef AVOID_UB
+	u32 mpindex = g_MpPlayerNum % MAX_PLAYERS;
+	struct menudialog *prev = g_Menus[mpindex].curdialog;
+	s32 i;
+#else
 	struct menudialog *prev = g_Menus[g_MpPlayerNum].curdialog;
 	s32 i;
+#endif
 
 	if (g_MenuData.unk66e > 0) {
 		for (i = g_MenuData.unk66e; i >= 0; i--) {
@@ -3420,11 +3426,22 @@ void func0f0f8120(void)
 		}
 	}
 
+#ifdef AVOID_UB
+	mpindex = g_MpPlayerNum;
+	if (mpindex >= MAX_PLAYERS)
+		mpindex -= MAX_PLAYERS;
+	if (g_Menus[mpindex].curdialog == prev) {
+		while (g_Menus[mpindex].depth > 0) {
+			menuPopDialog();
+		}
+	}
+#else
 	if (g_Menus[g_MpPlayerNum].curdialog == prev) {
 		while (g_Menus[g_MpPlayerNum].depth > 0) {
 			menuPopDialog();
 		}
 	}
+#endif
 }
 
 void func0f0f820c(struct menudialogdef *dialogdef, s32 root)
@@ -4338,7 +4355,11 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 	}
 
 	// Apply default navigational behaviour if requested
+#ifdef AVOID_UB
+	if (usedefaultbehaviour && (tickflags & MENUTICKFLAG_DIALOGISCURRENT) && !dialog->dimmed && g_Menus[g_MpPlayerNum].depth >= 1) {
+#else
 	if (usedefaultbehaviour && (tickflags & MENUTICKFLAG_DIALOGISCURRENT) && !dialog->dimmed) {
+#endif
 		struct menulayer *layer = &g_Menus[g_MpPlayerNum].layers[g_Menus[g_MpPlayerNum].depth - 1];
 
 		if (layer->numsiblings <= 1) {
@@ -4603,11 +4624,11 @@ void menuProcessInput(void)
 			if (buttonsnow & BUTTON_RADIAL) {
 				inputs.select = 1;
 			}
-			// this will naturally feel nice w/ a switch layout
-			// with the default mapping for weapon-back
+
 			if (buttonsnow & BUTTON_WPNBACK) {
-				inputs.select = 1;
+				inputs.back = 1;
 			}
+
 			#endif
 			if (buttonsnow & B_BUTTON) {
 				inputs.back = 1;

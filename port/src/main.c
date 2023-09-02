@@ -60,6 +60,7 @@ static void cleanup(void)
 	sysLogPrintf(LOG_NOTE, "shutdown");
 	inputSaveConfig();
 	configSave(CONFIG_FNAME);
+	crashShutdown();
 	// TODO: actually shut down all subsystems
 }
 
@@ -77,6 +78,7 @@ static void gameLoadConfig(void)
 
 int main(int argc, const char **argv)
 {
+	crashInit();
 	sysInit(argc, argv);
 	fsInit();
 	configInit();
