@@ -20,6 +20,7 @@ static u32 dlcount = 0;
 static u32 frames = 0;
 static u32 framesPerSec = 0;
 static f64 startTime, endTime, fpsTime;
+static u32 fontTextureFilter = 1;
 
 s32 videoInit(void)
 {
@@ -45,6 +46,8 @@ s32 videoInit(void)
 	u32 filter = configGetInt("Video.TextureFilter", FILTER_LINEAR);
 	if (filter > FILTER_THREE_POINT) filter = FILTER_THREE_POINT;
 	renderingAPI->set_texture_filter((enum FilteringMode)filter);
+
+	fontTextureFilter = configGetInt("Video.FontTextureFilter", 1);
 
 	initDone = true;
 	return 0;
@@ -132,6 +135,11 @@ s32 videoGetHeight(void)
 f32 videoGetAspect(void)
 {
 	return gfx_current_dimensions.aspect_ratio;
+}
+
+u32 videoGetFontTextureFilter(void)
+{
+	return fontTextureFilter;
 }
 
 s32 videoCreateFramebuffer(u32 w, u32 h)

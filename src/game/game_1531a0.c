@@ -394,7 +394,12 @@ Gfx *text0f153628(Gfx *gdl)
 	}
 #endif
 	else {
-		gDPSetTextureFilter(gdl++, G_TF_BILERP);
+		if (videoGetFontTextureFilter() == 0) {
+			gDPSetTextureFilter(gdl++, G_TF_POINT);
+		}
+		else {
+			gDPSetTextureFilter(gdl++, G_TF_BILERP);
+		}
 	}
 
 	return gdl;
