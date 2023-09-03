@@ -21,6 +21,8 @@ s32 videoGetHeight(void);
 f32 videoGetAspect(void);
 u32 videoGetTextureFilter2D(void);
 
+void videoSetWindowOffset(s32 x, s32 y);
+
 s32 videoCreateFramebuffer(u32 w, u32 h);
 void videoSetFramebuffer(s32 target);
 void videoResetFramebuffer(void);
