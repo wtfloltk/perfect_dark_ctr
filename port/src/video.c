@@ -142,6 +142,12 @@ u32 videoGetTextureFilter2D(void)
 	return texFilter2D;
 }
 
+void videoSetWindowOffset(s32 x, s32 y)
+{
+	gfx_current_game_window_viewport.x = x;
+	gfx_current_game_window_viewport.y = y;
+}
+
 s32 videoCreateFramebuffer(u32 w, u32 h)
 {
 	return gfx_create_framebuffer(w, h);
