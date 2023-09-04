@@ -341,7 +341,7 @@ void textReset(void)
 			textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
 		}
 
-		textLoadFont(&_fonthandelgothicxsSegmentRomStart, &_fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
+		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
 #elif VERSION >= VERSION_PAL_BETA
 		textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
 		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
@@ -394,7 +394,7 @@ Gfx *text0f153628(Gfx *gdl)
 	}
 #endif
 	else {
-		gDPSetTextureFilter(gdl++, G_TF_BILERP);
+		gDPSetTextureFilter(gdl++, TEX_FILTER_2D);
 	}
 
 	return gdl;
@@ -1790,7 +1790,7 @@ Gfx *text0f15568c(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fon
 									(*x + curchar->width) * 4 + var8007fadc,
 									G_TX_RENDERTILE,
 									var8007fae8 + 32,
-									((curchar->height - 1) << 5) + var8007fae4 + 32,
+									((curchar->height) << 5) + var8007fae4 + 32,
 									1024,
 									65536 - 1024 / var8007fad0);
 						} else {
