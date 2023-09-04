@@ -6579,7 +6579,11 @@ bool chrHasLosToPosWasteful(struct chrdata *chr, struct coord *pos, RoomNum *roo
 		return chrHasLosToPos(chr, pos, rooms);
 	}
 
+#ifdef N64_PLATFORM
 	return chrHasLosToPos(chr, pos, rooms);
+#else
+	return false;
+#endif
 }
 
 bool chrHasLosToProp(struct chrdata *chr, struct prop *prop)
