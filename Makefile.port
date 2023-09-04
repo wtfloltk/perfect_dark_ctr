@@ -27,6 +27,8 @@ TARGET_PLATFORM ?=
 #
 # Supported values:
 #  * ntsc-final
+#  * pal-final
+#  * jpn-final
 
 ROMID ?= ntsc-final
 
@@ -99,6 +101,13 @@ TARGET_BIG_ENDIAN = 0 # TODO
 # The VERSION constant is used in the source to handle version-specific code.
 ifeq ($(ROMID),ntsc-final)
   VERSION = 2
+  IS_PAL = 0
+else ifeq ($(ROMID),pal-final)
+  VERSION = 4
+  IS_PAL = 1
+else ifeq ($(ROMID),jpn-final)
+  VERSION = 5
+  IS_PAL = 0
 else
   $(error ROM version $(VERSION) is not supported)
 endif
@@ -113,7 +122,7 @@ DEFINES := \
   VERSION_TARGET=\"$(VERSION_TARGET)\" \
   VERSION_ROMID=\"$(VERSION_ROMID)\" \
   MATCHING=0 \
-  PAL=0 \
+  PAL=$(IS_PAL) \
   PIRACYCHECKS=0 \
   ROM_SIZE=$(ROM_SIZE) \
   _LANGUAGE_C=1
