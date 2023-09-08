@@ -1154,7 +1154,11 @@ void mpApplyWeaponSet(void)
 			mpSetWeaponSlot(i, random() % numoptions + 1);
 		}
 
+#ifndef PLATFORM_N64 // take into account the new classic weapons slots
+		mpSetWeaponSlot(i, MPWEAPON_DISABLED - 1);
+#else
 		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1);
+#endif
 	}
 }
 
