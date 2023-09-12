@@ -31,7 +31,7 @@ static LPTOP_LEVEL_EXCEPTION_FILTER prevExFilter;
 static void *crashGetModuleBase(const void *addr)
 {
 	HMODULE h = NULL;
-	GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, addr, &h);
+	GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, addr, &h);
 	return (void *)h;
 }
 
