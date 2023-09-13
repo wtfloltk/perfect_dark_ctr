@@ -304,7 +304,7 @@ s32 configLoad(const char *fname)
 
 void configInit(void)
 {
-	if (fsFileSize(CONFIG_FNAME) > 0) {
-		configLoad(CONFIG_FNAME);
+	if (fsFileSize(CONFIG_PATH) > 0) {
+		configLoad(CONFIG_PATH);
 	}
 }

@@ -152,7 +152,7 @@ static inline void romdataLoadRom(void)
 	g_RomFile = fsFileLoad(romName, &g_RomFileSize);
 
 	if (!g_RomFile) {
-		sysFatalError("Could not open ROM file %s.\nEnsure that it is in the data directory.", romName);
+		sysFatalError("Could not open ROM file %s.\nEnsure that it is in the %s directory.", romName, fsFullPath(""));
 	}
 
 	if (g_RomFileSize != ROMDATA_ROM_SIZE) {

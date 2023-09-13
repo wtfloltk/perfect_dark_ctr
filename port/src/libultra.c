@@ -13,9 +13,10 @@
 #include "fs.h"
 
 #define EEPROM_SIZE (EEP16K_MAXBLOCKS * 8)
-#define EEPROM_FNAME "./eeprom.bin"
-#define OS_COUNTER_RATE 46875000ULL
+#define EEPROM_FNAME "eeprom.bin"
+#define EEPROM_PATH "$S/" EEPROM_FNAME
 
+#define OS_COUNTER_RATE 46875000ULL
 #define OS_COUNTER_NUM (OS_COUNTER_RATE / 1000ULL)
 #define OS_COUNTER_DEN (1000000ULL / 1000ULL)
 
@@ -260,7 +261,7 @@ static inline void osEeepromLoad(const char *fname)
 			fread(eeprom, 1, EEPROM_SIZE, fp);
 			fsFileClose(fp);
 		} else {
-			sysLogPrintf(LOG_NOTE, "could not read EEPROM from `%s`: %s", fname, strerror(errno));
+			sysLogPrintf(LOG_NOTE, "could not read EEPROM from `%s`: %s", fsFullPath(fname), strerror(errno));
 		}
 	}
 }
@@ -272,7 +273,7 @@ static inline void osEeepromSave(const char *fname)
 		fwrite(eeprom, 1, EEPROM_SIZE, fp);
 		fsFileClose(fp);
 	} else {
-		sysLogPrintf(LOG_ERROR, "could not save EEPROM to `%s`: %s", fname, strerror(errno));
+		sysLogPrintf(LOG_ERROR, "could not save EEPROM to `%s`: %s", fsFullPath(fname), strerror(errno));
 	}
 }
 
@@ -283,7 +284,7 @@ s32 osEepromProbe(OSMesgQueue *mq)
 
 s32 osEepromLongRead(OSMesgQueue *mq, u8 address, u8 *buffer, int nbytes)
 {
-	osEeepromLoad(EEPROM_FNAME);
+	osEeepromLoad(EEPROM_PATH);
 
 	memcpy(buffer, eeprom + address * 8, nbytes);
 
@@ -292,11 +293,11 @@ s32 osEepromLongRead(OSMesgQueue *mq, u8 address, u8 *buffer, int nbytes)
 
 s32 osEepromLongWrite(OSMesgQueue *mq, u8 address, u8 *buffer, int nbytes)
 {
-	osEeepromLoad(EEPROM_FNAME);
+	osEeepromLoad(EEPROM_PATH);
 
 	memcpy(eeprom + address * 8, buffer, nbytes);
 
-	osEeepromSave(EEPROM_FNAME);
+	osEeepromSave(EEPROM_PATH);
 
 	return 0;
 }

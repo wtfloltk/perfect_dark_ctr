@@ -59,7 +59,7 @@ static void cleanup(void)
 {
 	sysLogPrintf(LOG_NOTE, "shutdown");
 	inputSaveConfig();
-	configSave(CONFIG_FNAME);
+	configSave(CONFIG_PATH);
 	crashShutdown();
 	// TODO: actually shut down all subsystems
 }
