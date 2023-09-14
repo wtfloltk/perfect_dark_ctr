@@ -18,7 +18,8 @@ static char saveDir[FS_MAXPATH + 1]; // replaces $S
 static char homeDir[FS_MAXPATH + 1]; // replaces $H
 static char exeDir[FS_MAXPATH + 1];  // replaces $E
 
-static s32 fsPathIsWritable(const char *path) {
+static s32 fsPathIsWritable(const char *path)
+{
 #ifdef PLATFORM_WIN32
 	// on windows access() on directories will only check if the directory exists, so
 	char tmp[FS_MAXPATH + 1] = { 0 };
@@ -33,6 +34,17 @@ static s32 fsPathIsWritable(const char *path) {
 #else
 	return (access(path, W_OK) == 0);
 #endif
+}
+
+s32 fsPathIsAbsolute(const char *path)
+{
+ return (path[0] == '/' || (isalpha(path[0]) && path[1] == ':'));
+}
+
+s32 fsPathIsCwdRelative(const char *path)
+{
+	// ., .., ./, ../
+	return (path[0] == '.' && (path[1] == '.' || path[1] == '/' || path[1] == '\\' || path[1] == '\0'));
 }
 
 const char *fsFullPath(const char *relPath)
@@ -59,7 +71,7 @@ const char *fsFullPath(const char *relPath)
 		}
 		// couldn't expand anything, return as is
 		return relPath;
-	} else if (!dataDir[0] || relPath[0] == '.' || relPath[0] == '/' || (isalpha(relPath[0]) && relPath[1] == ':')) {
+	} else if (!dataDir[0] || fsPathIsAbsolute(relPath) || fsPathIsCwdRelative(relPath)) {
 		// user explicitly wants working directory or this is an absolute path or we have no dataDir set up yet
 		return relPath;
 	}

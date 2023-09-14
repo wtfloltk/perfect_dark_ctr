@@ -10,6 +10,9 @@ s32 fsInit(void);
 
 const char *fsFullPath(const char *relPath);
 
+s32 fsPathIsAbsolute(const char *path);
+s32 fsPathIsCwdRelative(const char *path);
+
 void *fsFileLoad(const char *name, u32 *outSize);
 s32 fsFileSize(const char *name);
 
