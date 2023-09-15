@@ -4199,7 +4199,7 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 					result = romsize;
 				} else {
 					// by this point we've already written out of bounds in the previous dmaExec call but oh well
-					sysFatalError("File %d is larger than its allocation: %u > %u", filenum, romsize, allocationlen);
+					sysFatalError("File %d is larger than its allocation: %u > %u", filenum);
 				}
 			}
 #elif VERSION < VERSION_NTSC_1_0
