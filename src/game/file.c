@@ -12,6 +12,7 @@
 #include "types.h"
 #ifndef PLATFORM_N64
 #include "romdata.h"
+#include "system.h"
 #endif
 
 /**
@@ -4190,7 +4191,18 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 			dmaExec(scratch, *romaddrptr, romsize);
 			result = rzipInflate(scratch, dst, buffer);
 
-#if VERSION < VERSION_NTSC_1_0
+#ifndef PLATFORM_N64
+			if (result == 0) {
+				// probably not zipped, just copy it over if there's enough space
+				if (romsize < allocationlen) {
+					dmaExec(dst, *romaddrptr, romsize);
+					result = romsize;
+				} else {
+					// by this point we've already written out of bounds in the previous dmaExec call but oh well
+					sysFatalError("File %d is larger than its allocation: %u > %u", filenum);
+				}
+			}
+#elif VERSION < VERSION_NTSC_1_0
 			if (result == 0) {
 				sprintf(sp54, "DMA-Crash %s %d Ram: %02x%02x%02x%02x%02x%02x%02x%02x", "ob.c", 204,
 						scratch[0], scratch[1], scratch[2], scratch[3],
