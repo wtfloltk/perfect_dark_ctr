@@ -384,7 +384,12 @@ void mpPlayerSetDefaults(s32 playernum, bool autonames)
 
 	g_PlayerConfigsArray[playernum].controlmode = CONTROLMODE_12;
 
-	g_PlayerConfigsArray[playernum].options = OPTION_LOOKAHEAD
+	g_PlayerConfigsArray[playernum].options =
+#ifdef PLATFORM_N64
+		  OPTION_LOOKAHEAD
+#else
+		  OPTION_FORWARDPITCH
+#endif
 		| OPTION_SIGHTONSCREEN
 		| OPTION_AUTOAIM
 		| OPTION_AMMOONSCREEN
