@@ -1196,7 +1196,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						movedata.cannaturalturn = !g_Vars.currentplayer->insightaimmode;
 
 #ifndef PLATFORM_N64
-						if (g_PlayerMouseAimMode == MOUSEAIM_LOCKED) {
+						if (g_PlayerMouseAimMode == MOUSEAIM_LOCKED || bgunGetWeaponNum(HAND_RIGHT) == WEAPON_HORIZONSCANNER) {
 							movedata.cannaturalpitch = movedata.cannaturalpitch || (movedata.freelookdy != 0.0f);
 							movedata.cannaturalturn = movedata.cannaturalturn  || (movedata.freelookdx != 0.0f);
 						}
