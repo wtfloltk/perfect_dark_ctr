@@ -316,9 +316,16 @@ Gfx *bviewDrawStatic(Gfx *gdl, u32 arg1, s32 arg2)
 
 	gdl = bviewPrepareStaticI8(gdl, arg1, arg2);
 
+#ifdef PLATFORM_N64
 	for (y = viewtop; y < viewtop + viewheight; y++) {
 		gdl = bviewCopyPixels(gdl, fb2, random() % 240, 5, y, 1.0f, viewleft, viewwidth);
 	}
+#else
+	gDPSetCombineLERP(gdl++,
+			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
+			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
+	gDPFillRectangleEXT(gdl++, viewleft, viewtop, viewleft + viewwidth, viewtop + viewheight);
+#endif
 
 	if (fb2) {
 		// empty
@@ -401,6 +408,7 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
+#ifdef PLATFORM_N64
 	for (y = viewtop; y < viewtop + viewheight; y++) {
 		s32 offsety = y - offset;
 		s32 tmpy = y;
@@ -419,6 +427,32 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 
 		gdl = bviewCopyPixels(gdl, fb, tmpy, 5, y, 1, viewleft, viewwidth);
 	}
+#else
+	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
+
+	for (y = viewtop; y < viewtop + viewheight; y++) {
+		s32 offsety = y - offset;
+		s32 tmpy = y;
+
+		if (offsety % 6 == 0 || y == viewtop) {
+			if (offsety % 12 < 6) {
+				gDPSetPrimColor(gdl++, 0, 0, 0x7f, 0xff, 0xff, 0xff);
+			} else {
+				gDPSetPrimColor(gdl++, 0, 0, 0x00, 0xaf, 0xff, 0xff);
+			}
+		}
+
+		if (random() % 20 == 1) {
+			tmpy += random() % 200;
+		}
+
+		gDPFillRectangle(gdl++, viewleft, tmpy, viewleft + viewwidth, tmpy + 1);
+	}
+
+	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
+#endif
 
 	return gdl;
 }

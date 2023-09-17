@@ -204,6 +204,7 @@ static struct RenderingState {
     float depth_zfar;
     bool decal_mode;
     bool alpha_blend;
+    bool modulate;
     struct XYWidthHeight viewport, scissor;
     struct ShaderProgram* shader_program;
     TextureCacheNode* textures[SHADER_MAX_TEXTURES];
@@ -1279,6 +1280,7 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
     bool invisible =
         (rdp.other_mode_l & (3 << 24)) == (G_BL_0 << 24) && (rdp.other_mode_l & (3 << 20)) == (G_BL_CLR_MEM << 20);
     bool use_grayscale = rdp.grayscale;
+    bool use_modulate = use_alpha && (rsp.extra_geometry_mode & G_MODULATE_EXT) != 0;
 
     if (texture_edge) {
         use_alpha = true;
@@ -1400,10 +1402,11 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
         gfx_rapi->load_shader(prg);
         rendering_state.shader_program = prg;
     }
-    if (use_alpha != rendering_state.alpha_blend) {
+    if (use_alpha != rendering_state.alpha_blend || use_modulate != rendering_state.modulate) {
         gfx_flush();
-        gfx_rapi->set_use_alpha(use_alpha);
+        gfx_rapi->set_use_alpha(use_alpha, use_modulate);
         rendering_state.alpha_blend = use_alpha;
+        rendering_state.modulate = use_modulate;
     }
     uint8_t num_inputs;
     bool used_textures[2];

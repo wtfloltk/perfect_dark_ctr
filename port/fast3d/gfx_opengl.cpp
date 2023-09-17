@@ -775,11 +775,16 @@ static void gfx_opengl_set_scissor(int x, int y, int width, int height) {
     glScissor(x, y, width, height);
 }
 
-static void gfx_opengl_set_use_alpha(bool use_alpha) {
+static void gfx_opengl_set_use_alpha(bool use_alpha, bool modulate) {
     if (use_alpha) {
         glEnable(GL_BLEND);
     } else {
         glDisable(GL_BLEND);
+    }
+    if (modulate) {
+        glBlendFunc(GL_DST_COLOR, GL_ZERO);
+    } else {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 }
 
