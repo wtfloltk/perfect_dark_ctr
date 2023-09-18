@@ -39,8 +39,8 @@ void frametimeCalculate(void)
 		diffframet = count - g_Vars.thisframestartt;
 		g_Vars.diffframet = diffframet;
 
-		diffframe60 = (g_Vars.lostframetime60t + diffframet + CYCLES_PER_FRAME / 2) / CYCLES_PER_FRAME;
-		diffframe240 = (g_Vars.lostframetime240t + diffframet + CYCLES_PER_FRAME / 2 / 4) / (CYCLES_PER_FRAME / 4);
+		diffframe60 = (diffframet + CYCLES_PER_FRAME / 2) / CYCLES_PER_FRAME;
+		diffframe240 = (diffframet + CYCLES_PER_FRAME / 2 / 4) / (CYCLES_PER_FRAME / 4);
 	} while (diffframe60 < g_Vars.mininc60);
 
 	g_Vars.lostframetime60t = g_Vars.lostframetime60t + diffframet - diffframe60 * CYCLES_PER_FRAME;

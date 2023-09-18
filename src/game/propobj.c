@@ -5218,7 +5218,10 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 	f32 ymax;
 	f32 ymin;
 
-	if (g_Vars.lvframe60 > hov->prevframe60) {
+#ifdef PLATFORM_N64
+	if (g_Vars.lvframe60 > hov->prevframe60)
+#endif
+	{
 		prop = obj->prop;
 		bbox = objFindBboxRodata(obj);
 		type = &g_HovTypes[hov->type];
