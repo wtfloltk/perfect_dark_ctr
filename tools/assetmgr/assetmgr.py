@@ -45,17 +45,19 @@ def write_enums(typename, names, filename, terminator, start=0):
 
     fd.close()
 
+def write_data(data):
+    idx = sys.argv.index('--raw-out')
+    filename = sys.argv[idx + 1]
+    print('writing binary to', filename)
+    fd = open(filename, 'wb')
+    fd.write(data)
+    fd.close()
+
 def write_object(data, filename):
     if '--raw-out' in sys.argv:
         # write the raw data into a user-specified file instead
-        idx = sys.argv.index('--raw-out')
-        if idx + 1 < len(sys.argv):
-            filename = sys.argv[idx + 1]
-            fd = open(filename, 'wb')
-            fd.write(data)
-            fd.close()
-            print('wrote binary to', filename)
-            return
+        write_data(data)
+        return
 
     filename = 'build/%s/assets/%s' % (os.environ['ROMID'], filename)
     mkpath(filename)
