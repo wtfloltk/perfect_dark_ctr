@@ -1104,9 +1104,13 @@ void preprocessTexturesList(u8 *data, u32 size)
 	const u32 count = size / sizeof(*tex);
 	for (u32 i = 0; i < count; ++i, ++tex) {
 		// TODO: it sure looks like none of the fields except soundsurfacetype, surfacetype and dataoffset are set
-		// just swap the last 3 bytes of the first word
+		// just swap the last 3 bytes of the first word...
 		const u32 dofs = (u32)tex->dataoffset << 8;
 		tex->dataoffset = PD_BE32(dofs);
+		// ...and the surface types in the first byte
+		const u8 tmp = tex->soundsurfacetype;
+		tex->soundsurfacetype = tex->surfacetype;
+		tex->surfacetype = tmp;
 	}
 }
 
