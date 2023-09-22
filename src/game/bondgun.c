@@ -12741,7 +12741,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 #ifndef PLATFORM_N64
 	if (playercount < 2) {
-		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, G_ASPECT_RIGHT_EXT);
+		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 	}
 #endif
 
@@ -12995,7 +12995,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 #ifndef PLATFORM_N64
 		if (playercount < 2) {
-			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, G_ASPECT_LEFT_EXT);
+			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
 		}
 #endif
 
@@ -13035,7 +13035,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 #ifndef PLATFORM_N64
 		if (playercount < 2) {
-			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, G_ASPECT_RIGHT_EXT);
+			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 		}
 #endif
 
