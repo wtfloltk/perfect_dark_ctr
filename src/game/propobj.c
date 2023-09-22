@@ -5170,7 +5170,10 @@ void hovUpdateGround(struct defaultobj *obj, struct hov *hov, struct coord *pos,
 	RoomNum testrooms[8];
 	struct coord testpos;
 
-	if (g_Vars.lvframe60 > hov->prevframe60) {
+#ifdef PLATFORM_N64
+	if (g_Vars.lvframe60 > hov->prevframe60)
+#endif
+	{
 		testpos.x = pos->x;
 		testpos.y = pos->y - 50;
 		testpos.z = pos->z;
@@ -5218,7 +5221,10 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 	f32 ymax;
 	f32 ymin;
 
-	if (g_Vars.lvframe60 > hov->prevframe60) {
+#ifdef PLATFORM_N64
+	if (g_Vars.lvframe60 > hov->prevframe60)
+#endif
+	{
 		prop = obj->prop;
 		bbox = objFindBboxRodata(obj);
 		type = &g_HovTypes[hov->type];
