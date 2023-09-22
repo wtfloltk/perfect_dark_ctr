@@ -3865,7 +3865,11 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 #endif
 										texturenum = -1;
 									} else {
+#ifdef PLATFORM_N64
 										s32 tmp = PHYS_TO_K0(UNSEGADDR(imggdl->words.w1) - 8);
+#else
+										uintptr_t tmp = PHYS_TO_K0(UNSEGADDR(imggdl->words.w1) - 8);
+#endif
 										texturenum = *(s16 *) tmp;
 									}
 
@@ -4366,7 +4370,11 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 #endif
 												texturenum = -1;
 											} else {
+#ifdef PLATFORM_N64
 												s32 tmp = UNSEGADDR(tmpgdl->words.w1) - 8;
+#else
+												uintptr_t tmp = UNSEGADDR(tmpgdl->words.w1) - 8;
+#endif
 												texturenum = *(s16 *) PHYS_TO_K0(tmp);
 											}
 
