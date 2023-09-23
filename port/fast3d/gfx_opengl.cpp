@@ -803,8 +803,24 @@ typedef void (APIENTRY *DEBUGPROC)(GLenum source,
     const void *userParam);
 
 static void APIENTRY gl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *msg, const void *p) {
-    if (severity > 0x826B) {
-        sysLogPrintf(LOG_WARNING, "GL: %s", msg);
+    sysLogPrintf(LOG_WARNING, "GL: (%05x) %s", id, msg);
+}
+
+static void gfx_opengl_enable_debug(void) {
+    if (GLAD_GL_KHR_debug) {
+        glEnable(GL_DEBUG_OUTPUT);
+    }
+    if (glDebugMessageControl != NULL) {
+        // enable everything except some specific spam messages
+        const GLuint disable[] = {
+            0x20061, /* "Framebuffer detailed info" */
+            0x20071  /* "Buffer detailed info" */
+        };
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+        glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 2, disable, GL_FALSE);
+    }
+    if (glDebugMessageCallback != NULL) {
+        glDebugMessageCallback(gl_debug, NULL);
     }
 }
 
@@ -813,9 +829,8 @@ static void gfx_opengl_init(void) {
         sysFatalError("Could not load OpenGL. Ensure your GPU supports at least OpenGL 2.1.");
     }
 
-    void APIENTRY (*pglDebugMessageCallback)(DEBUGPROC, const void *) = (void  APIENTRY (*)(DEBUGPROC, const void *))SDL_GL_GetProcAddress("glDebugMessageCallback");
-    if (pglDebugMessageCallback) {
-        pglDebugMessageCallback(gl_debug, NULL);
+    if (sysArgCheck("--debug-gl")) {
+        gfx_opengl_enable_debug();
     }
 
     glGenBuffers(1, &opengl_vbo);
