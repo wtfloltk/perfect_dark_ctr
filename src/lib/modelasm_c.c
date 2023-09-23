@@ -1577,6 +1577,8 @@ static f32 modelasmAcosOrAsin(f32 f6)
 	return 0.000047937632189132f * t3;
 }
 
+#ifdef PLATFORM_N64
+
 f32 cosf(f32 radians)
 {
 	return sinf(radians + 1.570796251297f);
@@ -1650,3 +1652,5 @@ f32 sinf(f32 radians)
 
 	return ret;
 }
+
+#endif
