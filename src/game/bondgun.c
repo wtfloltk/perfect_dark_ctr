@@ -5441,10 +5441,12 @@ void bgunTickSwitch2(void)
 				ctrl->switchtoweaponnum = WEAPON_UNARMED;
 			}
 
+#ifdef PLATFORM_N64
 #if VERSION == VERSION_JPN_FINAL
 			if (ctrl->switchtoweaponnum == WEAPON_COMBATKNIFE) {
 				ctrl->switchtoweaponnum = WEAPON_UNARMED;
 			}
+#endif
 #endif
 
 			if (ctrl->dualwielding && !invHasDoubleWeaponIncAllGuns(ctrl->switchtoweaponnum, ctrl->switchtoweaponnum)) {
