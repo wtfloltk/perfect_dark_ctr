@@ -70,14 +70,12 @@ u8 ciGetFiringRangeScore(s32 weaponindex)
 {
 	// Data at firingrangescores is a u8 array where each score uses 2 bits
 
-#ifdef PLATFORM_N64
-#if VERSION == VERSION_JPN_FINAL
+#if (VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)
 	if (weaponindex == frGetWeaponIndexByWeapon(WEAPON_COMBATKNIFE)) {
 		// The knife doesn't exist in the JPN version.
 		// Treat it as completed so unlockables still work.
 		return 3;
 	}
-#endif
 #endif
 
 	return (g_GameFile.firingrangescores[weaponindex >> 2] >> (weaponindex % 4) * 2) & 3;
@@ -207,12 +205,10 @@ bool func0f19cbcc(s32 weapon)
 
 bool frIsWeaponAvailable(s32 weapon)
 {
-#ifdef PLATFORM_N64
-#if VERSION == VERSION_JPN_FINAL
+#if (VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)
 	if (weapon == WEAPON_COMBATKNIFE) {
 		return false;
 	}
-#endif
 #endif
 
 	if (weapon < WEAPON_FALCON2 || weapon > WEAPON_REMOTEMINE
