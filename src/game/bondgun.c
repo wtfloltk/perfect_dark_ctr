@@ -5441,7 +5441,7 @@ void bgunTickSwitch2(void)
 				ctrl->switchtoweaponnum = WEAPON_UNARMED;
 			}
 
-#if VERSION == VERSION_JPN_FINAL
+#if (VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)
 			if (ctrl->switchtoweaponnum == WEAPON_COMBATKNIFE) {
 				ctrl->switchtoweaponnum = WEAPON_UNARMED;
 			}
