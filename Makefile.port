@@ -170,7 +170,7 @@ JSON_FILES += $(wildcard $(A_DIR)/*.json)
 
 JSON_HEADERS := $(patsubst $(A_DIR)/%.json, $(G_DIR)/%.h, $(JSON_FILES))
 
-C_FILES := $(shell find src/game port -name '*.c' ! -name 'atan2f.c' ! -name 'acosfasinf.c')
+C_FILES := $(shell find src/game port -name '*.c')
 C_FILES := $(C_FILES) \
   $(wildcard src/lib/mp3/*.c) \
   $(wildcard src/lib/naudio/*.c) \
