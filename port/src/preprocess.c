@@ -43,7 +43,7 @@ static inline u32 swapUnk(u32 x) { assert(0 && "unknown type"); return x; }
 static u8 swapmap[0x40000 >> 3];
 
 static inline u32 alreadySwapped(const intptr_t addr) {
-	const u32 mask = (1 << (addr & 3));
+	const u32 mask = (1 << (addr & 7));
 	const u32 old = swapmap[addr >> 3] & mask;
 	if (!old) {
 		swapmap[addr >> 3] |= mask;
