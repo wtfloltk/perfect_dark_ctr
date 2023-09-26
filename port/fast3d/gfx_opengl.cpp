@@ -14,12 +14,6 @@
 #endif
 #include <PR/gbi.h>
 
-#ifdef __MINGW32__
-#define FOR_WINDOWS 1
-#else
-#define FOR_WINDOWS 0
-#endif
-
 #include "glad/glad.h"
 
 #include "gfx_cc.h"
@@ -63,8 +57,7 @@ static size_t current_framebuffer;
 static float current_noise_scale;
 static FilteringMode current_filter_mode = FILTER_LINEAR;
 
-GLuint pixel_depth_rb, pixel_depth_fb;
-size_t pixel_depth_rb_size;
+static GLenum gl_mirror_clamp = GL_MIRROR_CLAMP_TO_EDGE;
 
 static int gfx_opengl_get_max_texture_size() {
     GLint max_texture_size;
@@ -715,10 +708,6 @@ static void gfx_opengl_upload_texture(const uint8_t* rgba32_buf, uint32_t width,
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba32_buf);
 }
 
-#ifdef __SWITCH__
-#define GL_MIRROR_CLAMP_TO_EDGE 0x8743
-#endif
-
 static uint32_t gfx_cm_to_opengl(uint32_t val) {
     switch (val) {
         case G_TX_NOMIRROR | G_TX_CLAMP:
@@ -726,7 +715,7 @@ static uint32_t gfx_cm_to_opengl(uint32_t val) {
         case G_TX_MIRROR | G_TX_WRAP:
             return GL_MIRRORED_REPEAT;
         case G_TX_MIRROR | G_TX_CLAMP:
-            return GL_MIRRORED_REPEAT /*GL_MIRROR_CLAMP_TO_EDGE*/; // GL4 only
+            return gl_mirror_clamp;
         case G_TX_NOMIRROR | G_TX_WRAP:
             return GL_REPEAT;
     }
@@ -885,6 +874,7 @@ static void gfx_opengl_log_info(void) {
     sysLogPrintf(LOG_NOTE, "GL: GLSL version: %s", glsl_version ? glsl_version : "unknown");
     sysLogPrintf(LOG_NOTE, "GL: ARB_framebuffer_object: %s", gfx_opengl_supports_framebuffers() ? "yes" : "no");
     sysLogPrintf(LOG_NOTE, "GL: ARB_depth_clamp: %s", GLAD_GL_ARB_depth_clamp ? "yes" : "no");
+    sysLogPrintf(LOG_NOTE, "GL: ARB_texture_mirror_clamp_to_edge: %s", GLAD_GL_ARB_texture_mirror_clamp_to_edge ? "yes" : "no");
 }
 
 static void *gl_load_proc(const char *name) {
@@ -936,6 +926,11 @@ static void gfx_opengl_init(void) {
         // TODO: actually disable fb usage
     }
 
+    if ((GLVersion.major < 4 || GLVersion.minor < 4) && !GLAD_GL_ARB_texture_mirror_clamp_to_edge) {
+        // GL_MIRROR_CLAMP_TO_EDGE unsupported
+        gl_mirror_clamp = GL_MIRRORED_REPEAT;
+    }
+
     glGenBuffers(1, &opengl_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, opengl_vbo);
 
@@ -951,18 +946,6 @@ static void gfx_opengl_init(void) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     framebuffers.resize(1); // for the default screen buffer
-
-    glGenRenderbuffers(1, &pixel_depth_rb);
-    glBindRenderbuffer(GL_RENDERBUFFER, pixel_depth_rb);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1, 1);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    glGenFramebuffers(1, &pixel_depth_fb);
-    glBindFramebuffer(GL_FRAMEBUFFER, pixel_depth_fb);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pixel_depth_rb);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    pixel_depth_rb_size = 1;
 }
 
 static void gfx_opengl_on_resize(void) {
