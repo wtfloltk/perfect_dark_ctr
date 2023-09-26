@@ -1897,7 +1897,7 @@ void playerTickCutscene(bool arg0)
 	f32 fovy;
 	s32 endframe;
 	s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-	u16 buttons;
+	u32 buttons;
 #if PAL
 	u8 stack3[0x2c];
 #endif
@@ -1910,7 +1910,7 @@ void playerTickCutscene(bool arg0)
 	f32 sp54[4];
 
 	if (arg0) {
-		buttons = joyGetButtons(contpadnum, 0xffff);
+		buttons = joyGetButtons(contpadnum, 0xffffffff);
 	} else {
 		buttons = 0;
 	}
@@ -2029,7 +2029,7 @@ void playerTickCutscene(bool arg0)
 	}
 
 #if VERSION >= VERSION_NTSC_1_0
-	if (g_CutsceneCurTotalFrame60f > 30 && (buttons & 0xffff)) {
+	if (g_CutsceneCurTotalFrame60f > 30 && (buttons & 0xffffffff)) {
 		g_CutsceneSkipRequested = true;
 
 		if (g_Vars.autocutplaying) {
@@ -2042,7 +2042,7 @@ void playerTickCutscene(bool arg0)
 	}
 #else
 	if (g_CutsceneCurTotalFrame60f > 30) {
-		if (buttons & 0xffff) {
+		if (buttons & 0xffffffff) {
 			g_CutsceneSkipRequested = true;
 		}
 
@@ -3300,7 +3300,7 @@ void playerTick(bool arg0)
 				if (g_Vars.currentplayer->eyespy->active) {
 					// And is being controlled
 					s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-					u16 buttons = arg0 ? joyGetButtons(contpad1, 0xffff) : 0;
+					u32 buttons = arg0 ? joyGetButtons(contpad1, 0xffffffff) : 0;
 
 					if (g_Vars.currentplayer->isdead == false
 							&& g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED
@@ -3491,6 +3491,9 @@ void playerTick(bool arg0)
 				s8 contpad2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
 				s8 stickx = 0;
 				s8 sticky = 0;
+#ifndef PLATFORM_N64
+				s8 rsticky = joyGetRStickY(contpad1);
+#endif
 				Mtxf sp1fc;
 				Mtxf sp1bc;
 				Mtxf sp17c;
@@ -3507,6 +3510,7 @@ void playerTick(bool arg0)
 				f32 sp11c[3];
 #endif
 				bool explode = false;
+				// NOTE: slayer handling
 				bool slow = false;
 				bool pause = false;
 				f32 newspeed;
@@ -3659,6 +3663,16 @@ void playerTick(bool arg0)
 					targetspeed = 12;
 				}
 
+#ifndef PLATFORM_N64
+				targetspeed += rsticky / 127.f * 12.f;
+				if (targetspeed > 12) {
+					targetspeed = 12;
+				}
+				if (targetspeed < 1) {
+					targetspeed = 1;
+				}
+#endif
+				
 				newspeed = prevspeed;
 
 				if (prevspeed < targetspeed) {

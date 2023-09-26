@@ -4689,6 +4689,10 @@ enum weaponnum {
 #define BUTTON_RADIAL         D_JPAD
 #define BUTTON_ALTMODE        L_TRIG
 
+#define BUTTON_CROUCH_CYCLE   CONT_8000             
+#define BUTTON_HALF_CROUCH    CONT_4000             
+#define BUTTON_FULL_CROUCH    CONT_2000             
+
 #define MOUSEAIM_CLASSIC 0 // crosshair moves around the screen in aim mode
 #define MOUSEAIM_LOCKED 1  // crosshair locked to the center of the screen in aim mode
 

@@ -1367,8 +1367,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 	{
 		s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-		u16 buttonsdown = joyGetButtons(contpadnum, 0xffff); \
-		u16 buttonsthisframe = joyGetButtonsPressedThisFrame(contpadnum, 0xffff);
+		u32 buttonsdown = joyGetButtons(contpadnum, 0xffffffff); \
+		u32 buttonsthisframe = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
 		s8 cstickx = joyGetStickX(contpadnum); \
 		s8 csticky = joyGetStickY(contpadnum);
 		s32 xpos;

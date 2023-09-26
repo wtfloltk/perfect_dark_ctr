@@ -36,7 +36,7 @@ You must already have a Perfect Dark ROM to run the game, as specified above.
 
 1964GEPD-style and Xbox-style bindings are partially implemented.
 
-N64 pad buttons X and Y (or `X_BUTTON`, `Y_BUTTON` in the code) refer to the reserved buttons 0x40 and 0x80, which are also leveraged by 1964GEPD.
+N64 pad buttons X and Y (or `X_BUTTON`, `Y_BUTTON` in the code) refer to the reserved buttons `0x40` and `0x80`, which are also leveraged by 1964GEPD.
 
 | Action          | Keyboard and mouse | Xbox pad | N64 pad    |
 | -               | -                  | -        | -          |
@@ -44,6 +44,9 @@ N64 pad buttons X and Y (or `X_BUTTON`, `Y_BUTTON` in the code) refer to the res
 | Aim mode        | RMB/Z              | LT       | R Trigger  |
 | Use / Cancel    | E                  | N/A      | B          |
 | Use / Accept    | N/A                | A        | A          |
+| Crouch cycle    | N/A                | L3       | D-Right    |
+| Half-Crouch     | Shift              | N/A      | D-Up       |
+| Full-Crouch     | Control            | N/A      | D-Down     |
 | Reload          | R                  | X        | X `(0x40)` |
 | Previous weapon | Mousewheel forward | B        | D-Left     |
 | Next weapon     | Mousewheel back    | Y        | Y `(0x80)` |

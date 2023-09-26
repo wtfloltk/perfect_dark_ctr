@@ -5076,6 +5076,7 @@ struct movedata {
 #ifndef PLATFORM_N64
 	/*    */ f32 freelookdx; // how much the mouse moved ...
 	/*    */ f32 freelookdy; // ... scaled by sensitivity
+	/*    */ f32 analoglean; // how much we're trying to lean
 #endif
 
 };
