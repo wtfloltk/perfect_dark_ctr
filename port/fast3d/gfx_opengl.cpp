@@ -824,13 +824,116 @@ static void gfx_opengl_enable_debug(void) {
     }
 }
 
+static bool gfx_opengl_supports_framebuffers(void) {
+    if (GLVersion.major > 2) {
+        // GL3.0+ supports everything we need, but we'll still check it for sanity
+        return (glad_glFramebufferRenderbuffer && glad_glBlitFramebuffer && glad_glRenderbufferStorageMultisample);
+    }
+    if (GLAD_GL_ARB_framebuffer_object) {
+        // some implementations might be missing these
+        return (glad_glBlitFramebuffer && glad_glRenderbufferStorageMultisample);
+    }
+    if (GLAD_GL_EXT_framebuffer_object && GLAD_GL_EXT_framebuffer_blit && GLAD_GL_EXT_framebuffer_multisample) {
+        // because of the way glad works we'll have to copy the pointers over
+        glad_glGenFramebuffers = glad_glGenFramebuffersEXT;
+        glad_glGenRenderbuffers = glad_glGenRenderbuffersEXT;
+        glad_glDeleteFramebuffers = glad_glDeleteFramebuffersEXT;
+        glad_glDeleteRenderbuffers = glad_glDeleteRenderbuffersEXT;
+        glad_glBindFramebuffer = glad_glBindFramebufferEXT;
+        glad_glBindRenderbuffer = glad_glBindRenderbufferEXT;
+        glad_glFramebufferRenderbuffer = glad_glFramebufferRenderbufferEXT;
+        glad_glFramebufferTexture2D = glad_glFramebufferTexture2DEXT;
+        glad_glRenderbufferStorage = glad_glRenderbufferStorageEXT;
+        glad_glRenderbufferStorageMultisample = glad_glRenderbufferStorageMultisampleEXT;
+        glad_glBlitFramebuffer = glad_glBlitFramebufferEXT;
+        // sanity check
+        return (glad_glFramebufferRenderbuffer && glad_glBlitFramebuffer && glad_glRenderbufferStorageMultisample);
+    }
+    // nothing
+    return false;
+}
+
+static bool gfx_opengl_supports_shaders(void) {
+    if (GLVersion.major > 2) {
+        // should support GLSL130+
+        return true;
+    }
+
+    // check supported GLSL version
+    const char *ver = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    if (ver) {
+        int maj = 0, min = 0;
+        sscanf(ver, "%d.%d", &maj, &min);
+        if (maj > 1 || (maj == 1 && min > 20)) {
+            // above 120, should be fine
+            return true;
+        }
+    }
+
+    // check for extension that adds textureSize
+    return GLAD_GL_EXT_gpu_shader4;
+}
+
+static void gfx_opengl_log_info(void) {
+    const char *version = (const char *)glGetString(GL_VERSION);
+    const char *vendor = (const char *)glGetString(GL_VENDOR);
+    const char *renderer = (const char *)glGetString(GL_RENDERER);
+    const char *glsl_version = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    sysLogPrintf(LOG_NOTE, "GL: version: %s", version ? version : "unknown");
+    sysLogPrintf(LOG_NOTE, "GL: vendor: %s", vendor ? vendor : "unknown");
+    sysLogPrintf(LOG_NOTE, "GL: renderer: %s", renderer ? renderer : "unknown");
+    sysLogPrintf(LOG_NOTE, "GL: GLSL version: %s", glsl_version ? glsl_version : "unknown");
+    sysLogPrintf(LOG_NOTE, "GL: ARB_framebuffer_object: %s", gfx_opengl_supports_framebuffers() ? "yes" : "no");
+    sysLogPrintf(LOG_NOTE, "GL: ARB_depth_clamp: %s", GLAD_GL_ARB_depth_clamp ? "yes" : "no");
+}
+
+static void *gl_load_proc(const char *name) {
+    void *ret = SDL_GL_GetProcAddress(name);
+    if (ret) {
+        return ret;
+    }
+
+    // try with postfixes
+    static const char *post[] = { "ARB", "EXT" };
+    char tmp[256] = { 0 };
+    for (size_t i = 0; i < sizeof(post) / sizeof(*post); ++i) {
+        snprintf(tmp, sizeof(tmp), "%s%s", name, post[i]);
+        ret = SDL_GL_GetProcAddress(tmp);
+        if (ret) {
+            return ret;
+        }
+    }
+
+    sysLogPrintf(LOG_ERROR, "GL: could not find function: %s", name);
+
+    return NULL;
+}
+
 static void gfx_opengl_init(void) {
-    if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
-        sysFatalError("Could not load OpenGL. Ensure your GPU supports at least OpenGL 2.1.");
+    if (!gladLoadGLLoader(gl_load_proc) || glGetString == NULL || glEnable == NULL) {
+        sysFatalError("Could not load OpenGL.\nReported SDL error: %s", SDL_GetError());
     }
 
     if (sysArgCheck("--debug-gl")) {
         gfx_opengl_enable_debug();
+        // dump version info as early as possible
+        gfx_opengl_log_info();
+    }
+
+    if (GLVersion.major < 2 || (GLVersion.major == 2 && GLVersion.minor < 1)) {
+        const char *ver = (const char *)glGetString(GL_VERSION);
+        sysFatalError("Could not load OpenGL 2.1.\nReported version: %d.%d (%s)",
+            GLVersion.major, GLVersion.minor, ver ? ver : "unknown");
+    }
+
+    if (!gfx_opengl_supports_shaders()) {
+        sysLogPrintf(LOG_WARNING, "GL: GLSL 1.30 unsupported");
+        // maybe replace this with sysFatalError, though the GLSL compiler will cause that later anyway
+    }
+
+    if (!gfx_opengl_supports_framebuffers()) {
+        sysLogPrintf(LOG_WARNING, "GL: GL_ARB_framebuffer_object unsupported, framebuffer effects will be broken");
+        // TODO: actually disable fb usage
     }
 
     glGenBuffers(1, &opengl_vbo);
