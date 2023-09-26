@@ -922,8 +922,8 @@ static void gfx_opengl_init(void) {
     }
 
     if (!gfx_opengl_supports_framebuffers()) {
-        sysLogPrintf(LOG_WARNING, "GL: GL_ARB_framebuffer_object unsupported, framebuffer effects will be broken");
-        // TODO: actually disable fb usage
+        sysLogPrintf(LOG_WARNING, "GL: GL_ARB_framebuffer_object unsupported, framebuffer effects disabled");
+        gfx_framebuffers_enabled = false;
     }
 
     if ((GLVersion.major < 4 || GLVersion.minor < 4) && !GLAD_GL_ARB_texture_mirror_clamp_to_edge) {
@@ -963,6 +963,9 @@ static void gfx_opengl_finish_render(void) {
 }
 
 static int gfx_opengl_create_framebuffer() {
+    size_t i = framebuffers.size();
+    framebuffers.resize(i + 1);
+
     GLuint clrbuf;
     glGenTextures(1, &clrbuf);
     glBindTexture(GL_TEXTURE_2D, clrbuf);
@@ -970,26 +973,26 @@ static int gfx_opengl_create_framebuffer() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
+    framebuffers[i].clrbuf = clrbuf;
+
+    if (!gfx_framebuffers_enabled) {
+        return i;
+    }
 
     GLuint clrbuf_msaa;
     glGenRenderbuffers(1, &clrbuf_msaa);
+    framebuffers[i].clrbuf_msaa = clrbuf_msaa;
 
     GLuint rbo;
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1, 1);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    framebuffers[i].rbo = rbo;
 
     GLuint fbo;
     glGenFramebuffers(1, &fbo);
-
-    size_t i = framebuffers.size();
-    framebuffers.resize(i + 1);
-
     framebuffers[i].fbo = fbo;
-    framebuffers[i].clrbuf = clrbuf;
-    framebuffers[i].clrbuf_msaa = clrbuf_msaa;
-    framebuffers[i].rbo = rbo;
 
     return i;
 }
@@ -1002,39 +1005,43 @@ static void gfx_opengl_update_framebuffer_parameters(int fb_id, uint32_t width, 
     width = max(width, 1U);
     height = max(height, 1U);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+    if (gfx_framebuffers_enabled) {
+        glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 
-    if (fb_id != 0) {
-        if (fb.width != width || fb.height != height || fb.msaa_level != msaa_level) {
-            if (msaa_level <= 1) {
-                glBindTexture(GL_TEXTURE_2D, fb.clrbuf);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-                glBindTexture(GL_TEXTURE_2D, 0);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb.clrbuf, 0);
-            } else {
-                glBindRenderbuffer(GL_RENDERBUFFER, fb.clrbuf_msaa);
-                glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa_level, GL_RGB8, width, height);
+        if (fb_id != 0) {
+            if (fb.width != width || fb.height != height || fb.msaa_level != msaa_level) {
+                if (msaa_level <= 1) {
+                    glBindTexture(GL_TEXTURE_2D, fb.clrbuf);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+                    glBindTexture(GL_TEXTURE_2D, 0);
+                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb.clrbuf, 0);
+                } else {
+                    glBindRenderbuffer(GL_RENDERBUFFER, fb.clrbuf_msaa);
+                    glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa_level, GL_RGB8, width, height);
+                    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, fb.clrbuf_msaa);
+                }
+            }
+
+            if (has_depth_buffer &&
+                (fb.width != width || fb.height != height || fb.msaa_level != msaa_level || !fb.has_depth_buffer)) {
+                glBindRenderbuffer(GL_RENDERBUFFER, fb.rbo);
+                if (msaa_level <= 1) {
+                    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+                } else {
+                    glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa_level, GL_DEPTH24_STENCIL8, width, height);
+                }
                 glBindRenderbuffer(GL_RENDERBUFFER, 0);
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, fb.clrbuf_msaa);
+            }
+
+            if (!fb.has_depth_buffer && has_depth_buffer) {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fb.rbo);
+            } else if (fb.has_depth_buffer && !has_depth_buffer) {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
             }
         }
-
-        if (has_depth_buffer &&
-            (fb.width != width || fb.height != height || fb.msaa_level != msaa_level || !fb.has_depth_buffer)) {
-            glBindRenderbuffer(GL_RENDERBUFFER, fb.rbo);
-            if (msaa_level <= 1) {
-                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-            } else {
-                glRenderbufferStorageMultisample(GL_RENDERBUFFER, msaa_level, GL_DEPTH24_STENCIL8, width, height);
-            }
-            glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        }
-
-        if (!fb.has_depth_buffer && has_depth_buffer) {
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fb.rbo);
-        } else if (fb.has_depth_buffer && !has_depth_buffer) {
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
-        }
+    } else {
+        has_depth_buffer = false;
     }
 
     fb.width = width;
@@ -1045,7 +1052,7 @@ static void gfx_opengl_update_framebuffer_parameters(int fb_id, uint32_t width, 
 }
 
 bool gfx_opengl_start_draw_to_framebuffer(int fb_id, float noise_scale) {
-    if (fb_id < (int)framebuffers.size()) {
+    if (gfx_framebuffers_enabled && fb_id < (int)framebuffers.size()) {
         Framebuffer& fb = framebuffers[fb_id];
         if (noise_scale != 0.0f) {
             current_noise_scale = 1.0f / noise_scale;
@@ -1068,6 +1075,10 @@ void gfx_opengl_clear_framebuffer() {
 }
 
 void gfx_opengl_resolve_msaa_color_buffer(int fb_id_target, int fb_id_source) {
+    if (!gfx_framebuffers_enabled) {
+        return;
+    }
+
     Framebuffer& fb_dst = framebuffers[fb_id_target];
     Framebuffer& fb_src = framebuffers[fb_id_source];
     glDisable(GL_SCISSOR_TEST);
@@ -1090,7 +1101,7 @@ void gfx_opengl_select_texture_fb(int fb_id) {
 }
 
 void gfx_opengl_copy_framebuffer(int fb_dst, int fb_src, int left, int top) {
-    if (fb_dst >= (int)framebuffers.size() || fb_src >= (int)framebuffers.size()) {
+    if (!gfx_framebuffers_enabled || fb_dst >= (int)framebuffers.size() || fb_src >= (int)framebuffers.size()) {
         return;
     }
 

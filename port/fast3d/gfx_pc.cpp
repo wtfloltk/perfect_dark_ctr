@@ -217,6 +217,7 @@ struct GfxDimensions gfx_current_dimensions;
 static struct GfxDimensions gfx_prev_dimensions;
 struct XYWidthHeight gfx_current_game_window_viewport;
 struct XYWidthHeight gfx_current_native_viewport;
+bool gfx_framebuffers_enabled = true;
 
 static bool game_renders_to_framebuffer;
 static int game_framebuffer;
@@ -2677,7 +2678,7 @@ extern "C" void gfx_start_frame(void) {
 
     bool different_size = gfx_current_dimensions.width != gfx_current_game_window_viewport.width ||
                           gfx_current_dimensions.height != gfx_current_game_window_viewport.height;
-    if (different_size || gfx_msaa_level > 1) {
+    if (gfx_framebuffers_enabled && (different_size || gfx_msaa_level > 1)) {
         game_renders_to_framebuffer = true;
         if (different_size) {
             gfx_rapi->update_framebuffer_parameters(game_framebuffer, gfx_current_dimensions.width,
