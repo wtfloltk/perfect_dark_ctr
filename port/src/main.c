@@ -14,6 +14,7 @@
 #include "fs.h"
 #include "romdata.h"
 #include "config.h"
+#include "mod.h"
 #include "system.h"
 
 u32 g_OsMemSize = 0;
@@ -94,6 +95,10 @@ int main(int argc, const char **argv)
 	romdataInit();
 
 	gameLoadConfig();
+
+	if (fsGetModDir()) {
+		modConfigLoad(MOD_CONFIG_FNAME);
+	}
 
 	atexit(cleanup);
 

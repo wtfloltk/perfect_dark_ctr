@@ -20,4 +20,6 @@ FILE *fsFileOpenWrite(const char *name);
 FILE *fsFileOpenRead(const char *name);
 void fsFileClose(FILE *f);
 
+const char *fsGetModDir(void);
+
 #endif

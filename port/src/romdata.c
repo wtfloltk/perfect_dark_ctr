@@ -431,11 +431,34 @@ void romdataFileFree(s32 fileNum)
 	}
 
 	if (fileSlots[fileNum].source == SRC_EXTERNAL) {
-		free(fileSlots[fileNum].data);
+		sysMemFree(fileSlots[fileNum].data);
 		fileSlots[fileNum].data = NULL;
 	}
 
 	fileSlots[fileNum].source = SRC_UNLOADED;
+}
+
+const char *romdataFileGetName(s32 fileNum)
+{
+	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
+		return NULL;
+	}
+	return fileSlots[fileNum].name;
+}
+
+s32 romdataFileGetNumForName(const char *name)
+{
+	if (!name || !name[0]) {
+		return -1;
+	}
+
+	for (s32 i = 0; i < ROMDATA_MAX_FILES; ++i) {
+		if (fileSlots[i].name && !strcmp(fileSlots[i].name, name)) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 u8 *romdataSegGetData(const char *segName)

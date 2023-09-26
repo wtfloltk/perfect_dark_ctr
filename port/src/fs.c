@@ -9,11 +9,13 @@
 #include "config.h"
 #include "system.h"
 #include "platform.h"
+#include "utils.h"
 #include "fs.h"
 
-#define DEFAULT_DATADIR_NAME "data"
+#define DEFAULT_BASEDIR_NAME "data"
 
-static char dataDir[FS_MAXPATH + 1]; // replaces $D
+static char baseDir[FS_MAXPATH + 1]; // replaces $B
+static char modDir[FS_MAXPATH + 1];  // replaces $M
 static char saveDir[FS_MAXPATH + 1]; // replaces $S
 static char homeDir[FS_MAXPATH + 1]; // replaces $H
 static char exeDir[FS_MAXPATH + 1];  // replaces $E
@@ -57,7 +59,8 @@ const char *fsFullPath(const char *relPath)
 		switch (relPath[1]) {
 			case 'E': expStr = exeDir; break;
 			case 'H': expStr = homeDir; break;
-			case 'D': expStr = dataDir; break;
+			case 'M': expStr = modDir; break;
+			case 'B': expStr = baseDir; break;
 			case 'S': expStr = saveDir; break;
 			default: break;
 		}
@@ -71,13 +74,20 @@ const char *fsFullPath(const char *relPath)
 		}
 		// couldn't expand anything, return as is
 		return relPath;
-	} else if (!dataDir[0] || fsPathIsAbsolute(relPath) || fsPathIsCwdRelative(relPath)) {
-		// user explicitly wants working directory or this is an absolute path or we have no dataDir set up yet
+	} else if (!baseDir[0] || fsPathIsAbsolute(relPath) || fsPathIsCwdRelative(relPath)) {
+		// user explicitly wants working directory or this is an absolute path or we have no baseDir set up yet
 		return relPath;
 	}
 
-	// path relative to data dir
-	snprintf(pathBuf, FS_MAXPATH, "%s/%s", dataDir, relPath);
+	// path relative to mod or base dir; this will be a read request, so check where the file actually is
+	if (modDir[0]) {
+		snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
+		if (fsFileSize(pathBuf) >= 0) {
+			return pathBuf;
+		}
+	}
+	// fall back to basedir
+	snprintf(pathBuf, FS_MAXPATH, "%s/%s", baseDir, relPath);
 	return pathBuf;
 }
 
@@ -93,21 +103,45 @@ s32 fsInit(void)
 		sysGetHomePath(homeDir, FS_MAXPATH);
 	}
 
-	// get path to data dir and expand it if needed
-	const char *path = sysArgGetString("--datadir");
+	// get path to base dir and expand it if needed
+	const char *path = sysArgGetString("--basedir");
 	if (!path) {
-		// check if there's a data directory in working directory or homeDir, otherwise default to exe directory
-		path = "$E/" DEFAULT_DATADIR_NAME;
+		// check if there's a `data` directory in working directory or homeDir, otherwise default to exe directory
+		path = "$E/" DEFAULT_BASEDIR_NAME;
 		if (!portable) {
-			if (fsFileSize("./" DEFAULT_DATADIR_NAME) >= 0) {
-				path = "./" DEFAULT_DATADIR_NAME;
-			} else if (fsFileSize("$H/" DEFAULT_DATADIR_NAME)) {
-				path = "$H/" DEFAULT_DATADIR_NAME;
+			if (fsFileSize("./" DEFAULT_BASEDIR_NAME) >= 0) {
+				path = "./" DEFAULT_BASEDIR_NAME;
+			} else if (fsFileSize("$H/" DEFAULT_BASEDIR_NAME)) {
+				path = "$H/" DEFAULT_BASEDIR_NAME;
 			}
 		}
 	}
+	strncpy(baseDir, fsFullPath(path), FS_MAXPATH);
 
-	strncpy(dataDir, fsFullPath(path), FS_MAXPATH);
+	// get path to mod dir and expand it if needed
+	// mod directory is overlaid on top of base directory
+	path = sysArgGetString("--moddir");
+	if (path) {
+		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
+			// path is explicit; check as-is
+			if (fsFileSize(path) >= 0) {
+				strncpy(modDir, fsFullPath(path), FS_MAXPATH);
+			}
+		} else {
+			// path is relative to workdir; try to find it
+			const char *priority[] = { ".", "$E", "$H" };
+			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
+				char *tmp = strFmt("%s/%s", priority[i], path);
+				if (fsFileSize(tmp) >= 0) {
+					strncpy(modDir, fsFullPath(tmp), FS_MAXPATH);
+					break;
+				}
+			}
+		}
+		if (!modDir[0]) {
+			sysLogPrintf(LOG_WARNING, "could not find specified moddir `%s`", path);
+		}
+	}
 
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");
@@ -136,10 +170,18 @@ s32 fsInit(void)
 
 	strncpy(saveDir, fsFullPath(path), FS_MAXPATH);
 
-	sysLogPrintf(LOG_NOTE, "data dir: %s", dataDir);
+	if (modDir[0]) {
+		sysLogPrintf(LOG_NOTE, " mod dir: %s", modDir);
+	}
+	sysLogPrintf(LOG_NOTE, "base dir: %s", baseDir);
 	sysLogPrintf(LOG_NOTE, "save dir: %s", saveDir);
 
 	return 0;
+}
+
+const char *fsGetModDir(void)
+{
+	return modDir[0] ? modDir : NULL;
 }
 
 void *fsFileLoad(const char *name, u32 *outSize)
