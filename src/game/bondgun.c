@@ -54,6 +54,7 @@
 #include "data.h"
 #include "types.h"
 #ifndef PLATFORM_N64
+#include "game/stagetable.h"
 #include "video.h"
 #endif
 
@@ -3628,6 +3629,7 @@ u32 bgunCalculateGunMemCapacity(void)
 	}
 
 	if (PLAYERCOUNT() == 1) {
+#ifdef PLATFORM_N64
 		switch (g_Vars.stagenum) {
 		case STAGE_CHICAGO:
 		case STAGE_AIRBASE:
@@ -3636,6 +3638,9 @@ u32 bgunCalculateGunMemCapacity(void)
 		case STAGE_ATTACKSHIP:
 			 return g_BgunGunMemBaseSizeDefault + 25 * 1024;
 		}
+#else
+		return g_BgunGunMemBaseSizeDefault + stageGetCurrent()->extragunmem;
+#endif
 	}
 
 	return g_BgunGunMemBaseSizeDefault;

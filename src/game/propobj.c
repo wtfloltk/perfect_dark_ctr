@@ -20978,6 +20978,7 @@ void alarmTick(void)
 
 		// These sounds are alarm sounds.
 		// They go for a fraction of a second and are repeated by this function.
+#ifdef PLATFORM_N64
 		switch (g_Vars.stagenum) {
 		case STAGE_CHICAGO:      sound = SFX_ALARM_CHICAGO; break;
 		case STAGE_G5BUILDING:   sound = SFX_ALARM_2; break;
@@ -20987,6 +20988,13 @@ void alarmTick(void)
 		case STAGE_INFILTRATION: sound = SFX_ALARM_INFILTRATION; break;
 		default:                 sound = SFX_ALARM_DEFAULT; break;
 		}
+#else
+		// allow user to override alarm
+		sound = g_Stages[g_StageIndex].alarm;
+		if (!sound) {
+			sound = SFX_ALARM_DEFAULT;
+		}
+#endif
 
 		if (!lvIsPaused()) {
 			if (g_AlarmAudioHandle) {

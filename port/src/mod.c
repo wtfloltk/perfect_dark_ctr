@@ -329,7 +329,13 @@ static char *modConfigParseStage(char *p, char *token)
 			// mpsetupfile FILE_NAME_OR_NUM
 			PARSE_STAGE_FILENAME("", "mpsetupfile", tmp);
 			stab->mpsetupfileid = tmp;
-		} else if (!strcmp(token, "allocation")) {
+		} else if (!strcmp(token, "alarm")) {
+			PARSE_STAGE_INT("", "alarm", tmp, 1, 0xFFFF);
+			stab->alarm = tmp;
+		} else if (!strcmp(token, "extragunmem")) {
+			PARSE_STAGE_INT("", "extragunmem", tmp, 0, 0xFFFF);
+			stab->extragunmem = tmp;
+		}  else if (!strcmp(token, "allocation")) {
 			// allocation "ALLOCSTRING"
 			PARSE_STAGE_STRING("", "allocation", tmps);
 			// FIXME: this leaks

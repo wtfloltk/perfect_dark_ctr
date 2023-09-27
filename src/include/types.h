@@ -3111,6 +3111,8 @@ struct stagetableentry {
 	/*0x2e*/ s16 eraserpropdist;
 	/*0x30*/ s16 unk30;
 	/*0x34*/ f32 unk34;
+	/*0x38*/ s16 alarm;
+	/*0x3a*/ u16 extragunmem;
 };
 
 struct mpweaponset {
