@@ -1686,6 +1686,9 @@ void bgBuildTables(s32 stagenum)
 		g_Rooms[i].unk4d = 0;
 		g_Rooms[i].lightop = 0;
 		g_Rooms[i].unk4e_04 = 0;
+#ifndef PLATFORM_N64
+		g_Rooms[i].extra_flags = 0;
+#endif
 	}
 
 	bgSetStageTranslationThing(g_Stages[g_StageIndex].unk14);

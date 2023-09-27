@@ -531,6 +531,10 @@ extern struct menudialogdef g_HangarListMenuDialog;
 
 #ifndef PLATFORM_N64
 
+extern struct weathercfg g_WeatherConfig[WEATHERCFG_MAX_STAGES];
+extern const struct weathercfg g_DefaultWeatherConfig;
+extern const struct weathercfg *g_CurWeatherConfig;
+
 extern f32 g_PlayerCrosshairSway;
 extern f32 g_PlayerDefaultFovY;
 extern s32 g_PlayerMouseAimMode;

@@ -3594,6 +3594,9 @@
 #define ROOMFLAG_PLAYAMBIENTTRACK      0x4000
 #define ROOMFLAG_OUTDOORS              0x8000
 
+// flags for the extra_flags field
+#define ROOMFLAG_EX_WEATHERPROOF       0x0001
+
 #define RUMBLESTATE_1                 1
 #define RUMBLESTATE_ENABLED_STOPPED   2
 #define RUMBLESTATE_ENABLED_STARTING  3
@@ -4489,6 +4492,13 @@ enum weaponnum {
 
 #define WEATHERTYPE_RAIN 0
 #define WEATHERTYPE_SNOW 1
+
+#define WEATHERCFG_MAX_SKIPROOMS 128
+#define WEATHERCFG_MAX_STAGES 16
+
+#define WEATHERFLAG_INCLUDE       0x0001 // rooms listed in skiprooms are the only ones that have weather
+#define WEATHERFLAG_CUTSCENE_ONLY 0x0002 // weather only in cutscenes
+#define WEATHERFLAG_FORCE_WINDDIR 0x0004 // force constant wind direction
 
 // Reasons for playing X music
 #define XREASON_0       0

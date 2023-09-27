@@ -3670,6 +3670,10 @@ struct room {
 	/*0x80*/ s32 gfxdatalen; // when inflated
 	/*0x84*/ struct wallhit *opawallhits; // opaque
 	/*0x88*/ struct wallhit *xluwallhits; // translucent
+
+#ifndef PLATFORM_N64
+	/*0x8c*/ u16 extra_flags;
+#endif
 };
 
 struct fireslotthing {
@@ -4891,6 +4895,23 @@ struct weatherparticledata {
 	/*0x3ef8*/ u32 unk3ef8;
 	/*0x3efc*/ u32 unk3efc;
 };
+
+#ifndef PLATFORM_N64
+
+struct weathercfg {
+	s32 stagenum;
+	u32 flags;
+	f32 windspeed;
+	f32 ymin;
+	f32 ymax;
+	f32 zmax;
+	RoomNum skiprooms[WEATHERCFG_MAX_SKIPROOMS]; // if flags has WEATHERFLAG_INCLUDE, rooms that have weather, else rooms that don't
+	f32 windanglerad; // wind fields only used if flags has WEATHERFLAG_FORCE_WINDDIR
+	f32 windspeedx;
+	f32 windspeedz;
+};
+
+#endif
 
 struct texture {
 	u32 soundsurfacetype : 4;

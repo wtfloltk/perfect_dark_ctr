@@ -13,6 +13,35 @@
 extern struct stagemusic g_StageTracks[];
 extern struct stageallocation g_StageAllocations8Mb[];
 
+#define PARSE_STAGE_FLOAT(sec, name, v, min, max) \
+	p = modConfigParseFloatValue(p, token, &v); \
+	if (!p || v < (min) || v > (max)) { \
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: " sec " invalid " name " value: %s", stagenum, token); \
+		return NULL; \
+	}
+
+#define PARSE_STAGE_INT(sec, name, v, min, max) \
+	p = modConfigParseIntValue(p, token, &v); \
+	if (!p || v < (min) || v > (max)) { \
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: " sec " invalid " name " value: %s", stagenum, token); \
+		return NULL; \
+	}
+
+#define PARSE_STAGE_FILENAME(sec, name, v) \
+	p = modConfigParseFileValue(p, token, &v); \
+	if (!p) { \
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: " sec " invalid " name " value: %s", stagenum, token); \
+		return NULL; \
+	}
+
+#define PARSE_STAGE_STRING(sec, name, v) \
+	p = strParseToken(p, token, NULL); \
+	if (!p) { \
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: " sec " invalid " name " value: %s", stagenum, token); \
+		return NULL; \
+	} \
+	v = strUnquote(token);
+
 static inline char *modConfigParseFileValue(char *p, char *token, s32 *filenum)
 {
 	p = strParseToken(p, token, NULL);
@@ -35,7 +64,7 @@ static inline char *modConfigParseFileValue(char *p, char *token, s32 *filenum)
 	return NULL;
 }
 
-static inline char *modConfigParseNumericValue(char *p, char *token, s32 *out)
+static inline char *modConfigParseIntValue(char *p, char *token, s32 *out)
 {
 	p = strParseToken(p, token, NULL);
 	if (!token[0]) {
@@ -50,7 +79,22 @@ static inline char *modConfigParseNumericValue(char *p, char *token, s32 *out)
 	return p;
 }
 
-static inline char *modConfigParseStageMusic(char *p, char *token, s32 stagenum)
+static inline char *modConfigParseFloatValue(char *p, char *token, f32 *out)
+{
+	p = strParseToken(p, token, NULL);
+	if (!token[0]) {
+		return NULL; // empty 
+	}
+	char *endp = token;
+	const f32 num = strtof(token, &endp);
+	if (num == 0.f && (endp == token || *endp != '\0')) {
+		return NULL;
+	}
+	*out = num;
+	return p;
+}
+
+static char *modConfigParseStageMusic(char *p, char *token, s32 stagenum)
 {
 	struct stagemusic *smus = NULL;
 	for (struct stagemusic *p = g_StageTracks; p->stagenum; ++p) {
@@ -76,25 +120,13 @@ static inline char *modConfigParseStageMusic(char *p, char *token, s32 stagenum)
 	p = strParseToken(p, token, NULL);
 	while (p && token[0] && strcmp(token, "}") != 0) {
 		if (!strcmp(token, "primarytrack")) {
-			p = modConfigParseNumericValue(p, token, &tmp);
-			if (!p || tmp < 0 || tmp > 128) {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: music: invalid primarytrack value: %s", stagenum, token);
-				return NULL;
-			}
+			PARSE_STAGE_INT("music:", "primarytrack", tmp, 0, 128);
 			smus->primarytrack = tmp;
 		} else if (!strcmp(token, "ambienttrack")) {
-			p = modConfigParseNumericValue(p, token, &tmp);
-			if (!p || tmp < 0 || tmp > 128) {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: music: invalid ambienttrack value: %s", stagenum, token);
-				return NULL;
-			}
+			PARSE_STAGE_INT("music:", "ambienttrack", tmp, 0, 128);
 			smus->ambienttrack = tmp;
 		} else if (!strcmp(token, "xtrack")) {
-			p = modConfigParseNumericValue(p, token, &tmp);
-			if (!p || tmp < 0 || tmp > 128) {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: music: invalid xtrack value: %s", stagenum, token);
-				return NULL;
-			}
+			PARSE_STAGE_INT("music:", "xtrack", tmp, 0, 128);
 			smus->xtrack = tmp;
 		} else {
 			sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: music: invalid key: %s", stagenum, token);
@@ -111,7 +143,136 @@ static inline char *modConfigParseStageMusic(char *p, char *token, s32 stagenum)
 	return p;
 }
 
-static inline char *modConfigParseStage(char *p, char *token)
+static char *modConfigParseStageWeatherRooms(char *p, char *token, s32 stagenum, struct weathercfg *wcfg)
+{
+	// determine where we can start adding rooms
+	s32 idx;
+	for (idx = 0; idx < WEATHERCFG_MAX_SKIPROOMS && wcfg->skiprooms[idx]; ++idx);
+
+	// eat opening bracket
+	p = strParseToken(p, token, NULL);
+	if (token[0] != '{' || token[1] != '\0') {
+		return NULL;
+	}
+
+	// check if user wants to clear the whole list
+	p = strParseToken(p, token, NULL);
+	if (!strcmp(token, "clear")) {
+		memset(wcfg->skiprooms, 0, sizeof(wcfg->skiprooms));
+		idx = 0;
+		p = strParseToken(p, token, NULL);
+	}
+
+	s32 tmp = 0;
+	while (p && token[0] && strcmp(token, "}") != 0) {
+		if (token[0] == ',' && !token[1]) {
+			p = strParseToken(p, token, NULL);
+			continue;
+		}
+
+		tmp = strtol(token, NULL, 0);
+		if (tmp <= 0 || tmp > 32767) {
+			sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: weather: rooms: invalid room %s", stagenum, token);
+			return NULL;
+		}
+
+		if (idx < WEATHERCFG_MAX_SKIPROOMS) {
+			wcfg->skiprooms[idx++] = tmp;
+		}
+
+		p = strParseToken(p, token, NULL);
+	}
+
+	if (token[0] != '}') {
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: weather: unterminated rooms block", stagenum);
+		return NULL;
+	}
+
+	return p;
+}
+
+static char *modConfigParseStageWeather(char *p, char *token, s32 stagenum)
+{
+	s32 wi;
+	struct weathercfg *wcfg = NULL;
+	for (wi = 0; wi < ARRAYCOUNT(g_WeatherConfig) && g_WeatherConfig[wi].stagenum; ++wi) {
+		if (g_WeatherConfig[wi].stagenum == stagenum) {
+			break;
+		}
+	}
+
+	if (wi >= WEATHERCFG_MAX_STAGES) {
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: no more space for weather config", stagenum);
+		return NULL;
+	}
+
+	wcfg = &g_WeatherConfig[wi];
+
+	if (!wcfg->stagenum) {
+		// new weather config; initialize with defaults
+		*wcfg = g_DefaultWeatherConfig;
+		wcfg->stagenum = stagenum;
+	} else {
+		// flags have to be re-specified
+		wcfg->flags = 0;
+	}
+
+	// eat opening bracket
+	p = strParseToken(p, token, NULL);
+	if (token[0] != '{' || token[1] != '\0') {
+		return NULL;
+	}
+
+	// parse keyvalues until } is reached
+	s32 tmpi = 0;
+	f32 tmpf = 0.f;
+	p = strParseToken(p, token, NULL);
+	while (p && token[0] && strcmp(token, "}") != 0) {
+		if (!strcmp(token, "include_rooms") || !strcmp(token, "exclude_rooms")) {
+			// include_rooms | exclude_rooms { ROOM_NUMBERS... }
+			const s32 include = (token[0] == 'i');
+			p = modConfigParseStageWeatherRooms(p, token, stagenum, wcfg);
+			if (!p) {
+				return NULL;
+			}
+			if (wcfg->skiprooms[0] && include) {
+				wcfg->flags |= WEATHERFLAG_INCLUDE;
+			}
+		} else if (!strcmp(token, "cutscene_only")) {
+			wcfg->flags |= WEATHERFLAG_CUTSCENE_ONLY;
+		} else if (!strcmp(token, "constant_wind")) {
+			PARSE_STAGE_FLOAT("weather:", "constant_wind (0)", wcfg->windanglerad, -M_TAU, M_TAU);
+			PARSE_STAGE_FLOAT("weather:", "constant_wind (1)", wcfg->windspeedx, -1024.f, 1024.f);
+			PARSE_STAGE_FLOAT("weather:", "constant_wind (2)", wcfg->windspeedz, -1024.f, 1024.f);
+			wcfg->flags |= WEATHERFLAG_FORCE_WINDDIR;
+		} else if (!strcmp(token, "windspeed")) {
+			PARSE_STAGE_FLOAT("weather:", "windspeed", tmpf, -1024.f, 1024.f);
+			wcfg->windspeed = tmpf;
+		} else if (!strcmp(token, "ymin")) {
+			PARSE_STAGE_FLOAT("weather:", "ymin", tmpf, -65536.f, 65536.f);
+			wcfg->ymin = tmpf;
+		} else if (!strcmp(token, "ymax")) {
+			PARSE_STAGE_FLOAT("weather:", "ymax", tmpf, -65536.f, 65536.f);
+			wcfg->ymax = tmpf;
+		} else if (!strcmp(token, "zmax")) {
+			PARSE_STAGE_FLOAT("weather:", "zmax", tmpf, -65536.f, 65536.f);
+			wcfg->zmax = tmpf;
+		} else {
+			sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: weather: invalid key: %s", stagenum, token);
+			return NULL;
+		}
+		p = strParseToken(p, token, NULL);
+	}
+
+	if (token[0] != '}') {
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: unterminated weather block", stagenum);
+		return NULL;
+	}
+
+	return p;
+}
+
+static char *modConfigParseStage(char *p, char *token)
 {
 	// stage number
 	p = strParseToken(p, token, NULL);
@@ -132,6 +293,9 @@ static inline char *modConfigParseStage(char *p, char *token)
 	const s32 sidx = stageGetIndex(stagenum);
 	if (sidx >= 0) {
 		stab = &g_Stages[sidx];
+	} else {
+		sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: unknown stage number", stagenum);
+		return NULL;
 	}
 	for (struct stageallocation *p = g_StageAllocations8Mb; p->stagenum; ++p) {
 		if (p->stagenum == stagenum) {
@@ -142,65 +306,36 @@ static inline char *modConfigParseStage(char *p, char *token)
 
 	// parse keyvalues until } is reached
 	s32 tmp = 0;
+	char *tmps = NULL;
 	p = strParseToken(p, token, NULL);
 	while (p && token[0] && strcmp(token, "}") != 0) {
 		if (!strcmp(token, "bgfile")) {
 			// bg FILE_NAME_OR_NUM
-			p = modConfigParseFileValue(p, token, &tmp);
-			if (p && stab) {
-				stab->bgfileid = tmp;
-			} else {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: invalid bgfile value: %s", stagenum, token);
-				return NULL;
-			}
+			PARSE_STAGE_FILENAME("", "bgfile", tmp);
+			stab->bgfileid = tmp;
 		} else if (!strcmp(token, "tilesfile")) {
-			// tiles FILE_NAME_OR_NUM
-			p = modConfigParseFileValue(p, token, &tmp);
-			if (p && stab) {
-				stab->tilefileid = tmp;
-			} else {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: invalid tilesfile value: %s", stagenum, token);
-				return NULL;
-			}
+			// tilesfile FILE_NAME_OR_NUM
+			PARSE_STAGE_FILENAME("", "tilesfile", tmp);
+			stab->tilefileid = tmp;
 		} else if (!strcmp(token, "padsfile")) {
-			// tiles FILE_NAME_OR_NUM
-			p = modConfigParseFileValue(p, token, &tmp);
-			if (p && stab) {
-				stab->padsfileid = tmp;
-			} else {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: invalid padsfile value: %s", stagenum, token);
-				return NULL;
-			}
+			// padsfile FILE_NAME_OR_NUM
+			PARSE_STAGE_FILENAME("", "padsfile", tmp);
+			stab->padsfileid = tmp;
 		} else if (!strcmp(token, "setupfile")) {
-			// setup FILE_NAME_OR_NUM
-			p = modConfigParseFileValue(p, token, &tmp);
-			if (p && stab) {
-				stab->setupfileid = tmp;
-			} else {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: invalid setupfile value: %s", stagenum, token);
-				return NULL;
-			}
+			// setupfile FILE_NAME_OR_NUM
+			PARSE_STAGE_FILENAME("", "setupfile", tmp);
+			stab->setupfileid = tmp;
 		} else if (!strcmp(token, "mpsetupfile")) {
-			// mpsetup FILE_NAME_OR_NUM
-			p = modConfigParseFileValue(p, token, &tmp);
-			if (p && stab) {
-				stab->mpsetupfileid = tmp;
-			} else {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: invalid mpsetupfile value: %s", stagenum, token);
-				return NULL;
-			}
+			// mpsetupfile FILE_NAME_OR_NUM
+			PARSE_STAGE_FILENAME("", "mpsetupfile", tmp);
+			stab->mpsetupfileid = tmp;
 		} else if (!strcmp(token, "allocation")) {
 			// allocation "ALLOCSTRING"
-			p = strParseToken(p, token, NULL);
-			char *str = strUnquote(token);
-			if (!p || !str[0] || !salloc) {
-				sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: invalid allocation value: %s", stagenum, token);
-				return NULL;
-			}
+			PARSE_STAGE_STRING("", "allocation", tmps);
 			// FIXME: this leaks
-			str = strDuplicate(str);
-			if (str) {
-				salloc->string = str;
+			tmps = strDuplicate(tmps);
+			if (tmps) {
+				salloc->string = tmps;
 			}
 		}	else if (!strcmp(token, "music")) {
 			// music { KEYVALUES... }
@@ -208,6 +343,15 @@ static inline char *modConfigParseStage(char *p, char *token)
 			if (!p) {
 				return NULL;
 			}
+		} else if (!strcmp(token, "weather")) {
+			// weather { KEYVALUES... }
+			p = modConfigParseStageWeather(p, token, stagenum);
+			if (!p) {
+				return NULL;
+			}
+		} else {
+			sysLogPrintf(LOG_ERROR, "modconfig: stage 0x%02x: invalid key: %s", stagenum, token);
+			return NULL;
 		}
 		p = strParseToken(p, token, NULL);
 	}
