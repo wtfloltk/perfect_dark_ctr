@@ -12,6 +12,7 @@
 
 #define MOD_TEXTURES_DIR "textures"
 #define MOD_ANIMATIONS_DIR "animations"
+#define MOD_SEQUENCES_DIR "sequences"
 
 extern struct stagemusic g_StageTracks[];
 extern struct stageallocation g_StageAllocations8Mb[];
@@ -435,6 +436,30 @@ s32 modTextureLoad(u16 num, void *dst, u32 dstSize)
 	}
 
 	return ret;
+}
+
+void *modSequenceLoad(u16 num, u32 *outSize)
+{
+	static s32 dirExists = -1;
+	if (dirExists < 0) {
+		dirExists = (fsFileSize(MOD_SEQUENCES_DIR "/") >= 0);
+	}
+
+	if (!dirExists) {
+		return NULL;
+	}
+
+	char path[FS_MAXPATH + 1];
+	snprintf(path, sizeof(path), MOD_SEQUENCES_DIR "/%04x.bin", num);
+	if (fsFileSize(path) > 0) {
+		void *ret = fsFileLoad(path, outSize);
+		if (ret) {
+			sysLogPrintf(LOG_NOTE, "mod: loaded external sequence %04x", num);
+			return ret;
+		}
+	}
+
+	return NULL;
 }
 
 void *modAnimationLoadData(u16 num)
