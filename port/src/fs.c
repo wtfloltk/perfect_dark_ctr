@@ -184,6 +184,37 @@ const char *fsGetModDir(void)
 	return modDir[0] ? modDir : NULL;
 }
 
+s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
+{
+	const char *fullName = fsFullPath(name);
+
+	FILE *f = fopen(fullName, "rb");
+	if (!f) {
+		return -1;
+	}
+
+	fseek(f, 0, SEEK_END);
+	const s32 size = ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	if (size < 0) {
+		sysLogPrintf(LOG_ERROR, "fsFileLoadTo: empty file or invalid size (%d): %s", size, fullName);
+		fclose(f);
+		return -1;
+	}
+
+	if ((u32)size > dstSize) {
+		sysLogPrintf(LOG_ERROR, "fsFileLoadTo: file too big for buffer (%u > %u): %s", size, dstSize, fullName);
+		fclose(f);
+		return -1;
+	}
+
+	fread(dst, 1, size, f);
+	fclose(f);
+
+	return size;
+}
+
 void *fsFileLoad(const char *name, u32 *outSize)
 {
 	const char *fullName = fsFullPath(name);

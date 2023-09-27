@@ -12,6 +12,7 @@
 #include "game/texdecompress.h"
 #include "preprocess.h"
 #include "romdata.h"
+#include "mod.h"
 #include "system.h"
 
 static inline f32 swapF32(f32 x) { *(u32 *)&x = PD_BE32(*(u32 *)&x); return x; }
@@ -1011,18 +1012,25 @@ void preprocessAnimations(u8 *data, u32 size)
 	// set the anim table pointers as well
 	extern u8 *_animationsTableRomStart;
 	extern u8 *_animationsTableRomEnd;
+
 	// the animation table is at the end of the segment
 	u32 *animtbl = (void *)(data + size - 0x38a0);
 	_animationsTableRomStart = (u8 *)animtbl;
 	_animationsTableRomEnd = data + size;
+
 	PD_SWAP_VAL(*animtbl);
 	const u32 count = *animtbl++;
+
 	struct animtableentry *anim = (struct animtableentry *)animtbl;
 	for (u32 i = 0; i < count; ++i, ++anim) {
 		PD_SWAP_VAL(anim->numframes);
 		PD_SWAP_VAL(anim->bytesperframe);
 		PD_SWAP_VAL(anim->headerlen);
 		PD_SWAP_VAL(anim->data);
+		// if an external replacement exists, replace the table entry and mark the offset
+		if (modAnimationLoadDescriptor(i, anim) > 0) {
+			anim->data = 0xffffffff;
+		}
 	}
 }
 

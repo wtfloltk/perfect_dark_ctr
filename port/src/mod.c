@@ -10,6 +10,9 @@
 #include "data.h"
 #include "game/stagetable.h"
 
+#define MOD_TEXTURES_DIR "textures"
+#define MOD_ANIMATIONS_DIR "animations"
+
 extern struct stagemusic g_StageTracks[];
 extern struct stageallocation g_StageAllocations8Mb[];
 
@@ -41,6 +44,13 @@ extern struct stageallocation g_StageAllocations8Mb[];
 		return NULL; \
 	} \
 	v = strUnquote(token);
+
+#define PARSE_INT(sec, name, v, min, max, ret) \
+	p = modConfigParseIntValue(p, token, &v); \
+	if (!p || v < (min) || v > (max)) { \
+		sysLogPrintf(LOG_ERROR, "mod: %s: invalid " name " value: %s", sec, token); \
+		return ret; \
+	}
 
 static inline char *modConfigParseFileValue(char *p, char *token, s32 *filenum)
 {
@@ -403,4 +413,96 @@ s32 modConfigLoad(const char *fname)
 
 	sysMemFree(data);
 	return success;
+}
+
+s32 modTextureLoad(u16 num, void *dst, u32 dstSize)
+{
+	static s32 dirExists = -1;
+	if (dirExists < 0) {
+		dirExists = (fsFileSize(MOD_TEXTURES_DIR "/") >= 0);
+	}
+
+	if (!dirExists) {
+		return -1;
+	}
+
+	char path[FS_MAXPATH + 1];
+	snprintf(path, sizeof(path), MOD_TEXTURES_DIR "/%04x.bin", num);
+
+	const s32 ret = fsFileLoadTo(path, dst, dstSize);
+	if (ret > 0) {
+		sysLogPrintf(LOG_NOTE, "mod: loaded external texture %04x", num);
+	}
+
+	return ret;
+}
+
+void *modAnimationLoadData(u16 num)
+{
+	char path[FS_MAXPATH + 1];
+	// load the animation data
+	snprintf(path, sizeof(path), MOD_ANIMATIONS_DIR "/%04x.bin", num);
+	void *data = fsFileLoad(path, NULL);
+	if (!data) {
+		sysFatalError("External animation %04x has no data file.\nEnsure that it is placed at %s or delete the descriptor.", num, path);
+	}
+	return data;
+}
+
+s32 modAnimationLoadDescriptor(u16 num, struct animtableentry *anim)
+{
+	static s32 dirExists = -1;
+	if (dirExists < 0) {
+		dirExists = (fsFileSize(MOD_ANIMATIONS_DIR "/") >= 0);
+	}
+
+	if (!dirExists) {
+		return false;
+	}
+
+	char path[FS_MAXPATH + 1];
+
+	// load the descriptor, if any
+	snprintf(path, sizeof(path), MOD_ANIMATIONS_DIR "/%04x.txt", num);
+	if (fsFileSize(path) <= 0) {
+		return false;
+	}
+
+	char *desc = fsFileLoad(path, NULL);
+	if (!desc) {
+		return false;
+	}
+
+	// parse the descriptor
+	char token[UTIL_MAX_TOKEN + 1] = { 0 };
+	char *p = strParseToken(desc, token, NULL);
+	s32 tmp = 0;
+	while (p && token[0]) {
+		if (!strcmp(token, "numframes")) {
+			PARSE_INT(path, "numframes", tmp, 0, 0xFFFF, false);
+			anim->numframes = tmp;
+		} else if (!strcmp(token, "bytesperframe")) {
+			PARSE_INT(path, "bytesperframe", tmp, 0, 0xFFFF, false);
+			anim->bytesperframe = tmp;
+		} else if (!strcmp(token, "headerlen")) {
+			PARSE_INT(path, "headerlen", tmp, 0, 0xFFFF, false);
+			anim->headerlen = tmp;
+		} else if (!strcmp(token, "framelen")) {
+			PARSE_INT(path, "framelen", tmp, 0, 0xFF, false);
+			anim->framelen = tmp;
+		} else if (!strcmp(token, "flags")) {
+			PARSE_INT(path, "flags", tmp, 0, 0xFF, false);
+			anim->flags = tmp;
+		} else {
+			sysLogPrintf(LOG_ERROR, "mod: %s: invalid key: %s", path, token);
+			return false;
+		}
+		p = strParseToken(p, token, NULL);
+	}
+
+	sysMemFree(desc);
+
+	sysLogPrintf(LOG_NOTE, "mod: loaded external animation %04x", num);
+
+	return true;
 }
