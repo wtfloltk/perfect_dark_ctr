@@ -219,11 +219,11 @@ static inline void romdataInitSegment(struct romfile *seg)
 	}
 
 	// check if we have an external replacement and load it if so
+	char tmp[FS_MAXPATH];
+	snprintf(tmp, sizeof(tmp), ROMDATA_SEGDIR "/%s", seg->name);
 	u8 *newData = NULL;
-	const s32 extFileSize = fsFileSize(seg->name);
+	const s32 extFileSize = fsFileSize(tmp);
 	if (extFileSize > 0) {
-		char tmp[FS_MAXPATH];
-		snprintf(tmp, sizeof(tmp), ROMDATA_SEGDIR "/%s", seg->name);
 		newData = fsFileLoad(tmp, &seg->size);
 	}
 
