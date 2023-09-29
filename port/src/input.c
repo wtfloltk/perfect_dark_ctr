@@ -727,6 +727,20 @@ void inputMouseGetScaledDelta(f32 *dx, f32 *dy)
 	if (dy) *dy = mdy;
 }
 
+void inputMouseGetScaledDeltaAbsSens(f32 *dx, f32 *dy)
+{
+	f32 mdx, mdy;
+	if (mouseLocked) {
+		mdx = abs(mouseSensX) * (f32)mouseDX / 100.0f;
+		mdy = abs(mouseSensY) * (f32)mouseDY / 100.0f;
+	} else {
+		mdx = 0.f;
+		mdy = 0.f;
+	}
+	if (dx) *dx = mdx;
+	if (dy) *dy = mdy;
+}
+
 const char *inputGetContKeyName(u32 ck)
 {
 	if (ck >= CK_TOTAL_COUNT) {
