@@ -55,8 +55,8 @@ N64 pad buttons X and Y (or `X_BUTTON`, `Y_BUTTON` in the code) refer to the res
 
 ### Windows
 
-1. Install [MSYS2[(https://www.msys2.org).
-2. Open the MINGW32 prompt. (**NOTE:** _not_ the `msys2.exe` prompt)
+1. Install [MSYS2](https://www.msys2.org).
+2. Open the `MINGW32` prompt. (**NOTE:** _not_ the `MSYS` prompt or the `MINGW64` prompt)
 3. Install dependencies: `pacman -S mingw-w64-i686-toolchain mingw-w64-i686-SDL2 mingw-w64-i686-zlib make git`
 4. Run `make -f Makefile.port` in the `perfect_dark` directory.
 5. The resulting executable will be at `build/ntsc-final-port/pd.exe`.
