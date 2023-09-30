@@ -70,7 +70,7 @@ void amTick(void)
 				if (j == 0 && g_Vars.currentplayernum == 0 && inputMouseIsLocked()) {
 					f32 mdx, mdy;
 					struct activemenu *am = &g_AmMenus[g_AmIndex];
-					inputMouseGetScaledDelta(&mdx, &mdy);
+					inputMouseGetScaledDeltaAbsSens(&mdx, &mdy);
 					if (mdx || mdy) {
 						am->mousex += mdx * 4.f;
 						am->mousey += mdy * 4.f;
