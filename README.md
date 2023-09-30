@@ -56,16 +56,10 @@ N64 pad buttons X and Y (or `X_BUTTON`, `Y_BUTTON` in the code) refer to the res
 ### Windows
 
 1. Install [MSYS2[(https://www.msys2.org).
-2. Open the MINGW32 prompt.
+2. Open the MINGW32 prompt. (**NOTE:** _not_ the `msys2.exe` prompt)
 3. Install dependencies: `pacman -S mingw-w64-i686-toolchain mingw-w64-i686-SDL2 mingw-w64-i686-zlib make git`
-4. clone the project: `git clone https://github.com/fgsfdsfgs/perfect_dark`
-5. cd into the project: `cd perfect_dark`
-6. Set HOST_PLATFORM to i686-windows in Makefile.port: `sed -i "s/^HOST_PLATFORM ?=.*$/HOST_PLATFORM ?= i686-windows/" Makefile.port`
-7. Set a few environment variables (you can also add these to your `~/.bashrc` if you want them to stick around)
-   - `export PKG_CONFIG_PATH=/mingw32/lib/pkgconfig:$PKG_CONFIG_PATH`
-   - `export PATH=/mingw32/bin/:$PATH`
-7. Run `make -f Makefile.port` in the `perfect_dark` directory.
-8. The resulting executable will be at `build/ntsc-final-port/pd.exe`.
+6. Run `make -f Makefile.port` in the `perfect_dark` directory.
+7. The resulting executable will be at `build/ntsc-final-port/pd.exe`.
 
 ### Linux
 
