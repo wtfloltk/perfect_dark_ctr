@@ -1125,6 +1125,13 @@ void preprocessTexturesList(u8 *data, u32 size)
 	}
 }
 
+void preprocessTextureRGBA32Embedded(u32* dest, u32 size_bytes)
+{
+	for (uint32_t i = 0; i < size_bytes; i += 4, ++dest) {
+		*dest = PD_BE32(*dest);
+	}
+}
+
 void preprocessModel(u8 *base, u32 ofs)
 {
 	struct modeldef *mdl = (struct modeldef *)base;
@@ -1174,6 +1181,13 @@ void preprocessModel(u8 *base, u32 ofs)
 				// figure out the format and unswizzle
 				const s32 format = texConfigToFormat(&texconfigs[i]);
 				texSwizzleInternal(texdata, texconfigs[i].width, texconfigs[i].height, format, maxSize);
+
+				if (format == TEXFORMAT_RGBA32) {
+					// for some reason, RGBA32 embedded textures don't need to be byte-swapped,
+					// so we byte-swap them here, which will be undone when the renderer imports it
+					u32 size_bytes = texconfigs[i].width * texconfigs[i].height * 4;
+					preprocessTextureRGBA32Embedded((u32*)texdata, size_bytes);
+				}
 			}
 		}
 	}
