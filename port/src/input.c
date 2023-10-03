@@ -35,7 +35,7 @@ static s32 mouseWheel = 0;
 static f32 mouseSensX = 1.5f;
 static f32 mouseSensY = 1.5f;
 
-static f32 rumbleScale = 0.333f;
+static f32 rumbleScale = 0.5f;
 
 // NOTE: by default this gets inverted for 1.2
 static u32 axisMap[2][2] = {
@@ -431,7 +431,7 @@ s32 inputInit(void)
 	mouseSensX = configGetFloat("Input.MouseSpeedX", 1.5f);
 	mouseSensY = configGetFloat("Input.MouseSpeedY", 1.5f);
 
-	rumbleScale = configGetFloat("Input.RumbleScale", 0.333f);
+	rumbleScale = configGetFloat("Input.RumbleScale", 0.5f);
 
 	deadzone[0] = configGetInt("Input.LStickDeadzoneX", DEFAULT_DEADZONE);
 	deadzone[1] = configGetInt("Input.LStickDeadzoneY", DEFAULT_DEADZONE);
@@ -611,6 +611,7 @@ void inputRumble(s32 idx, f32 strength, f32 time)
 	}
 
 	if (rumbleSupported[idx]) {
+		strength *= rumbleScale;
 		if (strength <= 0.f) {
 			strength = 0.f;
 			time = 0.f;
