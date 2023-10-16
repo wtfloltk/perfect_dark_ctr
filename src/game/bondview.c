@@ -284,6 +284,12 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 
 	var8007f844 = 0;
 
+#ifndef PLATFORM_N64
+	if (!videoFramebuffersSupported()) {
+		return gdl;
+	}
+#endif
+
 	mainOverrideVariable("sfxxx", &sfxxx);
 	fxxx = sfxxx / 1000.0f;
 	mainOverrideVariable("sfyyy", &sfyyy);
@@ -510,6 +516,12 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 		return gdl;
 	}
 
+#ifndef PLATFORM_N64
+	if (!videoFramebuffersSupported()) {
+		return gdl;
+	}
+#endif
+
 	strcpy(var800a41c0, "stretchBlurGfx");
 
 	gDPPipeSync(gdl++);
@@ -567,15 +579,21 @@ f32 bview0f142d74(s32 arg0, f32 arg1, f32 arg2, f32 arg3)
 
 static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, s32 viewleft, s32 viewwidth, s32 y, f32 scale)
 {
+	if (!videoFramebuffersSupported()) {
+		return gdl;
+	}
+
 	const f32 orighalfw = viewwidth * 0.5f;
 	const f32 xcenter = viewleft + orighalfw;
 	const f32 halfw = orighalfw * scale;
 	const s32 left = xcenter - halfw;
 	const s32 right = xcenter + halfw;
+
 	gSPImageRectangleEXT(gdl++,
 		left << 2, y << 2, viewleft, y,
 		right << 2, (y + 1) << 2, viewleft + viewwidth, y + 1,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
+
 	return gdl;
 }
 

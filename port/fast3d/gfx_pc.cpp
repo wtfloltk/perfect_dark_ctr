@@ -2883,14 +2883,23 @@ extern "C" void gfx_set_framebuffer(int fb, float noise_scale) {
 }
 
 extern "C" void gfx_copy_framebuffer(int fb_dst, int fb_src, int left, int top, int use_back) {
-    if (fb_src == 0 && left > 0 && top > 0) {
-        // upscale the position
-        left = left * gfx_current_dimensions.width / gfx_current_native_viewport.width;
-        top = top * gfx_current_dimensions.height / gfx_current_native_viewport.height;
-        // flip Y
-        top = gfx_current_dimensions.height - top - 1;
+    const bool is_main_fb = (fb_src == 0);
+
+    if (is_main_fb) {
+        if (left > 0 && top > 0) {
+            // upscale the position
+            left = left * gfx_current_dimensions.width / gfx_current_native_viewport.width;
+            top = top * gfx_current_dimensions.height / gfx_current_native_viewport.height;
+            // flip Y
+            top = gfx_current_dimensions.height - top - 1;
+        }
+        if (use_back && gfx_msaa_level > 1) {
+            // read from the framebuffer we've been rendering to
+            fb_src = game_framebuffer;
+        }
     }
-    gfx_rapi->copy_framebuffer(fb_dst, fb_src, left, top, (bool)use_back);
+
+    gfx_rapi->copy_framebuffer(fb_dst, fb_src, left, top, is_main_fb, (bool)use_back);
 }
 
 extern "C" void gfx_reset_framebuffer(void) {

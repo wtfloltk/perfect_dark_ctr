@@ -1110,7 +1110,7 @@ void gfx_opengl_select_texture_fb(int fb_id) {
     glBindTexture(GL_TEXTURE_2D, framebuffers[fb_id].clrbuf);
 }
 
-void gfx_opengl_copy_framebuffer(int fb_dst, int fb_src, int left, int top, bool use_back) {
+void gfx_opengl_copy_framebuffer(int fb_dst, int fb_src, int left, int top, bool flip_y, bool use_back) {
     if (!gfx_framebuffers_enabled || fb_dst >= (int)framebuffers.size() || fb_src >= (int)framebuffers.size()) {
         return;
     }
@@ -1144,9 +1144,12 @@ void gfx_opengl_copy_framebuffer(int fb_dst, int fb_src, int left, int top, bool
     glBindFramebuffer(GL_READ_FRAMEBUFFER, src.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst.fbo);
 
-    if (fb_src == 0) {
+    if (flip_y) {
         // flip the dst rect to mirror the image vertically
         std::swap(dstY0, dstY1);
+    }
+
+    if (fb_src == 0) {
         glReadBuffer(use_back ? GL_BACK : GL_FRONT);
     } else {
         glReadBuffer(GL_COLOR_ATTACHMENT0);

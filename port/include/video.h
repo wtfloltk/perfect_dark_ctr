@@ -28,6 +28,7 @@ void videoSetFramebuffer(s32 target);
 void videoResetFramebuffer(void);
 void videoCopyFramebuffer(s32 dst, s32 src, s32 left, s32 top);
 void videoResizeFramebuffer(s32 target, u32 w, u32 h, s32 upscale, s32 autoresize);
+s32 videoFramebuffersSupported(void);
 
 void videoResetTextureCache(void);
 void videoFreeCachedTexture(const void *texptr);

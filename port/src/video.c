@@ -163,6 +163,11 @@ void videoResetFramebuffer(void)
 	return gfx_reset_framebuffer();
 }
 
+s32 videoFramebuffersSupported(void)
+{
+	return gfx_framebuffers_enabled;
+}
+
 void videoResizeFramebuffer(s32 target, u32 w, u32 h, s32 upscale, s32 autoresize)
 {
 	gfx_resize_framebuffer(target, w, h, upscale, autoresize);
