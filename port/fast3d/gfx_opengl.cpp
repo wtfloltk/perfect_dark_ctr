@@ -921,7 +921,9 @@ static void gfx_opengl_init(void) {
         // maybe replace this with sysFatalError, though the GLSL compiler will cause that later anyway
     }
 
-    if (!gfx_opengl_supports_framebuffers()) {
+    if (!gfx_framebuffers_enabled) {
+        sysLogPrintf(LOG_WARNING, "GL: framebuffer effects disabled by user");
+    } else if (!gfx_opengl_supports_framebuffers()) {
         sysLogPrintf(LOG_WARNING, "GL: GL_ARB_framebuffer_object unsupported, framebuffer effects disabled");
         gfx_framebuffers_enabled = false;
     }

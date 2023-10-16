@@ -33,6 +33,8 @@ s32 videoInit(void)
 	const s32 h = configGetInt("Video.DefaultHeight", 480);
 	const bool fs = configGetInt("Video.DefaultFullscreen", false);
 
+	gfx_framebuffers_enabled = (bool)configGetIntClamped("Video.FramebufferEffects", 1, 0, 1);
+
 	gfx_msaa_level = configGetInt("Video.MSAA", 0);
 	if (gfx_msaa_level < 1 || gfx_msaa_level > 16) {
 		gfx_msaa_level = 1;

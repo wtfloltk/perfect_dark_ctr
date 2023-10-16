@@ -2688,6 +2688,11 @@ extern "C" void gfx_init(struct GfxWindowManagerAPI* wapi, struct GfxRenderingAP
     game_framebuffer = gfx_rapi->create_framebuffer();
     game_framebuffer_msaa_resolved = gfx_rapi->create_framebuffer();
 
+    if (gfx_msaa_level > 1 && !gfx_framebuffers_enabled) {
+        sysLogPrintf(LOG_WARNING, "F3D: MSAA set to %d, but framebuffers are not available; disabling", gfx_msaa_level);
+        gfx_msaa_level = 1;
+    }
+
     for (int i = 0; i < 16; i++) {
         segmentPointers[i] = 0;
     }
