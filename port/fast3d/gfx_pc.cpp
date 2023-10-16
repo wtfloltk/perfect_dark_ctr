@@ -2634,7 +2634,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 }
                 break;
             case G_COPYFB_EXT:
-                gfx_copy_framebuffer(C0(12, 12), C0(0, 12), C1(16, 16), C1(0, 16));
+                gfx_copy_framebuffer(C0(11, 11), C0(0, 11), (int16_t)C1(16, 16), (int16_t)C1(0, 16), C0(22, 1));
                 break;
             case G_RDPSETOTHERMODE:
                 gfx_dp_set_other_mode(C0(0, 24), cmd->words.w1);
@@ -2882,7 +2882,7 @@ extern "C" void gfx_set_framebuffer(int fb, float noise_scale) {
     gfx_rapi->clear_framebuffer();
 }
 
-extern "C" void gfx_copy_framebuffer(int fb_dst, int fb_src, int left, int top) {
+extern "C" void gfx_copy_framebuffer(int fb_dst, int fb_src, int left, int top, int use_back) {
     if (fb_src == 0 && left > 0 && top > 0) {
         // upscale the position
         left = left * gfx_current_dimensions.width / gfx_current_native_viewport.width;
@@ -2890,7 +2890,7 @@ extern "C" void gfx_copy_framebuffer(int fb_dst, int fb_src, int left, int top) 
         // flip Y
         top = gfx_current_dimensions.height - top - 1;
     }
-    gfx_rapi->copy_framebuffer(fb_dst, fb_src, left, top);
+    gfx_rapi->copy_framebuffer(fb_dst, fb_src, left, top, (bool)use_back);
 }
 
 extern "C" void gfx_reset_framebuffer(void) {

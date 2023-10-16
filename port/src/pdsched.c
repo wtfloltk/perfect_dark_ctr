@@ -178,6 +178,8 @@ void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
 
 	osViSetEvent(&sc->interruptQ, (OSMesg)VIDEO_MSG, numFields);
 	schedInitCrashLastRendered();
+
+	g_PrevFrameFb = videoCreateFramebuffer(0, 0, false, true);
 }
 
 void osScAddClient(OSSched *sc, OSScClient *c, OSMesgQueue *msgQ, bool is30fps)
@@ -381,10 +383,6 @@ void schedConsiderScreenshot(void)
 		}
 
 		g_MenuData.screenshottimer = 0;
-	}
-
-	if (g_PrevFrameFb < 0) {
-		g_PrevFrameFb = videoCreateFramebuffer(0, 0, false, true);
 	}
 
 	if (g_PrevFrameCapTimer == 0) {

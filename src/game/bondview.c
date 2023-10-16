@@ -563,6 +563,24 @@ f32 bview0f142d74(s32 arg0, f32 arg1, f32 arg2, f32 arg3)
 	return result;
 }
 
+#ifndef PLATFORM_N64
+
+static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, s32 viewleft, s32 viewwidth, s32 y, f32 scale)
+{
+	const f32 orighalfw = viewwidth * 0.5f;
+	const f32 xcenter = viewleft + orighalfw;
+	const f32 halfw = orighalfw * scale;
+	const s32 left = xcenter - halfw;
+	const s32 right = xcenter + halfw;
+	gSPImageRectangleEXT(gdl++,
+		left << 2, y << 2, viewleft, y,
+		right << 2, (y + 1) << 2, viewleft + viewwidth, y + 1,
+		0, videoGetNativeWidth(), videoGetNativeHeight());
+	return gdl;
+}
+
+#endif
+
 /**
  * Draw the fisheye curved effect when using an eyespy.
  *
@@ -677,6 +695,12 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
+#ifndef PLATFORM_N64
+	// make a copy of the current back buffer contents that we will be using as a texture
+	gDPCopyFramebufferEXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
+	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
+#endif
+
 	if (starting) {
 		for (i = viewtop; i < viewtop + viewheight; i++) {
 			if (i % 2) {
@@ -684,7 +708,11 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 					gDPSetEnvColorViaWord(gdl++, (colour & 0xffffff00) | (spec & 0xff));
 
 					tmp = bview0f142d74(s2, f26, halfheight, sqhalfheight) * startupfrac;
+#ifdef PLATFORM_N64
 					gdl = bviewCopyPixels(gdl, fb, i, 5, i, tmp, viewleft, viewwidth);
+#else
+					gdl = bviewDrawFisheyeLine(gdl, viewleft, viewwidth, i, tmp);
+#endif
 				}
 			}
 
@@ -710,13 +738,21 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 			}
 
 			tmp = bview0f142d74(s2, f26, halfheight, sqhalfheight) * f22;
+#ifdef PLATFORM_N64
 			gdl = bviewCopyPixels(gdl, fb, i, 5, i, tmp, viewleft, viewwidth);
+#else
+			gdl = bviewDrawFisheyeLine(gdl, viewleft, viewwidth, i, tmp);
+#endif
 
 			if (hit == EYESPYHIT_DAMAGE) {
 				gDPSetEnvColorViaWord(gdl++, 0xddaaaa99);
 
 				tmp = bview0f142d74(s2, f26, halfheight, sqhalfheight) * 1.03f;
+#ifdef PLATFORM_N64
 				gdl = bviewCopyPixels(gdl, fb, i, 5, i, tmp, viewleft, viewwidth);
+#else
+				gdl = bviewDrawFisheyeLine(gdl, viewleft, viewwidth, i, tmp);
+#endif
 			}
 
 			s2 += s3;
