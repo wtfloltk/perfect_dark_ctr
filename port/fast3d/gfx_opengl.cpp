@@ -1139,15 +1139,18 @@ void gfx_opengl_copy_framebuffer(int fb_dst, int fb_src, int left, int top) {
         srcY1 = src.height;
     }
 
-    if (fb_src == 0) {
-        // flip the dst rect to mirror the image vertically
-        std::swap(dstY0, dstY1);
-    }
-
     glDisable(GL_SCISSOR_TEST);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, src.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dst.fbo);
+
+    if (fb_src == 0) {
+        // flip the dst rect to mirror the image vertically
+        std::swap(dstY0, dstY1);
+        glReadBuffer(GL_FRONT);
+    } else {
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+    }
 
     glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 

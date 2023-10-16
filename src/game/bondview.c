@@ -20,6 +20,9 @@
 #include "data.h"
 #include "types.h"
 #include "gbiex.h"
+#ifndef PLATFORM_N64
+#include "video.h"
+#endif
 
 #ifdef AVOID_UB
 char var800a41c0[26];
@@ -291,10 +294,19 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 	somefloat = (viewheight - viewheight / fyyy) * 0.5f;
 	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
+#ifdef PLATFORM_N64
 	for (i = viewtop; i < viewtop + viewheight; i++) {
 		gdl = bviewCopyPixels(gdl, fb, viewtop + (s32)somefloat, 5, i, fxxx, viewleft, viewwidth);
 		somefloat += 1.0f / fyyy;
 	}
+#else
+	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
+	gSPImageRectangleEXT(gdl++,
+		viewleft << 2, viewtop << 2, viewleft, viewtop,
+		(viewleft + viewwidth) << 2, (viewtop + viewheight) << 2, viewleft + viewwidth, viewtop + viewheight,
+		0, videoGetNativeWidth(), videoGetNativeHeight());
+		g_PrevFrameCapTimer = 0;
+#endif
 
 	return gdl;
 }
@@ -506,10 +518,27 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
+#ifdef PLATFORM_N64
 	for (i = viewtop; i < viewtop + viewheight; i++) {
 		gdl = bviewCopyPixels(gdl, fb, (s32)somefloat + viewtop, 5, i, arg3, viewleft, viewwidth);
 		somefloat += 1.0f / arg4;
 	}
+#else
+	const f32 xcenter = viewleft + viewwidth * 0.5f;
+	const f32 ycenter = viewtop + viewheight * 0.5f;
+	const f32 halfw = viewwidth * 0.5f * arg3;
+	const f32 halfh = viewheight * 0.5f * arg4;
+	const s32 left = xcenter - halfw;
+	const s32 top = ycenter - halfh;
+	const s32 right = xcenter + halfw;
+	const s32 bottom = ycenter + halfh;
+	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
+	gSPImageRectangleEXT(gdl++,
+		left << 2, top << 2, viewleft, viewtop,
+		right << 2, bottom << 2, viewleft + viewwidth, viewtop + viewheight,
+		0, videoGetNativeWidth(), videoGetNativeHeight());
+	g_PrevFrameCapTimer = 0;
+#endif
 
 	return gdl;
 }

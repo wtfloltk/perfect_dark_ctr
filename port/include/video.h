@@ -23,10 +23,11 @@ u32 videoGetTextureFilter2D(void);
 
 void videoSetWindowOffset(s32 x, s32 y);
 
-s32 videoCreateFramebuffer(u32 w, u32 h);
+s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize);
 void videoSetFramebuffer(s32 target);
 void videoResetFramebuffer(void);
 void videoCopyFramebuffer(s32 dst, s32 src, s32 left, s32 top);
+void videoResizeFramebuffer(s32 target, u32 w, u32 h, s32 upscale, s32 autoresize);
 
 void videoResetTextureCache(void);
 void videoFreeCachedTexture(const void *texptr);

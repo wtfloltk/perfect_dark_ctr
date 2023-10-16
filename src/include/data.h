@@ -546,6 +546,8 @@ extern f32 g_ViShakeIntensityMult;
 extern u32 g_TexFilter2D;
 extern u32 g_HudAlignModeL;
 extern u32 g_HudAlignModeR;
+extern s32 g_PrevFrameFb;
+extern s32 g_PrevFrameCapTimer;
 
 #define TEX_FILTER_2D g_TexFilter2D
 #define ADJUST_ZOOM_FOV(x) ((x) * g_PlayerFovZoomMultiplier)

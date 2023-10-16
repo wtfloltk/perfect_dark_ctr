@@ -148,9 +148,9 @@ void videoSetWindowOffset(s32 x, s32 y)
 	gfx_current_game_window_viewport.y = y;
 }
 
-s32 videoCreateFramebuffer(u32 w, u32 h)
+s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize)
 {
-	return gfx_create_framebuffer(w, h);
+	return gfx_create_framebuffer(w, h, upscale, autoresize);
 }
 
 void videoSetFramebuffer(s32 target)
@@ -161,6 +161,11 @@ void videoSetFramebuffer(s32 target)
 void videoResetFramebuffer(void)
 {
 	return gfx_reset_framebuffer();
+}
+
+void videoResizeFramebuffer(s32 target, u32 w, u32 h, s32 upscale, s32 autoresize)
+{
+	gfx_resize_framebuffer(target, w, h, upscale, autoresize);
 }
 
 void videoCopyFramebuffer(s32 dst, s32 src, s32 left, s32 top)
