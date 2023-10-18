@@ -1290,7 +1290,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 #ifndef PLATFORM_N64
 					// Handle turning and looking up/down via mouselook when aiming
-					if (g_Vars.currentplayer->insightaimmode && allowmcross) {
+					if (g_Vars.currentplayer->insightaimmode && allowmcross && bgunGetWeaponNum(HAND_RIGHT) != WEAPON_HORIZONSCANNER) {
 						if (g_Vars.currentplayer->swivelpos[0] > 0.9f) {
 							movedata.aimturnrightspeed = (g_Vars.currentplayer->swivelpos[0] - 0.9f) / 0.1f;
 							movedata.aimturnleftspeed = 0.f;
