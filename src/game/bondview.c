@@ -2654,6 +2654,15 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		vsplit = 14;
 	}
 
+#ifndef PLATFORM_N64
+	if (!videoFramebuffersSupported()) {
+		return gdl;
+	}
+	// make a copy of what we have drawn so far and use it as a texture
+	gDPCopyFramebufferEXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
+	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
+#endif
+
 	// Iterate horizontal lines down the lens with a bit extra on top and bottom
 	for (liney = lenstop - 9; liney < lenstop + lensheight + vsplit + 9; liney++) {
 		if (liney < lenstop + lensheight && liney >= lenstop) {
@@ -2701,7 +2710,18 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 
 		gDPSetColor(gdl++, G_SETENVCOLOR, colour);
 
+#ifdef PLATFORM_N64
 		gdl = bviewCopyPixels(gdl, fb, liney, 5, liney, RANDOMFRAC() * range + 1, viewleft, viewwidth);
+#else
+		const f32 xscale = RANDOMFRAC() * range + 1;
+		const f32 halfwidth = viewwidth / 2.f;
+		const s32 left = viewleft + halfwidth * (1.f - xscale);
+		const s32 right = viewleft + halfwidth * (1.f + xscale);
+		gSPImageRectangleEXT(gdl++,
+			left << 2, liney << 2, viewleft, liney,
+			right << 2, (liney + 1) << 2, viewleft + viewwidth, liney + 1,
+			0, videoGetNativeWidth(), videoGetNativeHeight());
+#endif
 	}
 
 	return gdl;
