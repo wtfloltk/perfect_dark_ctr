@@ -85,8 +85,13 @@ static void gameLoadConfig(void)
 
 int main(int argc, const char **argv)
 {
-	crashInit();
-	sysInit(argc, argv);
+	sysInitArgs(argc, argv);
+
+	if (!sysArgCheck("--no-crash-handler")) {
+		crashInit();
+	}
+
+	sysInit();
 	fsInit();
 	configInit();
 	videoInit();
