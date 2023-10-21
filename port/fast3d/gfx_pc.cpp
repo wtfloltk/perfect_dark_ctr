@@ -2652,6 +2652,9 @@ static void gfx_run_dl(Gfx* cmd) {
                 // TODO: skyRender uses these to render some types of skies and skybox water
                 // by issuing low-level ucode commands G_TRI_FILL and G_TRI_SHADE_TXTR
                 break;
+            case G_RDPFLUSH_EXT:
+                gfx_flush();
+                break;
             case G_RDPPIPESYNC:
             case G_RDPFULLSYNC:
             case G_RDPLOADSYNC:
