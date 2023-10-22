@@ -1536,6 +1536,37 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 								g_Vars.currentplayer->amdowntime = 0;
 							}
 						}
+
+						// Handle xbla-style crouch cycling
+						for (i = 0; i < numsamples; i++) {
+							s32 crouchsample = joyGetButtonsPressedOnSample(i, contpad1, 0xffffffff) & BUTTON_CROUCH_CYCLE;
+							if (crouchsample) {
+								if (g_Vars.currentplayer->crouchpos <= 0) {
+									g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
+								} else {
+									g_Vars.currentplayer->crouchpos--;
+								}
+							}
+
+							// handle 1964GEPD style crouch setting
+							crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_HALF_CROUCH;
+							if (crouchsample) {
+								if (g_Vars.currentplayer->crouchpos == CROUCHPOS_DUCK) {
+									g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
+								} else {
+									g_Vars.currentplayer->crouchpos = CROUCHPOS_DUCK;
+								}
+							}
+
+							crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_FULL_CROUCH;
+							if (crouchsample) {
+								if (g_Vars.currentplayer->crouchpos == CROUCHPOS_SQUAT) {
+									g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
+								} else {
+									g_Vars.currentplayer->crouchpos = CROUCHPOS_SQUAT;
+								}
+							}
+						}
 					}
 
 					// Handle manual zoom in and out (sniper, farsight and horizon scanner)
@@ -1575,37 +1606,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 
 							movedata.zoominfovpersec = movedata.zoominfovpersec + movedata.zoominfovpersec;
-						}
-					}
-
-					// Handle xbla-style crouch cycling
-					for (i = 0; i < numsamples; i++) {
-						s32 crouchsample = joyGetButtonsPressedOnSample(i, contpad1, 0xffffffff) & BUTTON_CROUCH_CYCLE;
-						if (crouchsample) {
-							if (g_Vars.currentplayer->crouchpos <= 0) {
-								g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
-							} else {
-								g_Vars.currentplayer->crouchpos--;
-							}
-						}
-
-						// handle 1964GEPD style crouch setting
-						crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_HALF_CROUCH;
-						if (crouchsample) {
-							if (g_Vars.currentplayer->crouchpos == CROUCHPOS_DUCK) {
-								g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
-							} else {
-								g_Vars.currentplayer->crouchpos = CROUCHPOS_DUCK;
-							}
-						}
-
-						crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_FULL_CROUCH;
-						if (crouchsample) {
-							if (g_Vars.currentplayer->crouchpos == CROUCHPOS_SQUAT) {
-								g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
-							} else {
-								g_Vars.currentplayer->crouchpos = CROUCHPOS_SQUAT;
-							}
 						}
 					}
 #else
