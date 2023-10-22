@@ -181,8 +181,9 @@ void inputSetDefaultKeyBinds(void)
 		{ CK_START,  SDL_CONTROLLER_BUTTON_START         },
 		{ CK_C_D,    SDL_CONTROLLER_BUTTON_DPAD_DOWN     },
 		{ CK_C_U,    SDL_CONTROLLER_BUTTON_DPAD_UP       },
-		{ CK_8000,   SDL_CONTROLLER_BUTTON_LEFTSTICK     },
+		{ CK_C_R,    SDL_CONTROLLER_BUTTON_DPAD_RIGHT    },
 		{ CK_C_L,    SDL_CONTROLLER_BUTTON_DPAD_LEFT     },
+		{ CK_8000,   SDL_CONTROLLER_BUTTON_LEFTSTICK     },
 	};
 
 	for (u32 i = 0; i < sizeof(kbbinds) / sizeof(kbbinds[0]); ++i) {
