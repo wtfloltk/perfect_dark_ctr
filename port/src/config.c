@@ -11,7 +11,7 @@
 #define CONFIG_MAX_STR 512
 #define CONFIG_MAX_SECNAME 128
 #define CONFIG_MAX_KEYNAME 256
-#define CONFIG_MAX_SETTINGS 128
+#define CONFIG_MAX_SETTINGS 256
 
 struct configentry {
 	char key[CONFIG_MAX_KEYNAME + 1];
