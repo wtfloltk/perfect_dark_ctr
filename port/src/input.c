@@ -37,7 +37,7 @@ static f32 mouseSensY = 1.5f;
 
 static f32 rumbleScale = 0.5f;
 
-// NOTE: by default this gets inverted for 1.2
+// NOTE: by default this gets inverted for 1.2: "right stick" here means left stick on your controller
 static u32 axisMap[2][2] = {
 	{ SDL_CONTROLLER_AXIS_LEFTX,  SDL_CONTROLLER_AXIS_LEFTY  },
 	{ SDL_CONTROLLER_AXIS_RIGHTX, SDL_CONTROLLER_AXIS_RIGHTY },
@@ -73,22 +73,22 @@ static const char *ckNames[CK_TOTAL_COUNT] = {
 	"Z_TRIG",
 	"B_BUTTON",
 	"A_BUTTON",
-    "CK_0001",
-    "CK_0002",
-    "CK_0004",
-    "CK_0008",
-    "CK_0010",
-    "CK_0020",
-    "CK_0040",
-    "CK_0080",
-    "CK_0100",
-    "CK_0200",
-    "CK_0400",
-    "CK_0800",
-    "CK_1000",
-    "CK_2000",
-    "CK_4000",
-    "CK_8000"
+	"CK_0001",
+	"CK_0002",
+	"CK_0004",
+	"CK_0008",
+	"CK_0010",
+	"CK_0020",
+	"CK_0040",
+	"CK_0080",
+	"CK_0100",
+	"CK_0200",
+	"CK_0400",
+	"CK_0800",
+	"CK_1000",
+	"CK_2000",
+	"CK_4000",
+	"CK_8000"
 	"STICK_XNEG",
 	"STICK_XPOS",
 	"STICK_YNEG",
@@ -169,8 +169,8 @@ void inputSetDefaultKeyBinds(void)
 		{ CK_STICK_XPOS,    SDL_SCANCODE_RIGHT,  0                   },
 		{ CK_STICK_YNEG,    SDL_SCANCODE_DOWN,   0                   },
 		{ CK_STICK_YPOS,    SDL_SCANCODE_UP,     0                   },
-		{CK_4000,           SDL_SCANCODE_LSHIFT, 0                   },
-		{CK_2000,           SDL_SCANCODE_LCTRL, 0                    }
+		{ CK_4000,          SDL_SCANCODE_LSHIFT, 0                   },
+		{ CK_2000,          SDL_SCANCODE_LCTRL,  0                   }
 	};
 
 	static const u32 joybinds[][2] = {
@@ -461,7 +461,7 @@ s32 inputInit(void)
 	stickSens[2] = configGetFloat("Input.RStickScaleX", 1.f);
 	stickSens[3] = configGetFloat("Input.RStickScaleY", 1.f);
 
-	stickCButtons = configGetInt("Input.StickCButtons", 1);
+	stickCButtons = configGetInt("Input.StickCButtons", 0);
 
 	if (configGetInt("Input.SwapSticks", 1)) {
 		// invert axis map
@@ -544,7 +544,6 @@ s32 inputReadController(s32 idx, OSContPad *npad)
 	rightX = inputAxisScale(rightX, deadzone[axisMap[1][0]], stickSens[axisMap[1][0]]);
 	rightY = inputAxisScale(rightY, deadzone[axisMap[1][1]], stickSens[axisMap[1][1]]);
 
-
 	if (!npad->stick_x && leftX) {
 		npad->stick_x = leftX / 0x100;
 	}
@@ -554,13 +553,23 @@ s32 inputReadController(s32 idx, OSContPad *npad)
 		npad->stick_y = (stickY == 128) ? 127 : stickY;
 	}
 
-	if (!npad->rstick_x && rightX) {
-		npad->rstick_x = rightX / 0x100;
-	}
-
-	s32 rStickY = -rightY / 0x100;
-	if (!npad->rstick_y && rStickY) {
-		npad->rstick_y = (rStickY == 128) ? 127 : rStickY;
+	if (stickCButtons) {
+		// rstick emulates C buttons
+		if (rightX < -0x4000) npad->button |= L_CBUTTONS;
+		if (rightX > +0x4000) npad->button |= R_CBUTTONS;
+		if (rightY < -0x4000) npad->button |= U_CBUTTONS;
+		if (rightY > +0x4000) npad->button |= D_CBUTTONS;
+		npad->rstick_x = 0;
+		npad->rstick_y = 0;
+	} else {
+		// rstick is an analog input
+		if (rightX) {
+			npad->rstick_x = rightX / 0x100;
+		}
+		s32 rStickY = -rightY / 0x100;
+		if (rStickY) {
+			npad->rstick_y = (rStickY == 128) ? 127 : rStickY;
+		}
 	}
 
 	return 0;

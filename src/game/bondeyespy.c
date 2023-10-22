@@ -728,13 +728,13 @@ void eyespyProcessInput(bool allowbuttons)
 
 		c2buttons = allowbuttons ? joyGetButtons(contpad2, 0xffffffff) : 0;
 	} else {
-		#ifndef PLATFORM_N64
+#ifndef PLATFORM_N64
 		c2stickx = joyGetRStickX(contpad1);
 		c2sticky = joyGetRStickY(contpad1);
-		#else
+#else
 		c2stickx = c1stickx;
 		c2sticky = c1sticky;
-		#endif
+#endif
 		c2buttons = c1buttons;
 	}
 
@@ -953,6 +953,12 @@ void eyespyProcessInput(bool allowbuttons)
 		g_Vars.currentplayer->eyespy->sintheta = sinf(g_Vars.currentplayer->eyespy->theta * 0.017453292384744f);
 
 		// Update verta
+#ifndef PLATFORM_N64
+		// respect the invert pitch setting
+		if (optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
+			pitchspeed = -pitchspeed;
+		}
+#endif
 		g_Vars.currentplayer->eyespy->verta -= pitchspeed * 0.0625f * g_Vars.lvupdate60freal;
 
 		if (prevverta != g_Vars.currentplayer->eyespy->verta) {

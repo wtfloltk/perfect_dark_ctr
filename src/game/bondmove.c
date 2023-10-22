@@ -39,11 +39,12 @@
 #include "data.h"
 #include "types.h"
 #ifndef PLATFORM_N64
+#include <math.h>
 #include "input.h"
 #include "video.h"
-#endif
 
-void handleProcessInputAltButton(struct movedata *data, s8 contpad, s32 i){
+static void bgunProcessInputAltButton(struct movedata *data, s8 contpad, s32 i)
+{
 	s32 buttons = joyGetButtonsOnSample(i, contpad, 0xffffffff);
 	if (buttons & (BUTTON_ALTMODE)) {
 		if (g_Vars.currentplayer->altdowntime >= -1) {
@@ -52,7 +53,6 @@ void handleProcessInputAltButton(struct movedata *data, s8 contpad, s32 i){
 					&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, true, false, true) != USETIMER_CONTINUE) {
 				g_Vars.currentplayer->altdowntime = -3;
 			}
-
 			if (g_Vars.currentplayer->altdowntime != -4) {
 				if (g_Vars.currentplayer->altdowntime <= 0) {
 					g_Vars.currentplayer->altdowntime++;
@@ -64,22 +64,19 @@ void handleProcessInputAltButton(struct movedata *data, s8 contpad, s32 i){
 				g_Vars.currentplayer->altdowntime = -4;
 			}
 		}
-	} 
-	else if (buttons & (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE)) {
+	} else if (buttons & (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE)) {
 		if (g_Vars.currentplayer->altdowntime >= -1) {
 			if (buttons & (Z_TRIG)
 					&& g_Vars.currentplayer->altdowntime >= 0
 					&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, true, false, true) != USETIMER_CONTINUE) {
 				g_Vars.currentplayer->altdowntime = -3;
 			}
-
-		} 
-	}
-	else {
+		}
+	} else {
 		// Released L
 		if (g_Vars.currentplayer->altdowntime != 0) {
-			s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, (g_Vars.currentplayer->altdowntime == -3 ? true: false), false, true);
-
+			const bool trigpressed = (g_Vars.currentplayer->altdowntime == -3);
+			s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, trigpressed, false, true);
 			if (result == USETIMER_STOP) {
 				g_Vars.currentplayer->altdowntime = -1;
 			} else if (result == USETIMER_REPEAT) {
@@ -90,6 +87,8 @@ void handleProcessInputAltButton(struct movedata *data, s8 contpad, s32 i){
 		bgun0f0a8c50();
 	}
 }
+
+#endif // PLATFORM_N64
 
 void bmoveSetControlDef(u32 controldef)
 {
@@ -808,14 +807,15 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 				c2allowedbuttons = 0xffffffff;
 
-                                // NOTE: I'm not 100% sure of correctness here
-				if (g_Vars.currentplayer->joybutinhibit << 0 >> 32) {
-					inhibitedbuttons = g_Vars.currentplayer->joybutinhibit >> 32;
+				// NOTE: joybutinhibit used to store two copies of the 16-bit inhibited mask for some reason
+				//       now it only stores one mask because it is 32 bits in size
+				if (g_Vars.currentplayer->joybutinhibit) {
+					inhibitedbuttons = g_Vars.currentplayer->joybutinhibit;
 					c2allowedbuttons = ~inhibitedbuttons;
 					inhibitedbuttons = joyGetButtons(contpad2, 0xffffffff) & inhibitedbuttons;
 					c2buttons &= ~inhibitedbuttons;
 					c2buttonsthisframe &= ~inhibitedbuttons;
-					g_Vars.currentplayer->joybutinhibit = (g_Vars.currentplayer->joybutinhibit & 0xffffffff) | (inhibitedbuttons << 32);
+					g_Vars.currentplayer->joybutinhibit |= inhibitedbuttons;
 				}
 
 				if (ignorec2) {
@@ -1501,45 +1501,10 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 #ifndef PLATFORM_N64
 					if (allowc1buttons) {
-						for (i = 0; i < numsamples; i++) {
-							handleProcessInputAltButton(&movedata, contpad1, i);
-						}
 						// handle L button : alt switching
-						// for (i = 0; i< numsamples; i++) {
-						// 	if (joyGetButtonsOnSample(i, contpad1, c1allowedbuttons & BUTTON_ALTMODE)) {
-						// 		if (g_Vars.currentplayer->altdowntime >= -1) {
-						// 			if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)
-						// 					&& g_Vars.currentplayer->altdowntime >= 0
-						// 					&& bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, true, false, true) != USETIMER_CONTINUE) {
-						// 				g_Vars.currentplayer->altdowntime = -3;
-						// 			}
-						//
-						// 			if (g_Vars.currentplayer->altdowntime != -4) {
-						// 				if (g_Vars.currentplayer->altdowntime <= 0) {
-						// 					g_Vars.currentplayer->altdowntime++;
-						// 				}
-						// 			}
-						// 		} else  {
-						// 			if (g_Vars.currentplayer->altdowntime == -2) {
-						// 				bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, false, false, true);
-						// 				g_Vars.currentplayer->altdowntime = -4;
-						// 			}
-						// 		}
-						// 	} else {
-						// 		// Released L
-						// 		if (g_Vars.currentplayer->altdowntime != 0) {
-						// 			s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, (g_Vars.currentplayer->altdowntime == -3 ? true: false), false, true);
-						//
-						// 			if (result == USETIMER_STOP) {
-						// 				g_Vars.currentplayer->altdowntime = -1;
-						// 			} else if (result == USETIMER_REPEAT) {
-						// 				g_Vars.currentplayer->altdowntime = -2;
-						// 			}
-						// 		}
-						// 		g_Vars.currentplayer->altdowntime = 0;
-						// 		bgun0f0a8c50();
-						// 	}
-						// }
+						for (i = 0; i < numsamples; i++) {
+							bgunProcessInputAltButton(&movedata, contpad1, i);
+						}
 
 						// Handle ALT1 / MI Reload Hack
 						for (i = 0; i < numsamples; i++) {
@@ -1547,7 +1512,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 								movedata.alt1tapcount++;
 							}
 						}
-
 
 						// Handle radial menu (D-Down)
 						for (i = 0; i < numsamples; i++) {
@@ -1614,7 +1578,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 					}
 
-					// // Handle xbla-style crouch cycling
+					// Handle xbla-style crouch cycling
 					for (i = 0; i < numsamples; i++) {
 						s32 crouchsample = joyGetButtonsPressedOnSample(i, contpad1, 0xffffffff) & BUTTON_CROUCH_CYCLE;
 						if (crouchsample) {
@@ -1625,7 +1589,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						}
 
-					// handle 1964GEPD style crouch setting
+						// handle 1964GEPD style crouch setting
 						crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_HALF_CROUCH;
 						if (crouchsample) {
 							if (g_Vars.currentplayer->crouchpos == CROUCHPOS_DUCK) {
@@ -1712,7 +1676,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 					}
 #endif
-
 
 					// Handle shutting eyes in multiplayer
 					if (bmoveGetCrouchPos() == CROUCHPOS_SQUAT

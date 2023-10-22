@@ -3598,6 +3598,11 @@ void playerTick(bool arg0)
 				sp174 = -stickx * LVUPDATE60FREAL() * 0.00025f;
 
 #ifndef PLATFORM_N64
+				// respect the invert pitch setting
+				if (optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
+					sp178 = -sp178;
+				}
+				// mouse control
 				if (g_Vars.currentplayernum == 0) {
 					f32 mdx, mdy;
 					inputMouseGetScaledDelta(&mdx, &mdy);
@@ -3672,7 +3677,7 @@ void playerTick(bool arg0)
 					targetspeed = 1;
 				}
 #endif
-				
+
 				newspeed = prevspeed;
 
 				if (prevspeed < targetspeed) {
