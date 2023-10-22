@@ -21,6 +21,7 @@ void bmoveGrabProp(struct prop *prop);
 void bmoveSetMode(u32 movemode);
 void bmoveSetModeForAllPlayers(u32 movemode);
 void bmoveHandleActivate(void);
+static void bgunProcessInputAltButton(struct movedata *data, s8 contpad, s32 i);
 void bmoveApplyMoveData(struct movedata *data);
 void bmoveUpdateSpeedTheta(void);
 f32 bmoveGetSpeedVertaLimit(f32 value);
