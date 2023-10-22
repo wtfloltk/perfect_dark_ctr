@@ -731,7 +731,7 @@ void titleTickPdLogo(void)
 		titleSetNextMode(TITLEMODE_SKIP);
 	}
 
-	if (joyGetButtonsPressedThisFrame(0, 0xffff)) {
+	if (joyGetButtonsPressedThisFrame(0, 0xffffffff)) {
 		g_TitleButtonPressed = g_TitleFastForward = true;
 
 		if (g_TitleTimer < TICKS(549)) {
@@ -1694,7 +1694,7 @@ void titleTickRarePresents(void)
 
 	if (g_TitleTimer > TICKS(300)) {
 		titleSetNextMode(TITLEMODE_PDLOGO);
-	} else if (joyGetButtonsPressedThisFrame(0, 0xffff)) {
+	} else if (joyGetButtonsPressedThisFrame(0, 0xffffffff)) {
 		titleSetNextMode(TITLEMODE_SKIP);
 	}
 }
@@ -1848,7 +1848,7 @@ void titleTickNintendoLogo(void)
 		g_TitleTimer += g_Vars.lvupdate60;
 	}
 
-	if (joyGetButtonsPressedThisFrame(0, 0xffff)) {
+	if (joyGetButtonsPressedThisFrame(0, 0xffffffff)) {
 		if (osResetType == RESETTYPE_WARM) {
 			g_TitleButtonPressed = true;
 			titleSetNextMode(TITLEMODE_PDLOGO);
@@ -2021,7 +2021,7 @@ void titleTickRareLogo(void)
 
 		g_TitleTimer += g_Vars.lvupdate60;
 
-		if (joyGetButtonsPressedThisFrame(0, 0xffff)) {
+		if (joyGetButtonsPressedThisFrame(0, 0xffffffff)) {
 			if (osResetType == RESETTYPE_WARM) {
 				g_TitleButtonPressed = true;
 				titleSetNextMode(TITLEMODE_PDLOGO);

@@ -12,7 +12,7 @@
 #define CONT_STICK_YNEG 0x40000
 #define CONT_STICK_YPOS 0x80000
 
-#define CONT_NUM_BUTTONS 16 // not including the stick axes
+#define CONT_NUM_BUTTONS 32 // not including the stick axes
 
 enum virtkey {
   /* same order as SDL scancodes */
@@ -59,6 +59,22 @@ enum contkey {
   CK_ZTRIG,
   CK_B,
   CK_A,
+  CK_0001,
+  CK_0002,
+  CK_0004,
+  CK_0008,
+  CK_0010,
+  CK_0020,
+  CK_0040,
+  CK_0080,
+  CK_0100,
+  CK_0200,
+  CK_0400,
+  CK_0800,
+  CK_1000,
+  CK_2000,
+  CK_4000,
+  CK_8000,
   CK_STICK_XNEG,
   CK_STICK_XPOS,
   CK_STICK_YNEG,
@@ -85,7 +101,7 @@ s32 inputControllerMask(void);
 s32 inputKeyPressed(u32 vk);
 
 // idx is controller index, contbtn is one of the CONT_ constants
-s32 inputButtonPressed(s32 idx, u16 contbtn);
+s32 inputButtonPressed(s32 idx, u32 contbtn);
 
 // bind virtkey vk to n64 pad #idx's button/axis ck as represented by its contkey value
 // if bind is -1, picks a bind slot automatically

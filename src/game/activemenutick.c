@@ -48,10 +48,12 @@ void amTick(void)
 				s8 gotonextscreen = false;
 				s8 cstickx = joyGetStickXOnSample(j, contpadnum);
 				s8 csticky = joyGetStickYOnSample(j, contpadnum);
+				s8 crstickx = joyGetRStickXOnSample(j, contpadnum);
+				s8 crsticky = joyGetRStickYOnSample(j, contpadnum);
 				s8 absstickx;
 				s8 abssticky;
-				u16 buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffff);
-				u16 buttonspressed = joyGetButtonsPressedOnSample(j, contpadnum, 0xffff);
+				u32 buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffffffff);
+				u32 buttonspressed = joyGetButtonsPressedOnSample(j, contpadnum, 0xffffffff);
 				bool stickpushed = false;
 				s32 slotnum;
 				bool stayopen;
@@ -77,8 +79,8 @@ void amTick(void)
 						am->mousex = (am->mousex > 127.f) ? 127.f : (am->mousex < -128.f) ? -128.f : am->mousex;
 						am->mousey = (am->mousey > 127.f) ? 127.f : (am->mousey < -128.f) ? -128.f : am->mousey;
 					}
-					const s32 newstickx = (s32)cstickx + (s32)am->mousex;
-					const s32 newsticky = (s32)csticky - (s32)am->mousey;
+					const s32 newstickx = (s32)cstickx + (s32)crstickx + (s32)am->mousex;
+					const s32 newsticky = (s32)csticky + (s32)crsticky - (s32)am->mousey;
 					cstickx = (newstickx < -128) ? -128 : (newstickx > 127) ? 127 : newstickx;
 					csticky = (newsticky < -128) ? -128 : (newsticky > 127) ? 127 : newsticky;
 				}
@@ -88,6 +90,8 @@ void amTick(void)
 					buttonsstate = buttonsstate & D_JPAD;
 					cstickx = 0;
 					csticky = 0;
+					crstickx = 0;
+					crsticky = 0;
 					buttonspressed = 0;
 				}
 
@@ -162,8 +166,8 @@ void amTick(void)
 					s8 contpadnum2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
 					s8 cstickx2 = joyGetStickXOnSample(j, contpadnum2);
 					s8 csticky2 = joyGetStickYOnSample(j, contpadnum2);
-					u16 buttonsstate2 = joyGetButtonsOnSample(j, contpadnum2, 0xffff);
-					u16 buttonspressed2 = joyGetButtonsPressedOnSample(j, contpadnum2, 0xffff);
+					u32 buttonsstate2 = joyGetButtonsOnSample(j, contpadnum2, 0xffffffff);
+					u32 buttonspressed2 = joyGetButtonsPressedOnSample(j, contpadnum2, 0xffffffff);
 
 					if (g_Vars.currentplayer->activemenumode == AMMODE_EDIT) {
 						buttonsstate2 = buttonsstate2 & D_JPAD;

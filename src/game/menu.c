@@ -4612,8 +4612,10 @@ void menuProcessInput(void)
 		for (i = 0; i < numcontpads; i++) {
 			s8 thisstickx = joyGetStickX(contpadnums[i]);
 			s8 thissticky = joyGetStickY(contpadnums[i]);
-			u16 buttons = joyGetButtons(contpadnums[i], 0xffff);
-			u16 buttonsnow = joyGetButtonsPressedThisFrame(contpadnums[i], 0xffff);
+			s8 thisrstickx = joyGetRStickX(contpadnums[i]);
+			s8 thisrsticky = joyGetRStickY(contpadnums[i]);
+			u32 buttons = joyGetButtons(contpadnums[i], 0xffffffff);
+			u32 buttonsnow = joyGetButtonsPressedThisFrame(contpadnums[i], 0xffffffff);
 
 			if (buttonsnow & A_BUTTON) {
 				inputs.select = 1;
@@ -4650,9 +4652,20 @@ void menuProcessInput(void)
 				stickx = thisstickx;
 			}
 
+#ifndef PLATFORM_N64
+			if ((stickx < 0 ? -stickx : stickx) < (thisrstickx < 0 ? -thisrstickx : thisrstickx)) {
+				stickx = thisrstickx;
+			}
+#endif
+
 			if ((sticky < 0 ? -sticky : sticky) < (thissticky < 0 ? -thissticky : thissticky)) {
 				sticky = thissticky;
 			}
+#ifndef PLATFORM_N64
+			if ((sticky < 0 ? -sticky : sticky) < (thisrsticky < 0 ? -thisrsticky : thisrsticky)) {
+				sticky = thisrsticky;
+			}
+#endif
 
 			if (buttons & U_CBUTTONS) {
 				yhelddir = -1;

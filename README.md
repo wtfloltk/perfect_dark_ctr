@@ -34,22 +34,29 @@ You must already have a Perfect Dark ROM to run the game, as specified above.
 
 ## Controls
 
-1964GEPD-style and Xbox-style bindings are partially implemented.
+1964GEPD-style and Xbox-style bindings are implemented.
 
-N64 pad buttons X and Y (or `X_BUTTON`, `Y_BUTTON` in the code) refer to the reserved buttons 0x40 and 0x80, which are also leveraged by 1964GEPD.
+N64 pad buttons X and Y (or `X_BUTTON`, `Y_BUTTON` in the code) refer to the reserved buttons `0x40` and `0x80`, which are also leveraged by 1964GEPD.
 
-| Action          | Keyboard and mouse | Xbox pad | N64 pad    |
-| -               | -                  | -        | -          |
-| Fire / Accept   | LMB/Space          | RT       | Z Trigger  |
-| Aim mode        | RMB/Z              | LT       | R Trigger  |
-| Use / Cancel    | E                  | N/A      | B          |
-| Use / Accept    | N/A                | A        | A          |
-| Reload          | R                  | X        | X `(0x40)` |
-| Previous weapon | Mousewheel forward | B        | D-Left     |
-| Next weapon     | Mousewheel back    | Y        | Y `(0x80)` |
-| Radial menu     | Q                  | LB       | D-Down     |
-| Alt fire mode   | F                  | RB       | L Trigger  |
-| Quick-detonate  | E + Q              | A + B    | A + D-Left |
+Support for one controller, two-stick configurations are enabled for 1.2.
+
+
+| Action           | Keyboard and mouse   | Xbox pad            | N64 pad              |
+| -                | -                    | -                   | -                    |
+| Fire / Accept    | LMB/Space            | RT                  | Z Trigger            |
+| Aim mode         | RMB/Z                | LT                  | R Trigger            |
+| Use / Cancel     | E                    | N/A                 | B                    |
+| Use / Accept     | N/A                  | A                   | A                    |
+| Crouch cycle     | N/A                  | L3                  | `0x80000000` (Extra) |
+| Half-Crouch      | Shift                | N/A                 | `0x40000000` (Extra) |
+| Full-Crouch      | Control              | N/A                 | `0x20000000` (Extra) |
+| Reload           | R                    | X                   | X `(0x40)`           |
+| Previous weapon  | Mousewheel forward   | B                   | D-Left               |
+| Next weapon      | Mousewheel back      | Y                   | Y `(0x80)`           |
+| Radial menu      | Q                    | LB                  | D-Down               |
+| Alt fire mode    | F                    | RB                  | L Trigger            |
+| Alt-fire oneshot | F + LMB or E + LMB   | A + RT or RB + RT   | A + Z, L + Z         |
+| Quick-detonate   | E + Q                | A + B               | A + D-Left           |
 
 ## Building
 
