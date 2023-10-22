@@ -1198,7 +1198,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				if (!g_Vars.currentplayer->insightaimmode) {
 					movedata.analogstrafe = c2stickx;
 					movedata.analogwalk = c2sticky;
-					movedata.unk14 = 1;
+					movedata.unk14 = (c2stickx || c2sticky);
 				} else {
 					movedata.analogstrafe = 0.f;
 					movedata.analogwalk = 0.f;
@@ -1256,7 +1256,11 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 						movedata.digitalstepforward = !g_Vars.currentplayer->insightaimmode && (c1buttons & (U_CBUTTONS));
 						movedata.digitalstepback = !g_Vars.currentplayer->insightaimmode && (c1buttons & (D_CBUTTONS));
-						movedata.canlookahead = !g_Vars.currentplayer->insightaimmode;
+#ifdef PLATFORM_N64
+						movedata.canlookahead = false;
+#else
+						movedata.canlookahead = !g_Vars.currentplayer->insightaimmode && (c2stickx || c2sticky);
+#endif
 						movedata.cannaturalpitch = !g_Vars.currentplayer->insightaimmode;
 						movedata.speedvertadown = 0;
 						movedata.speedvertaup = 0;
@@ -1320,7 +1324,11 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 
 						movedata.cannaturalturn = !g_Vars.currentplayer->insightaimmode;
-						movedata.unk14 = !g_Vars.currentplayer->insightaimmode;
+#ifdef PLATFORM_N64
+						movedata.unk14 = false;
+#else
+						movedata.unk14 = !g_Vars.currentplayer->insightaimmode && (c2stickx || c2sticky);
+#endif
 
 						if (g_Vars.tickmode == TICKMODE_AUTOWALK) {
 							movedata.analogstrafe = 0;
@@ -1699,9 +1707,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						movedata.farsighttempautoseek = g_Vars.currentplayer->insightaimmode && (c1buttons & (L_CBUTTONS | R_CBUTTONS));
 						if (g_Vars.currentplayer->insightaimmode) {
 								movedata.unk14 = 1;
-								#ifndef PLATFORM_N64
+#ifndef PLATFORM_N64
 								movedata.analogstrafe = c2stickx;
-								#endif
+#endif
 						}
 					} else {
 						movedata.rleanleft = g_Vars.currentplayer->insightaimmode && (c1buttons & (L_CBUTTONS));
