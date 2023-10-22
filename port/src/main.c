@@ -75,6 +75,7 @@ static void gameLoadConfig(void)
 	g_PlayerMouseAimSpeedY = configGetFloatClamped("Game.MouseAimSpeedY", g_PlayerMouseAimSpeedY, 0.f, 10.f);
 	g_PlayerFovAffectsZoom = configGetIntClamped("Game.FovAffectsZoom", g_PlayerFovAffectsZoom, 0, 1);
 	g_PlayerFovZoomMultiplier = g_PlayerFovAffectsZoom ? g_PlayerDefaultFovY / 60.0f : 1.0f;
+	g_PlayerClassicCrouch = configGetIntClamped("Game.ClassicCrouch", 0, 0, 1);
 	g_ViShakeIntensityMult = configGetFloatClamped("Game.ScreenShakeIntensity", 1.f, 0.f, 100.f);
 	const s32 center = configGetIntClamped("Game.CenterHUD", 0, 0, 1);
 	if (center) {

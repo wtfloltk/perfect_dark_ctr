@@ -542,6 +542,7 @@ extern f32 g_PlayerMouseAimSpeedX;
 extern f32 g_PlayerMouseAimSpeedY;
 extern s32 g_PlayerFovAffectsZoom;
 extern f32 g_PlayerFovZoomMultiplier;
+extern s32 g_PlayerClassicCrouch;
 extern f32 g_ViShakeIntensityMult;
 extern u32 g_TexFilter2D;
 extern u32 g_HudAlignModeL;

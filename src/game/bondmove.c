@@ -1628,12 +1628,17 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							movedata.zoominfovpersec = increment;
 						}
 					}
+#endif
 
-					// Handle crouch and uncrouch
-					if (allowc1buttons) {
+					// Handle C-button and analog crouch and uncrouch, if enabled
+					if (g_PlayerClassicCrouch && allowc1buttons) {
 						for (i = 0; i < numsamples; i++) {
 							if (!canmanualzoom && aimonhist[i]) {
-								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & (U_CBUTTONS))) {
+								bool goUp = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & (U_CBUTTONS));
+#ifndef PLATFORM_N64
+								goUp = goUp || ((joyGetRStickYOnSample(i, contpad1) > 30 && joyGetRStickYOnSampleIndex(i, contpad1) <= 30));
+#endif
+								if (goUp) {
 									if (movedata.crouchdown) {
 										movedata.crouchdown--;
 									} else {
@@ -1643,7 +1648,11 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 									g_Vars.currentplayer->aimtaptime = -1;
 								}
 
-								if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & (D_CBUTTONS))) {
+								bool goDn = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & (D_CBUTTONS));
+#ifndef PLATFORM_N64
+								goDn = goDn || ((joyGetRStickYOnSample(i, contpad1) < -30 && joyGetRStickYOnSampleIndex(i, contpad1) >= -30));
+#endif
+								if (goDn) {
 									if (movedata.crouchup) {
 										movedata.crouchup--;
 									} else {
@@ -1675,7 +1684,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						}
 					}
-#endif
 
 					// Handle shutting eyes in multiplayer
 					if (bmoveGetCrouchPos() == CROUCHPOS_SQUAT
