@@ -73,10 +73,10 @@ static const char *ckNames[CK_TOTAL_COUNT] = {
 	"Z_TRIG",
 	"B_BUTTON",
 	"A_BUTTON",
-	"CK_0001",
-	"CK_0002",
-	"CK_0004",
-	"CK_0008",
+	"STICK_XNEG",
+	"STICK_XPOS",
+	"STICK_YNEG",
+	"STICK_YPOS",
 	"CK_0010",
 	"CK_0020",
 	"CK_0040",
@@ -89,10 +89,6 @@ static const char *ckNames[CK_TOTAL_COUNT] = {
 	"CK_2000",
 	"CK_4000",
 	"CK_8000"
-	"STICK_XNEG",
-	"STICK_XPOS",
-	"STICK_YNEG",
-	"STICK_YPOS",
 };
 
 static const char *vkPunctNames[] = {

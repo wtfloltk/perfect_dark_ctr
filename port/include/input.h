@@ -59,10 +59,10 @@ enum contkey {
   CK_ZTRIG,
   CK_B,
   CK_A,
-  CK_0001,
-  CK_0002,
-  CK_0004,
-  CK_0008,
+  CK_STICK_XNEG,
+  CK_STICK_XPOS,
+  CK_STICK_YNEG,
+  CK_STICK_YPOS,
   CK_0010,
   CK_0020,
   CK_0040,
@@ -75,10 +75,6 @@ enum contkey {
   CK_2000,
   CK_4000,
   CK_8000,
-  CK_STICK_XNEG,
-  CK_STICK_XPOS,
-  CK_STICK_YNEG,
-  CK_STICK_YPOS,
   CK_TOTAL_COUNT
 };
 
