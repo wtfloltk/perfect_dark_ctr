@@ -11,6 +11,11 @@
 #include "input.h"
 #include "config.h"
 
+static s32 g_BindsPlayer = 0;
+static s32 g_BindIndex = 0;
+static u32 g_BindContKey = 0;
+static char g_BindsPlayerText[] = "Player 1 Bindings";
+
 static MenuItemHandlerResult menuhandlerMouseEnabled(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
@@ -691,6 +696,281 @@ struct menudialogdef g_ExtendedGameMenuDialog = {
 	NULL,
 };
 
+static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *item, union handlerdata *data);
+
+struct menuitem g_ExtendedBindKeyMenuItems[] = {
+	{
+		MENUITEMTYPE_LABEL,
+		0,
+		MENUITEMFLAG_SELECTABLE_CENTRE | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"\n",
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CENTRE | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Press new key or button...\n",
+		0,
+		menuhandlerDoBind,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+struct menudialogdef g_ExtendedBindKeyMenuDialog = {
+	MENUDIALOGTYPE_WHITE,
+	(uintptr_t)"Bind",
+	g_ExtendedBindKeyMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT | MENUDIALOGFLAG_IGNOREBACK | MENUDIALOGFLAG_STARTSELECTS,
+	NULL,
+};
+
+struct menubind {
+	u32 ck;
+	const char *name;
+};
+
+static const struct menubind menuBinds[] = {
+	{ CK_ZTRIG,  "Fire [ZT]\n" },
+	{ CK_LTRIG,  "Fire Mode [LT]\n" },
+	{ CK_RTRIG,  "Aim Mode [RT]\n" },
+	{ CK_A,      "Use / Accept [A]\n" },
+	{ CK_B,      "Use / Cancel [B]\n" },
+	{ CK_X,      "Reload [X]\n" },
+	{ CK_Y,      "Next Weapon [Y]\n" },
+	{ CK_DPAD_L, "Prev Weapon [DL]\n" },
+	{ CK_DPAD_L, "Radial Menu [DD]\n" },
+	{ CK_START,  "Pause Menu [ST]\n" },
+	{ CK_8000,   "Cycle Crouch [+]\n" },
+	{ CK_4000,   "Half Crouch [+]\n" },
+	{ CK_2000,   "Full Crouch [+]\n" },
+};
+
+static const char *menutextBind(struct menuitem *item);
+static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerResetBinds(s32 operation, struct menuitem *item, union handlerdata *data);
+
+#define DEFINE_MENU_BIND() \
+	{ \
+		MENUITEMTYPE_DROPDOWN, \
+		0, \
+		0, \
+		(uintptr_t)menutextBind, \
+		0, \
+		menuhandlerBind, \
+	}
+
+struct menuitem g_ExtendedBindsMenuItems[] = {
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Reset to Defaults\n",
+		0,
+		menuhandlerResetBinds,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_213, // "Back"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (!menuIsDialogOpen(&g_ExtendedBindKeyMenuDialog)) {
+		return 0;
+	}
+
+	if (inputKeyPressed(VK_ESCAPE)) {
+		menuPopDialog();
+		return 0;
+	}
+
+	const s32 key = inputGetLastKey();
+	if (key && key != VK_ESCAPE) {
+		inputKeyBind(g_BindsPlayer, g_BindContKey, g_BindIndex, key);
+		menuPopDialog();
+	}
+
+	return 0;
+}
+
+static const char *menutextBind(struct menuitem *item)
+{
+	return menuBinds[item - g_ExtendedBindsMenuItems].name;
+}
+
+static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	const s32 idx = item - g_ExtendedBindsMenuItems;
+	const u32 *binds;
+
+	static char keyname[128];
+
+	switch (operation) {
+	case MENUOP_GETOPTIONCOUNT:
+		data->dropdown.value = INPUT_MAX_BINDS;
+		break;
+	case MENUOP_GETOPTIONTEXT:
+		binds = inputKeyGetBinds(g_BindsPlayer, menuBinds[idx].ck);
+		if (binds && binds[data->dropdown.value]) {
+			strncpy(keyname, inputGetKeyName(binds[data->dropdown.value]), sizeof(keyname) - 1);
+			for (char *p = keyname; *p; ++p) {
+				if (*p == '_') *p = ' ';
+			}
+			return (intptr_t)keyname;
+		}
+		return (intptr_t)"NONE";
+	case MENUOP_SET:
+		g_ExtendedBindKeyMenuItems[0].param2 = (uintptr_t)menuBinds[idx].name;
+		g_BindIndex = data->dropdown.value;
+		g_BindContKey = menuBinds[idx].ck;
+		inputClearLastKey();
+		menuPushDialog(&g_ExtendedBindKeyMenuDialog);
+		break;
+	case MENUOP_GETSELECTEDINDEX:
+		data->dropdown.value = 0;
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerResetBinds(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		inputSetDefaultKeyBinds();
+	}
+
+	return 0;
+}
+
+struct menudialogdef g_ExtendedBindsMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)g_BindsPlayerText,
+	g_ExtendedBindsMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT | MENUDIALOGFLAG_STARTSELECTS | MENUDIALOGFLAG_IGNOREBACK,
+	NULL,
+};
+
+static MenuItemHandlerResult menuhandlerOpenBinds(s32 operation, struct menuitem *item, union handlerdata *data);
+
+struct menuitem g_ExtendedSelectBindsMenuItems[] = {
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 1\n",
+		0,
+		menuhandlerOpenBinds,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 2\n",
+		0,
+		menuhandlerOpenBinds,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 3\n",
+		0,
+		menuhandlerOpenBinds,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 4\n",
+		0,
+		menuhandlerOpenBinds,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_213, // "Back"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+static MenuItemHandlerResult menuhandlerOpenBinds(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		g_BindsPlayer = item - g_ExtendedSelectBindsMenuItems;
+		g_BindsPlayerText[7] = g_BindsPlayer + '1';
+		menuPushDialog(&g_ExtendedBindsMenuDialog);
+	}
+
+	return 0;
+}
+
+struct menudialogdef g_ExtendedSelectBindsMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)"Key Bindings",
+	g_ExtendedSelectBindsMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT,
+	NULL,
+};
+
 struct menuitem g_ExtendedMenuItems[] = {
 	{
 		MENUITEMTYPE_SELECTABLE,
@@ -723,6 +1003,14 @@ struct menuitem g_ExtendedMenuItems[] = {
 		(uintptr_t)"Game\n",
 		0,
 		(void *)&g_ExtendedGameMenuDialog,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Key Bindings\n",
+		0,
+		(void *)&g_ExtendedSelectBindsMenuDialog,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,

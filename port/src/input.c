@@ -10,7 +10,6 @@
 #include "config.h"
 #include "system.h"
 
-#define MAX_BINDS 4
 #define TRIG_THRESHOLD (30 * 256)
 #define DEFAULT_DEADZONE 4096
 #define DEFAULT_DEADZONE_RY 6144
@@ -21,7 +20,7 @@
 static SDL_GameController *pads[INPUT_MAX_CONTROLLERS];
 static s32 rumbleSupported[INPUT_MAX_CONTROLLERS];
 
-static u32 binds[MAXCONTROLLERS][CK_TOTAL_COUNT][MAX_BINDS]; // [i][CK_][b] = [VK_]
+static u32 binds[MAXCONTROLLERS][CK_TOTAL_COUNT][INPUT_MAX_BINDS]; // [i][CK_][b] = [VK_]
 
 static s32 connectedMask = 0;
 
@@ -36,6 +35,8 @@ static f32 mouseSensX = 1.5f;
 static f32 mouseSensY = 1.5f;
 
 static f32 rumbleScale = 0.5f;
+
+static s32 lastKey = 0;
 
 // NOTE: by default this gets inverted for 1.2: "right stick" here means left stick on your controller
 static u32 axisMap[2][2] = {
@@ -186,6 +187,8 @@ void inputSetDefaultKeyBinds(void)
 		{ CK_8000,   SDL_CONTROLLER_BUTTON_LEFTSTICK     },
 	};
 
+	memset(binds, 0, sizeof(binds));
+
 	for (u32 i = 0; i < sizeof(kbbinds) / sizeof(kbbinds[0]); ++i) {
 		for (s32 j = 1; j < 3; ++j) {
 			if (kbbinds[i][j]) {
@@ -233,6 +236,18 @@ static inline void inputCloseController(const s32 cidx)
 	}
 }
 
+
+static inline s32 inputControllerGetIndex(SDL_GameController *ctrl) {
+	if (ctrl) {
+		for (s32 i = 0; i < INPUT_MAX_CONTROLLERS; ++i) {
+			if (pads[i] == ctrl) {
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
 static int inputEventFilter(void *data, SDL_Event *event)
 {
 	switch (event->type) {
@@ -250,19 +265,54 @@ static int inputEventFilter(void *data, SDL_Event *event)
 
 		case SDL_CONTROLLERDEVICEREMOVED: {
 			SDL_GameController *ctrl = SDL_GameControllerFromInstanceID(event->cdevice.which);
-			if (ctrl) {
-				for (s32 i = 0; i < INPUT_MAX_CONTROLLERS; ++i) {
-					if (pads[i] == ctrl) {
-						inputCloseController(i);
-						break;
-					}
-				}
+			const s32 idx = inputControllerGetIndex(ctrl);
+			if (idx >= 0) {
+				inputCloseController(idx);
 			}
 			break;
 		}
 
 		case SDL_MOUSEWHEEL:
 			mouseWheel = event->wheel.y;
+			if (!lastKey && mouseWheel) {
+				lastKey = (mouseWheel < 0) + VK_MOUSE_WHEEL_UP;
+			}
+			break;
+
+		case SDL_MOUSEBUTTONDOWN:
+			if (!lastKey) {
+				lastKey = VK_MOUSE_BEGIN - 1 + event->button.button;
+			}
+			break;
+
+		case SDL_KEYDOWN:
+			if (!lastKey) {
+				lastKey = VK_KEYBOARD_BEGIN + event->key.keysym.scancode;
+			}
+			break;
+
+		case SDL_CONTROLLERBUTTONDOWN:
+			if (!lastKey) {
+				lastKey = VK_JOY1_BEGIN + event->cbutton.button;
+				SDL_GameController *ctrl = SDL_GameControllerFromInstanceID(event->cdevice.which);
+				const s32 idx = inputControllerGetIndex(ctrl);
+				if (idx >= 0) {
+					lastKey += idx * INPUT_MAX_CONTROLLER_BUTTONS;
+				}
+			}
+			break;
+
+		case SDL_CONTROLLERAXISMOTION:
+			if (!lastKey) {
+				if (event->caxis.axis >= SDL_CONTROLLER_AXIS_TRIGGERLEFT && event->caxis.value > TRIG_THRESHOLD) {
+					lastKey = VK_JOY1_LTRIG + (event->caxis.axis - SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+					SDL_GameController *ctrl = SDL_GameControllerFromInstanceID(event->cdevice.which);
+					const s32 idx = inputControllerGetIndex(ctrl);
+					if (idx >= 0) {
+						lastKey += idx * INPUT_MAX_CONTROLLER_BUTTONS;
+					}
+				}
+			}
 			break;
 
 		default:
@@ -349,7 +399,7 @@ static inline void inputSaveBinds(void)
 		for (u32 ck = 0; ck < CK_TOTAL_COUNT; ++ck) {
 			snprintf(keyname, sizeof(keyname), "%s.%s", secname, inputGetContKeyName(ck));
 			bindstr[0] = '\0';
-			for (s32 b = 0; b < MAX_BINDS; ++b) {
+			for (s32 b = 0; b < INPUT_MAX_BINDS; ++b) {
 				if (binds[i][ck][b]) {
 					if (b) {
 						strncat(bindstr, ", ", sizeof(bindstr) - 1);
@@ -500,7 +550,7 @@ s32 inputInit(void)
 
 static inline s32 inputBindPressed(const s32 idx, const u32 ck)
 {
-	for (s32 i = 0; i < MAX_BINDS; ++i) {
+	for (s32 i = 0; i < INPUT_MAX_BINDS; ++i) {
 		if (binds[idx][ck][i]) {
 			if (inputKeyPressed(binds[idx][ck][i])) {
 				return 1;
@@ -733,24 +783,32 @@ void inputControllerSetAxisDeadzone(s32 stick, s32 axis, f32 value)
 
 void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk)
 {
-	if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS || bind >= MAX_BINDS || ck >= CK_TOTAL_COUNT) {
+	if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS || bind >= INPUT_MAX_BINDS || ck >= CK_TOTAL_COUNT) {
 		return;
 	}
 
 
 	if (bind < 0) {
-		for (s32 i = 0; i < MAX_BINDS; ++i) {
+		for (s32 i = 0; i < INPUT_MAX_BINDS; ++i) {
 			if (binds[idx][ck][i] == 0) {
 				bind = i;
 				break;
 			}
 		}
 		if (bind < 0) {
-			bind = MAX_BINDS - 1; // just overwrite last
+			bind = INPUT_MAX_BINDS - 1; // just overwrite last
 		}
 	}
 
 	binds[idx][ck][bind] = vk;
+}
+
+const u32 *inputKeyGetBinds(s32 idx, u32 ck)
+{
+	if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS || ck >= CK_TOTAL_COUNT) {
+		return NULL;
+	}
+	return binds[idx][ck];
 }
 
 s32 inputKeyPressed(u32 vk)
@@ -934,4 +992,14 @@ s32 inputGetKeyByName(const char *name)
 	sysLogPrintf(LOG_WARNING, "unknown key name: `%s`", name);
 
 	return -1;
+}
+
+void inputClearLastKey(void)
+{
+	lastKey = 0;
+}
+
+s32 inputGetLastKey(void)
+{
+	return lastKey;
 }

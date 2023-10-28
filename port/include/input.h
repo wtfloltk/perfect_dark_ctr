@@ -6,6 +6,7 @@
 
 #define INPUT_MAX_CONTROLLERS MAXCONTROLLERS
 #define INPUT_MAX_CONTROLLER_BUTTONS 32
+#define INPUT_MAX_BINDS 4
 
 #define CONT_STICK_XNEG 0x10000
 #define CONT_STICK_XPOS 0x20000
@@ -115,6 +116,8 @@ s32 inputButtonPressed(s32 idx, u32 contbtn);
 // if bind is -1, picks a bind slot automatically
 void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk);
 
+const u32 *inputKeyGetBinds(s32 idx, u32 ck);
+
 // get VK_ value from human-readable name
 s32 inputGetKeyByName(const char *name);
 
@@ -164,5 +167,10 @@ void inputUpdate(void);
 
 // call this before configSave()
 void inputSaveConfig(void);
+
+void inputSetDefaultKeyBinds(void);
+
+void inputClearLastKey(void);
+s32 inputGetLastKey(void);
 
 #endif
