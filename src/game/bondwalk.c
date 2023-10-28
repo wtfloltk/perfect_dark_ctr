@@ -26,6 +26,9 @@
 #include "lib/collision.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+extern f32 fabsf(f32);
+#endif
 
 void bwalkInit(void)
 {

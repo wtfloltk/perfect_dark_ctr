@@ -56,15 +56,6 @@ void bootCreateSched(void)
 	}
 }
 
-static void cleanup(void)
-{
-	sysLogPrintf(LOG_NOTE, "shutdown");
-	inputSaveConfig();
-	configSave(CONFIG_PATH);
-	crashShutdown();
-	// TODO: actually shut down all subsystems
-}
-
 static void gameLoadConfig(void)
 {
 	osMemSize = configGetIntClamped("Game.MemorySize", 16, 4, 2048) * 1024 * 1024;
@@ -82,6 +73,29 @@ static void gameLoadConfig(void)
 		g_HudAlignModeL = G_ASPECT_CENTER_EXT;
 		g_HudAlignModeR = G_ASPECT_CENTER_EXT;
 	}
+}
+
+static void gameSaveConfig(void)
+{
+	configSetFloat("Game.FovY", g_PlayerDefaultFovY);
+	configSetInt("Game.CenterHUD", g_HudAlignModeL == G_ASPECT_CENTER_EXT);
+	configSetInt("Game.ClassicCrouch", g_PlayerClassicCrouch);
+	configSetInt("Game.MouseAimMode", g_PlayerMouseAimMode);
+	configSetFloat("Game.MouseAimSpeedX", g_PlayerMouseAimSpeedX);
+	configSetFloat("Game.MouseAimSpeedY", g_PlayerMouseAimSpeedY);
+	configSetFloat("Game.CrosshairSway", g_PlayerCrosshairSway);
+	configSetFloat("Game.ScreenShakeIntensity", g_ViShakeIntensityMult);
+}
+
+static void cleanup(void)
+{
+	sysLogPrintf(LOG_NOTE, "shutdown");
+	inputSaveConfig();
+	videoSaveConfig();
+	gameSaveConfig();
+	configSave(CONFIG_PATH);
+	crashShutdown();
+	// TODO: actually shut down all subsystems
 }
 
 int main(int argc, const char **argv)

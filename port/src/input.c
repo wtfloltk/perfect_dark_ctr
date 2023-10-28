@@ -407,6 +407,9 @@ static inline void inputLoadBinds(void)
 void inputSaveConfig(void)
 {
 	inputSaveBinds();
+
+	configSetFloat("Input.MouseSpeedX", mouseSensX);
+	configSetFloat("Input.MouseSpeedY", mouseSensY);
 }
 
 s32 inputInit(void)
@@ -646,9 +649,49 @@ void inputRumble(s32 idx, f32 strength, f32 time)
 	}
 }
 
+f32 inputRumbleGetStrength(void)
+{
+	return rumbleScale;
+}
+
+void inputRumbleSetStrength(f32 val)
+{
+	rumbleScale = val;
+}
+
 s32 inputControllerMask(void)
 {
 	return connectedMask;
+}
+
+s32 inputControllerGetSticksSwapped(void)
+{
+	return (axisMap[0][0] == SDL_CONTROLLER_AXIS_RIGHTX);
+}
+
+void inputControllerSetSticksSwapped(s32 swapped)
+{
+	if (swapped) {
+		axisMap[0][0] = SDL_CONTROLLER_AXIS_RIGHTX;
+		axisMap[0][1] = SDL_CONTROLLER_AXIS_RIGHTY;
+		axisMap[1][0] = SDL_CONTROLLER_AXIS_LEFTX;
+		axisMap[1][1] = SDL_CONTROLLER_AXIS_LEFTY;
+	} else {
+		axisMap[0][0] = SDL_CONTROLLER_AXIS_LEFTX;
+		axisMap[0][1] = SDL_CONTROLLER_AXIS_LEFTY;
+		axisMap[1][0] = SDL_CONTROLLER_AXIS_RIGHTX;
+		axisMap[1][1] = SDL_CONTROLLER_AXIS_RIGHTY;
+	}
+}
+
+s32 inputControllerGetDualAnalog(void)
+{
+	return !stickCButtons;
+}
+
+void inputControllerSetDualAnalog(s32 enable)
+{
+	stickCButtons = !enable;
 }
 
 void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk)
@@ -765,6 +808,32 @@ void inputMouseGetAbsScaledDelta(f32 *dx, f32 *dy)
 	if (dx) *dx = mdx;
 	if (dy) *dy = mdy;
 }
+
+void inputMouseGetSpeed(f32 *x, f32 *y)
+{
+	*x = mouseSensX;
+	*y = mouseSensY;
+}
+
+void inputMouseSetSpeed(f32 x, f32 y)
+{
+	mouseSensX = x;
+	mouseSensY = y;
+}
+
+s32 inputMouseIsEnabled(void)
+{
+	return mouseEnabled;
+}
+
+void inputMouseEnable(s32 enabled)
+{
+	mouseEnabled = !!enabled;
+	if (!mouseEnabled && mouseLocked) {
+		inputLockMouse(0);
+	}
+}
+
 
 const char *inputGetContKeyName(u32 ck)
 {

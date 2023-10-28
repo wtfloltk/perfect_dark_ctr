@@ -15,6 +15,7 @@ static struct GfxWindowManagerAPI *wmAPI;
 static struct GfxRenderingAPI *renderingAPI;
 
 static bool initDone = false;
+static bool isFullscreen = false;
 
 static u32 dlcount = 0;
 static u32 frames = 0;
@@ -31,7 +32,7 @@ s32 videoInit(void)
 
 	const s32 w = configGetInt("Video.DefaultWidth", 640);
 	const s32 h = configGetInt("Video.DefaultHeight", 480);
-	const bool fs = configGetInt("Video.DefaultFullscreen", false);
+	isFullscreen = configGetInt("Video.DefaultFullscreen", false);
 
 	gfx_framebuffers_enabled = (bool)configGetIntClamped("Video.FramebufferEffects", 1, 0, 1);
 
@@ -40,7 +41,7 @@ s32 videoInit(void)
 		gfx_msaa_level = 1;
 	}
 
-	gfx_init(wmAPI, renderingAPI, "PD", fs, w, h, 100, 100);
+	gfx_init(wmAPI, renderingAPI, "PD", isFullscreen, w, h, 100, 100);
 
 	wmAPI->set_swap_interval(configGetInt("Video.VSync", 1));
 	wmAPI->set_target_fps(configGetInt("Video.FramerateLimit", 0)); // disabled because vsync is on
@@ -134,6 +135,11 @@ s32 videoGetHeight(void)
 	return gfx_current_dimensions.height;
 }
 
+s32 videoGetFullscreen(void)
+{
+	return isFullscreen;
+}
+
 f32 videoGetAspect(void)
 {
 	return gfx_current_dimensions.aspect_ratio;
@@ -144,10 +150,34 @@ u32 videoGetTextureFilter2D(void)
 	return texFilter2D;
 }
 
+u32 videoGetTextureFilter(void)
+{
+	return renderingAPI->get_texture_filter();
+}
+
 void videoSetWindowOffset(s32 x, s32 y)
 {
 	gfx_current_game_window_viewport.x = x;
 	gfx_current_game_window_viewport.y = y;
+}
+
+void videoSetFullscreen(s32 fs)
+{
+	if (fs != isFullscreen) {
+		isFullscreen = !!fs;
+		wmAPI->set_fullscreen(isFullscreen);
+	}
+}
+
+void videoSetTextureFilter(u32 filter)
+{
+	if (filter > FILTER_THREE_POINT) filter = FILTER_THREE_POINT;
+	renderingAPI->set_texture_filter((enum FilteringMode)filter);
+}
+
+void videoSetTextureFilter2D(u32 filter)
+{
+	texFilter2D = !!filter;
 }
 
 s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize)
@@ -189,4 +219,11 @@ void videoResetTextureCache(void)
 void videoFreeCachedTexture(const void *texptr)
 {
 	gfx_texture_cache_delete(texptr);
+}
+
+void videoSaveConfig(void)
+{
+	configSetInt("Video.DefaultFullscreen", isFullscreen);
+	configSetInt("Video.TextureFilter", (u32)renderingAPI->get_texture_filter());
+	configSetInt("Video.TextureFilter2D", texFilter2D);
 }
