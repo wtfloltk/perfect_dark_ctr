@@ -99,6 +99,12 @@ void inputControllerSetSticksSwapped(s32 swapped);
 s32 inputControllerGetDualAnalog(void);
 void inputControllerSetDualAnalog(s32 enable);
 
+f32 inputControllerGetAxisScale(s32 stick, s32 axis);
+void inputControllerSetAxisScale(s32 stick, s32 axis, f32 value);
+
+f32 inputControllerGetAxisDeadzone(s32 stick, s32 axis);
+void inputControllerSetAxisDeadzone(s32 stick, s32 axis, f32 value);
+
 // vk is a value from the virtkey enum above
 s32 inputKeyPressed(u32 vk);
 

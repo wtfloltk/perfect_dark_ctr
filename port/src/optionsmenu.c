@@ -143,9 +143,17 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		menuhandlerMouseAimLock,
 	},
 	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
 		MENUITEMTYPE_SLIDER,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_ALTSIZE,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Mouse Speed X",
 		100,
 		menuhandlerMouseSpeedX,
@@ -153,7 +161,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 	{
 		MENUITEMTYPE_SLIDER,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_ALTSIZE,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Mouse Speed Y",
 		100,
 		menuhandlerMouseSpeedY,
@@ -161,7 +169,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 	{
 		MENUITEMTYPE_SLIDER,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_ALTSIZE,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Crosshair Speed X",
 		100,
 		menuhandlerMouseAimSpeedX,
@@ -169,7 +177,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 	{
 		MENUITEMTYPE_SLIDER,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_ALTSIZE,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Crosshair Speed Y",
 		100,
 		menuhandlerMouseAimSpeedY,
@@ -202,14 +210,154 @@ struct menudialogdef g_ExtendedMouseMenuDialog = {
 	NULL,
 };
 
+static MenuItemHandlerResult menuhandlerStickSpeed(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerStickDeadzone(s32 operation, struct menuitem *item, union handlerdata *data);
+
+struct menuitem g_ExtendedStickMenuItems[] = {
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"LStick Scale X",
+		20,
+		menuhandlerStickSpeed,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"LStick Scale Y",
+		20,
+		menuhandlerStickSpeed,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"RStick Scale X",
+		20,
+		menuhandlerStickSpeed,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"RStick Scale Y",
+		20,
+		menuhandlerStickSpeed,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"LStick Deadzone X",
+		32,
+		menuhandlerStickDeadzone,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"LStick Deadzone Y",
+		32,
+		menuhandlerStickDeadzone,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"RStick Deadzone X",
+		32,
+		menuhandlerStickDeadzone,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"RStick Deadzone Y",
+		32,
+		menuhandlerStickDeadzone,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_213, // "Back"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+static MenuItemHandlerResult menuhandlerStickSpeed(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	const s32 idx = item - g_ExtendedStickMenuItems;
+	const s32 stick = idx / 2;
+	const s32 axis = idx % 2;
+
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = inputControllerGetAxisScale(stick, axis) * 10.f + 0.5f;
+		break;
+	case MENUOP_SET:
+		inputControllerSetAxisScale(stick, axis, (f32)data->slider.value / 10.f);
+		break;
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerStickDeadzone(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	const s32 idx = item - (g_ExtendedStickMenuItems + 5);
+	const s32 stick = idx / 2;
+	const s32 axis = idx % 2;
+
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = inputControllerGetAxisDeadzone(stick, axis) * 32.f + 0.5f;
+		break;
+	case MENUOP_SET:
+		inputControllerSetAxisDeadzone(stick, axis, (f32)data->slider.value / 32.f);
+		break;
+	}
+
+	return 0;
+}
+
+struct menudialogdef g_ExtendedStickMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)"Analog Stick Settings",
+	g_ExtendedStickMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT,
+	NULL,
+};
+
 static MenuItemHandlerResult menuhandlerVibration(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = inputRumbleGetStrength() * 100.f + 0.5f;
+		data->slider.value = inputRumbleGetStrength() * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		inputRumbleSetStrength((f32)data->slider.value / 100.f);
+		inputRumbleSetStrength((f32)data->slider.value / 10.f);
 		break;
 	}
 
@@ -260,11 +408,19 @@ struct menuitem g_ExtendedControllerMenuItems[] = {
 		menuhandlerSwapSticks,
 	},
 	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Stick Settings...\n",
+		0,
+		(void *)&g_ExtendedStickMenuDialog,
+	},
+	{
 		MENUITEMTYPE_SLIDER,
 		0,
 		MENUITEMFLAG_LITERAL_TEXT,
 		(uintptr_t)"Vibration",
-		100,
+		10,
 		menuhandlerVibration,
 	},
 	{
@@ -494,7 +650,7 @@ struct menuitem g_ExtendedGameMenuItems[] = {
 	{
 		MENUITEMTYPE_SLIDER,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_ALTSIZE,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Crosshair Sway",
 		20,
 		menuhandlerCrosshairSway,
@@ -502,7 +658,7 @@ struct menuitem g_ExtendedGameMenuItems[] = {
 	{
 		MENUITEMTYPE_SLIDER,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_ALTSIZE,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Explosion Shake",
 		20,
 		menuhandlerScreenShake,

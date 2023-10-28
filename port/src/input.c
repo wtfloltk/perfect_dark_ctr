@@ -408,8 +408,25 @@ void inputSaveConfig(void)
 {
 	inputSaveBinds();
 
+	configSetInt("Input.MouseEnabled", mouseEnabled);
 	configSetFloat("Input.MouseSpeedX", mouseSensX);
 	configSetFloat("Input.MouseSpeedY", mouseSensY);
+
+	configSetInt("Input.LStickDeadzoneX", deadzone[0]);
+	configSetInt("Input.LStickDeadzoneY", deadzone[1]);
+	configSetInt("Input.RStickDeadzoneX", deadzone[2]);
+	configSetInt("Input.RStickDeadzoneY", deadzone[3]);
+
+	configSetFloat("Input.LStickScaleX", stickSens[0]);
+	configSetFloat("Input.LStickScaleY", stickSens[1]);
+	configSetFloat("Input.RStickScaleX", stickSens[2]);
+	configSetFloat("Input.RStickScaleY", stickSens[3]);
+
+	configSetFloat("Input.RumbleScale", rumbleScale);
+
+	configSetInt("Input.StickCButtons", stickCButtons);
+
+	configGetInt("Input.SwapSticks", axisMap[0][0] == SDL_CONTROLLER_AXIS_RIGHTX);
 }
 
 s32 inputInit(void)
@@ -692,6 +709,26 @@ s32 inputControllerGetDualAnalog(void)
 void inputControllerSetDualAnalog(s32 enable)
 {
 	stickCButtons = !enable;
+}
+
+f32 inputControllerGetAxisScale(s32 stick, s32 axis)
+{
+	return stickSens[stick * 2 + axis];
+}
+
+void inputControllerSetAxisScale(s32 stick, s32 axis, f32 value)
+{
+	stickSens[stick * 2 + axis] = value;
+}
+
+f32 inputControllerGetAxisDeadzone(s32 stick, s32 axis)
+{
+	return (f32)deadzone[stick * 2 + axis] / 32767.f;
+}
+
+void inputControllerSetAxisDeadzone(s32 stick, s32 axis, f32 value)
+{
+	deadzone[stick * 2 + axis] = value * 32767.f;
 }
 
 void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk)
