@@ -458,10 +458,10 @@ static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menu
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = g_PlayerCrosshairSway * 10.f;
+		data->slider.value = g_PlayerCrosshairSway * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		g_PlayerCrosshairSway = data->slider.value / 10.f;
+		g_PlayerCrosshairSway = (f32)data->slider.value / 10.f;
 		break;
 	}
 
@@ -472,10 +472,10 @@ static MenuItemHandlerResult menuhandlerScreenShake(s32 operation, struct menuit
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = g_ViShakeIntensityMult * 10.f;
+		data->slider.value = g_ViShakeIntensityMult * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		g_ViShakeIntensityMult = data->slider.value / 10.f;
+		g_ViShakeIntensityMult = (f32)data->slider.value / 10.f;
 		break;
 	}
 
