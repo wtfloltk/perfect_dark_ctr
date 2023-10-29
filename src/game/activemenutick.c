@@ -48,8 +48,6 @@ void amTick(void)
 				s8 gotonextscreen = false;
 				s8 cstickx = joyGetStickXOnSample(j, contpadnum);
 				s8 csticky = joyGetStickYOnSample(j, contpadnum);
-				s8 crstickx = joyGetRStickXOnSample(j, contpadnum);
-				s8 crsticky = joyGetRStickYOnSample(j, contpadnum);
 #ifdef AVOID_UB
 				// if cstickx is -128, it will get negated and stored into absstickx, negating it again if it's 8 bit
 				s32 absstickx;
@@ -75,8 +73,8 @@ void amTick(void)
 				g_AmMenus[g_AmIndex].allbots = false;
 
 #ifndef PLATFORM_N64
-				s32 newstickx = (s32)cstickx + (s32)crstickx;
-				s32 newsticky = (s32)csticky + (s32)crsticky;
+				s32 newstickx = (s32)cstickx;
+				s32 newsticky = (s32)csticky;
 				if (j == 0 && g_Vars.currentplayernum == 0 && inputMouseIsLocked()) {
 					f32 mdx, mdy;
 					struct activemenu *am = &g_AmMenus[g_AmIndex];
@@ -98,8 +96,6 @@ void amTick(void)
 					buttonsstate = buttonsstate & D_JPAD;
 					cstickx = 0;
 					csticky = 0;
-					crstickx = 0;
-					crsticky = 0;
 					buttonspressed = 0;
 				}
 
