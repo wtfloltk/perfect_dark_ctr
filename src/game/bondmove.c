@@ -1748,7 +1748,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						g_Vars.currentplayer->usedowntime = -2;
 					}
 #else
-					bgunProcessQuickDetonate(&movedata, c1buttons, c1buttonsthisframe, (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE), (BUTTON_WPNBACK | BUTTON_RADIAL));
+					bgunProcessQuickDetonate(&movedata, c1buttons, c1buttonsthisframe, (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE), (BUTTON_WPNBACK | BUTTON_RADIAL | BUTTON_RELOAD));
 #endif
 				}
 
