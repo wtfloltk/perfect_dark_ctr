@@ -62,22 +62,22 @@ Note that the mouse only controls player 1.
 
 Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 
-| Action           | Keyboard and mouse   | Xbox pad            | N64 pad              |
-| -                | -                    | -                   | -                    |
-| Fire / Accept    | LMB/Space            | RT                  | Z Trigger            |
-| Aim mode         | RMB/Z                | LT                  | R Trigger            |
-| Use / Cancel     | E                    | N/A                 | B                    |
-| Use / Accept     | N/A                  | A                   | A                    |
-| Crouch cycle     | N/A                  | L3                  | `0x80000000` (Extra) |
-| Half-Crouch      | Shift                | N/A                 | `0x40000000` (Extra) |
-| Full-Crouch      | Control              | N/A                 | `0x20000000` (Extra) |
-| Reload           | R                    | X                   | X `(0x40)`           |
-| Previous weapon  | Mousewheel forward   | B                   | D-Left               |
-| Next weapon      | Mousewheel back      | Y                   | Y `(0x80)`           |
-| Radial menu      | Q                    | LB                  | D-Down               |
-| Alt fire mode    | F                    | RB                  | L Trigger            |
-| Alt-fire oneshot | F + LMB or E + LMB   | A + RT or RB + RT   | A + Z, L + Z         |
-| Quick-detonate   | E + Q                | A + B               | A + D-Left           |
+| Action           | Keyboard and mouse     | Xbox pad                 | N64 pad                   |
+| -                | -                      | -                        | -                         |
+| Fire / Accept    | LMB/Space              | RT                       | Z Trigger                 |
+| Aim mode         | RMB/Z                  | LT                       | R Trigger                 |
+| Use / Cancel     | E                      | N/A                      | B                         |
+| Use / Accept     | N/A                    | A                        | A                         |
+| Crouch cycle     | N/A                    | L3                       | `0x80000000` (Extra)      |
+| Half-Crouch      | Shift                  | N/A                      | `0x40000000` (Extra)      |
+| Full-Crouch      | Control                | N/A                      | `0x20000000` (Extra)      |
+| Reload           | R                      | X                        | X `(0x40)`                |
+| Previous weapon  | Mousewheel forward     | B                        | D-Left                    |
+| Next weapon      | Mousewheel back        | Y                        | Y `(0x80)`                |
+| Radial menu      | Q                      | LB                       | D-Down                    |
+| Alt fire mode    | F                      | RB                       | L Trigger                 |
+| Alt-fire oneshot | `F + LMB` or `E + LMB` | `A + RT`` or 'RB + RT`   | `A + Z`     or `L + Z`    |
+| Quick-detonate   | `E + Q`   or `E + R`   | `A + B`   or `A + X`     | `A + D-Left`or `A + 0x40` |
 
 ## Building
 
