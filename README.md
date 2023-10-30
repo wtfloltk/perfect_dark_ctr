@@ -76,8 +76,8 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 | Next weapon      | Mousewheel back        | Y                        | Y `(0x80)`                |
 | Radial menu      | Q                      | LB                       | D-Down                    |
 | Alt fire mode    | F                      | RB                       | L Trigger                 |
-| Alt-fire oneshot | `F + LMB` or `E + LMB` | `A + RT`` or 'RB + RT`   | `A + Z`     or `L + Z`    |
-| Quick-detonate   | `E + Q`   or `E + R`   | `A + B`   or `A + X`     | `A + D-Left`or `A + 0x40` |
+| Alt-fire oneshot | `F + LMB` or `E + LMB` | `A + RT` or  `RB + RT`   | `A + Z`     or `L + Z`    |
+| Quick-detonate   | `E + Q`   or `E + R`   | `A + B`  or  `A + X`     | `A + D-Left`or `A + X`    |
 
 ## Building
 
