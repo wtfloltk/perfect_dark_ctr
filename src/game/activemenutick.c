@@ -80,8 +80,8 @@ void amTick(void)
 					struct activemenu *am = &g_AmMenus[g_AmIndex];
 					inputMouseGetAbsScaledDelta(&mdx, &mdy);
 					if (mdx || mdy) {
-						am->mousex += mdx * 4.f;
-						am->mousey += mdy * 4.f;
+						am->mousex += mdx * g_PlayerRadialMenuSpeed;
+						am->mousey += mdy * g_PlayerRadialMenuSpeed;
 						am->mousex = (am->mousex > 127.f) ? 127.f : (am->mousex < -128.f) ? -128.f : am->mousex;
 						am->mousey = (am->mousey > 127.f) ? 127.f : (am->mousey < -128.f) ? -128.f : am->mousey;
 					}

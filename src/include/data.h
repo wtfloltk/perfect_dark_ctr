@@ -540,6 +540,7 @@ extern f32 g_PlayerDefaultFovY;
 extern s32 g_PlayerMouseAimMode;
 extern f32 g_PlayerMouseAimSpeedX;
 extern f32 g_PlayerMouseAimSpeedY;
+extern f32 g_PlayerRadialMenuSpeed;
 extern s32 g_PlayerFovAffectsZoom;
 extern f32 g_PlayerFovZoomMultiplier;
 extern s32 g_PlayerClassicCrouch;

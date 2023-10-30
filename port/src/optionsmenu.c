@@ -130,6 +130,27 @@ static MenuItemHandlerResult menuhandlerMouseAimSpeedY(s32 operation, struct men
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerRadialMenuSpeed(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		if (g_PlayerRadialMenuSpeed < 0.f) {
+			data->slider.value = 0;
+		} else if (g_PlayerRadialMenuSpeed> 10.f) {
+			data->slider.value = 100;
+		} else {
+			data->slider.value = g_PlayerRadialMenuSpeed * 10.f + 0.5f;
+		}
+		break;
+	case MENUOP_SET:
+		g_PlayerRadialMenuSpeed = (f32)data->slider.value / 10.f;
+		break;
+	}
+
+	return 0;
+}
+
+
 struct menuitem g_ExtendedMouseMenuItems[] = {
 	{
 		MENUITEMTYPE_CHECKBOX,
@@ -186,6 +207,14 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		(uintptr_t)"Crosshair Speed Y",
 		100,
 		menuhandlerMouseAimSpeedY,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"Radial Menu Speed",
+		100,
+		menuhandlerRadialMenuSpeed,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,

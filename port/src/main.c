@@ -64,6 +64,7 @@ static void gameLoadConfig(void)
 	g_PlayerMouseAimMode = configGetIntClamped("Game.MouseAimMode", g_PlayerMouseAimMode, 0, 1);
 	g_PlayerMouseAimSpeedX = configGetFloatClamped("Game.MouseAimSpeedX", g_PlayerMouseAimSpeedX, 0.f, 10.f);
 	g_PlayerMouseAimSpeedY = configGetFloatClamped("Game.MouseAimSpeedY", g_PlayerMouseAimSpeedY, 0.f, 10.f);
+	g_PlayerRadialMenuSpeed = configGetFloatClamped("Game.RadialMenuSpeed", g_PlayerRadialMenuSpeed, 0.f, 10.f);
 	g_PlayerFovAffectsZoom = configGetIntClamped("Game.FovAffectsZoom", g_PlayerFovAffectsZoom, 0, 1);
 	g_PlayerFovZoomMultiplier = g_PlayerFovAffectsZoom ? g_PlayerDefaultFovY / 60.0f : 1.0f;
 	g_PlayerClassicCrouch = configGetIntClamped("Game.ClassicCrouch", 0, 0, 1);
@@ -83,6 +84,7 @@ static void gameSaveConfig(void)
 	configSetInt("Game.MouseAimMode", g_PlayerMouseAimMode);
 	configSetFloat("Game.MouseAimSpeedX", g_PlayerMouseAimSpeedX);
 	configSetFloat("Game.MouseAimSpeedY", g_PlayerMouseAimSpeedY);
+	configSetFloat("Game.RadialMenuSpeed", g_PlayerRadialMenuSpeed);
 	configSetFloat("Game.CrosshairSway", g_PlayerCrosshairSway);
 	configSetFloat("Game.ScreenShakeIntensity", g_ViShakeIntensityMult);
 }
