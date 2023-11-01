@@ -12,6 +12,9 @@ To run the port, you must already have a Perfect Dark ROM, specifically one of t
 * `jpn-final` (md5 `538d2b75945eae069b29c46193e74790`).  
   Technically supported, but requires a separate custom-built executable.  
   Called `JPN version 8.9 final` on the boot screen.
+* `pal-final` (md5 `d9b5cd305d228424891ce38e71bc9213`).  
+  Technically supported, but requires a separate custom-built executable.  
+  Called `PAL 8.7 final` on the boot screen.
 
 ## Status
 
@@ -101,8 +104,8 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 Currently only `i686-linux` and `i686-windows` are supported, using `gcc -m32` and `i686-w64-mingw32-gcc` as compilers, respectively.  
 Alternate compilers can be specified by passing `TOOLCHAIN=i686-whatever-` as a command line argument.
 
-For both platforms you can optionally specify `ROMID=jpn-final` on the `make` command line to build the JPN executable.  
-You will need to provide a `jpn-final` ROM for that, named `pd.jpn-final.z64`.
+You can build an executable with PAL or JPN ROM support by adding `ROMID=pal-final` or `ROMID=jpn-final` to the `make` command.  
+You will need to provide a `jpn-final` or `pal-final` ROM for those, named `pd.jpn-final.z64` or `pd.pal-final.z64`.
 
 It might be possible to build a 32-bit ARM executable, but this has not been tested.
 
