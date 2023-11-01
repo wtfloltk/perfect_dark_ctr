@@ -460,7 +460,7 @@ void inputSaveConfig(void)
 	inputSaveBinds();
 
 	configSetInt("Input.MouseEnabled", mouseEnabled);
-    configSetInt("Input.MouseDefaultLocked", mouseDefaultLocked);
+	configSetInt("Input.MouseDefaultLocked", mouseDefaultLocked);
 	configSetFloat("Input.MouseSpeedX", mouseSensX);
 	configSetFloat("Input.MouseSpeedY", mouseSensY);
 
