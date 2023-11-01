@@ -42,6 +42,19 @@ static MenuItemHandlerResult menuhandlerMouseAimLock(s32 operation, struct menui
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerMouseDefaultLocked(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return inputGetMouseDefaultLocked();
+	case MENUOP_SET:
+		inputSetMouseDefaultLocked(data->checkbox.value);
+		break;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	f32 x, y;
@@ -167,6 +180,14 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		(uintptr_t)"Mouse Aim Lock",
 		0,
 		menuhandlerMouseAimLock,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Grab Mouse Input by Default",
+		0,
+		menuhandlerMouseDefaultLocked,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,

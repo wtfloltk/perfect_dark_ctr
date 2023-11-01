@@ -26,6 +26,7 @@ static s32 connectedMask = 0;
 
 static s32 mouseEnabled = 1;
 static s32 mouseLocked = 0;
+static s32 mouseDefaultLocked = 0;
 static s32 mouseX, mouseY;
 static s32 mouseDX, mouseDY;
 static u32 mouseButtons;
@@ -459,6 +460,7 @@ void inputSaveConfig(void)
 	inputSaveBinds();
 
 	configSetInt("Input.MouseEnabled", mouseEnabled);
+    configSetInt("Input.MouseDefaultLocked", mouseDefaultLocked);
 	configSetFloat("Input.MouseSpeedX", mouseSensX);
 	configSetFloat("Input.MouseSpeedY", mouseSensY);
 
@@ -513,6 +515,8 @@ s32 inputInit(void)
 	inputSetDefaultKeyBinds();
 
 	mouseEnabled = configGetInt("Input.MouseEnabled", 1);
+	mouseDefaultLocked = configGetInt("Input.MouseDefaultLocked", 0);
+	inputLockMouse(mouseDefaultLocked);
 	mouseSensX = configGetFloat("Input.MouseSpeedX", 1.5f);
 	mouseSensY = configGetFloat("Input.MouseSpeedY", 1.5f);
 
@@ -929,6 +933,18 @@ void inputMouseEnable(s32 enabled)
 	}
 }
 
+s32 inputGetMouseDefaultLocked(void)
+{
+	return mouseDefaultLocked;
+}
+
+void inputSetMouseDefaultLocked(s32 defaultLocked)
+{
+	mouseDefaultLocked = !!defaultLocked;
+	if (mouseEnabled) {
+		inputLockMouse(mouseDefaultLocked);
+	}
+}
 
 const char *inputGetContKeyName(u32 ck)
 {
