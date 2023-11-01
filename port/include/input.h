@@ -173,4 +173,7 @@ void inputSetDefaultKeyBinds(void);
 void inputClearLastKey(void);
 s32 inputGetLastKey(void);
 
+s32 inputGetMouseDefaultLocked(void);
+void inputSetMouseDefaultLocked(s32 defaultLocked);
+
 #endif
