@@ -799,7 +799,7 @@ static const struct menubind menuBinds[] = {
 	{ CK_X,      "Reload [X]\n" },
 	{ CK_Y,      "Next Weapon [Y]\n" },
 	{ CK_DPAD_L, "Prev Weapon [DL]\n" },
-	{ CK_DPAD_L, "Radial Menu [DD]\n" },
+	{ CK_DPAD_D, "Radial Menu [DD]\n" },
 	{ CK_START,  "Pause Menu [ST]\n" },
 	{ CK_8000,   "Cycle Crouch [+]\n" },
 	{ CK_4000,   "Half Crouch [+]\n" },
