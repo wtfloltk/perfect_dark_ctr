@@ -20,6 +20,7 @@ enum virtkey {
   VK_KEYBOARD_BEGIN = 0,
   VK_RETURN = 40,
   VK_ESCAPE = 41,
+  VK_DELETE = 76,
 
   /* same order as SDL mouse buttons */
   VK_MOUSE_BEGIN = 512,

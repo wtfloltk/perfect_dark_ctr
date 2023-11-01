@@ -773,11 +773,19 @@ struct menuitem g_ExtendedBindKeyMenuItems[] = {
 		0,
 		menuhandlerDoBind,
 	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CENTRE | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"ESC to cancel, DEL to remove binding\n",
+		0,
+		menuhandlerDoBind,
+	},
 	{ MENUITEMTYPE_END },
 };
 
 struct menudialogdef g_ExtendedBindKeyMenuDialog = {
-	MENUDIALOGTYPE_WHITE,
+	MENUDIALOGTYPE_SUCCESS,
 	(uintptr_t)"Bind",
 	g_ExtendedBindKeyMenuItems,
 	NULL,
@@ -882,7 +890,7 @@ static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *i
 
 	const s32 key = inputGetLastKey();
 	if (key && key != VK_ESCAPE) {
-		inputKeyBind(g_BindsPlayer, g_BindContKey, g_BindIndex, key);
+		inputKeyBind(g_BindsPlayer, g_BindContKey, g_BindIndex, (key == VK_DELETE ? 0 : key));
 		menuPopDialog();
 	}
 
