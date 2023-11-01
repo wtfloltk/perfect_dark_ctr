@@ -1063,7 +1063,21 @@ void preprocessFont(u8 *data, u32 size)
 		PD_SWAP_VAL(fnt->kerning[i]);
 	}
 
-	for (s32 i = 0; i < ARRAYCOUNT(fnt->chars); ++i) {
+	s32 numchars = 94;
+
+#if PAL
+	// PAL has more characters in these fonts
+	extern u8 *_fonthandelgothicsmSegmentRomStart;
+	extern u8 *_fonthandelgothicxsSegmentRomStart;
+	extern u8 *_fonthandelgothicmdSegmentRomStart;
+	if (data == _fonthandelgothicsmSegmentRomStart
+			|| data == _fonthandelgothicxsSegmentRomStart
+			|| data == _fonthandelgothicmdSegmentRomStart) {
+		numchars = 135;
+	}
+#endif
+
+	for (s32 i = 0; i < numchars; ++i) {
 		PD_SWAP_VAL(fnt->chars[i].kerningindex);
 		PD_SWAP_PTR(fnt->chars[i].pixeldata);
 	}
