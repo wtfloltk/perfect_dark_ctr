@@ -549,9 +549,10 @@ static MenuItemHandlerResult menuhandlerCenterHUD(s32 operation, struct menuitem
 {
 	switch (operation) {
 	case MENUOP_GET:
-		return g_HudAlignModeL == G_ASPECT_CENTER_EXT;
+		return g_HudCenter;
 	case MENUOP_SET:
-		if (data->checkbox.value) {
+		g_HudCenter = data->checkbox.value;
+		if (g_HudCenter) {
 			g_HudAlignModeL = G_ASPECT_CENTER_EXT;
 			g_HudAlignModeR = G_ASPECT_CENTER_EXT;
 		} else {

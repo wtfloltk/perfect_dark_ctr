@@ -546,6 +546,7 @@ extern f32 g_PlayerFovZoomMultiplier;
 extern s32 g_PlayerClassicCrouch;
 extern f32 g_ViShakeIntensityMult;
 extern u32 g_TexFilter2D;
+extern s32 g_HudCenter;
 extern u32 g_HudAlignModeL;
 extern u32 g_HudAlignModeR;
 extern s32 g_PrevFrameFb;

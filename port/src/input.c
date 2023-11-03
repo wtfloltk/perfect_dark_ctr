@@ -10,6 +10,8 @@
 #include "config.h"
 #include "system.h"
 
+#define MAX_BIND_STR 256
+
 #define TRIG_THRESHOLD (30 * 256)
 #define DEFAULT_DEADZONE 4096
 #define DEFAULT_DEADZONE_RY 6144
@@ -21,7 +23,10 @@ static SDL_GameController *pads[INPUT_MAX_CONTROLLERS];
 static s32 rumbleSupported[INPUT_MAX_CONTROLLERS];
 
 static u32 binds[MAXCONTROLLERS][CK_TOTAL_COUNT][INPUT_MAX_BINDS]; // [i][CK_][b] = [VK_]
+static char bindStrs[MAXCONTROLLERS][CK_TOTAL_COUNT][MAX_BIND_STR];
 
+static s32 fakeControllers = 0;
+static s32 firstController = 0;
 static s32 connectedMask = 0;
 
 static s32 mouseEnabled = 1;
@@ -57,6 +62,7 @@ static s32 deadzone[4] = {
 };
 
 static s32 stickCButtons = 1;
+static s32 swapSticks = 1;
 
 static const char *ckNames[CK_TOTAL_COUNT] = {
 	"R_CBUTTONS",
@@ -253,7 +259,7 @@ static int inputEventFilter(void *data, SDL_Event *event)
 {
 	switch (event->type) {
 		case SDL_CONTROLLERDEVICEADDED:
-			for (s32 i = 0; i < INPUT_MAX_CONTROLLERS; ++i) {
+			for (s32 i = firstController; i < INPUT_MAX_CONTROLLERS; ++i) {
 				if (!pads[i]) {
 					pads[i] = SDL_GameControllerOpen(event->cdevice.which);
 					if (pads[i]) {
@@ -387,34 +393,36 @@ static inline void inputInitKeyNames(void)
 	}
 }
 
-static inline void inputSaveBinds(void)
+void inputSaveBinds(void)
 {
-	char bindstr[256];
-	char keyname[256];
-	char secname[] = "Input.Player1.Binds";
-
-	bindstr[sizeof(bindstr) - 1] = '\0';
+	char *bindstr;
 
 	for (s32 i = 0; i < MAXCONTROLLERS; ++i) {
-		secname[12] = '1' + i;
 		for (u32 ck = 0; ck < CK_TOTAL_COUNT; ++ck) {
-			snprintf(keyname, sizeof(keyname), "%s.%s", secname, inputGetContKeyName(ck));
+			bindstr = bindStrs[i][ck];
 			bindstr[0] = '\0';
 			for (s32 b = 0; b < INPUT_MAX_BINDS; ++b) {
 				if (binds[i][ck][b]) {
 					if (b) {
-						strncat(bindstr, ", ", sizeof(bindstr) - 1);
+						strncat(bindstr, ", ", MAX_BIND_STR - 1);
 					}
-					strncat(bindstr, inputGetKeyName(binds[i][ck][b]), sizeof(bindstr) - 1);
+					strncat(bindstr, inputGetKeyName(binds[i][ck][b]), MAX_BIND_STR - 1);
 				}
 			}
-			configSetString(keyname, bindstr[0] ? bindstr : "NONE");
+			if (!bindstr[0]) {
+				strcpy(bindstr, "NONE");
+			}
 		}
 	}
 }
 
 static inline void inputParseBindString(const s32 ctrl, const u32 ck, char *bindstr)
 {
+	if (!bindstr[0]) {
+		// empty string, keep defaults
+		return;
+	}
+
 	// unbind all first
 	memset(binds[ctrl][ck], 0, sizeof(binds[ctrl][ck]));
 
@@ -437,48 +445,11 @@ static inline void inputParseBindString(const s32 ctrl, const u32 ck, char *bind
 
 static inline void inputLoadBinds(void)
 {
-	char secname[] = "Input.Player1.Binds";
-	char keyname[256];
-	char bindstr[256];
-
 	for (s32 i = 0; i < MAXCONTROLLERS; ++i) {
-		secname[12] = '1' + i;
 		for (u32 ck = 0; ck < CK_TOTAL_COUNT; ++ck) {
-			snprintf(keyname, sizeof(keyname), "%s.%s", secname, inputGetContKeyName(ck));
-			const char *cfgstr = configGetString(keyname, "");
-			if (cfgstr[0]) {
-				strncpy(bindstr, cfgstr, sizeof(bindstr) - 1);
-				bindstr[sizeof(bindstr) - 1] = '\0';
-				inputParseBindString(i, ck, bindstr);
-			}
+			inputParseBindString(i, ck, bindStrs[i][ck]);
 		}
 	}
-}
-
-void inputSaveConfig(void)
-{
-	inputSaveBinds();
-
-	configSetInt("Input.MouseEnabled", mouseEnabled);
-	configSetInt("Input.MouseDefaultLocked", mouseDefaultLocked);
-	configSetFloat("Input.MouseSpeedX", mouseSensX);
-	configSetFloat("Input.MouseSpeedY", mouseSensY);
-
-	configSetInt("Input.LStickDeadzoneX", deadzone[0]);
-	configSetInt("Input.LStickDeadzoneY", deadzone[1]);
-	configSetInt("Input.RStickDeadzoneX", deadzone[2]);
-	configSetInt("Input.RStickDeadzoneY", deadzone[3]);
-
-	configSetFloat("Input.LStickScaleX", stickSens[0]);
-	configSetFloat("Input.LStickScaleY", stickSens[1]);
-	configSetFloat("Input.RStickScaleX", stickSens[2]);
-	configSetFloat("Input.RStickScaleY", stickSens[3]);
-
-	configSetFloat("Input.RumbleScale", rumbleScale);
-
-	configSetInt("Input.StickCButtons", stickCButtons);
-
-	configGetInt("Input.SwapSticks", axisMap[0][0] == SDL_CONTROLLER_AXIS_RIGHTX);
 }
 
 s32 inputInit(void)
@@ -493,11 +464,9 @@ s32 inputInit(void)
 
 	connectedMask = 1; // always report first controller as connected
 
-	// if this is set to 1, keyboard will count as a separate controller on its own,
+	// if firstController is set to 1, keyboard will count as a separate controller on its own,
 	// so the first connected gamepad will go to player 2 instead of player 1
-	const s32 cstart = configGetInt("Input.FirstGamepadNum", 0);
-
-	for (s32 jidx = 0, cidx = cstart; jidx < numJoys && cidx < INPUT_MAX_CONTROLLERS; ++jidx) {
+	for (s32 jidx = 0, cidx = firstController; jidx < numJoys && cidx < INPUT_MAX_CONTROLLERS; ++jidx) {
 		if (SDL_IsGameController(jidx)) {
 			pads[cidx] = SDL_GameControllerOpen(jidx);
 			if (pads[cidx]) {
@@ -514,27 +483,9 @@ s32 inputInit(void)
 
 	inputSetDefaultKeyBinds();
 
-	mouseEnabled = configGetInt("Input.MouseEnabled", 1);
-	mouseDefaultLocked = configGetInt("Input.MouseDefaultLocked", 0);
 	inputLockMouse(mouseDefaultLocked);
-	mouseSensX = configGetFloat("Input.MouseSpeedX", 1.5f);
-	mouseSensY = configGetFloat("Input.MouseSpeedY", 1.5f);
 
-	rumbleScale = configGetFloat("Input.RumbleScale", 0.5f);
-
-	deadzone[0] = configGetInt("Input.LStickDeadzoneX", DEFAULT_DEADZONE);
-	deadzone[1] = configGetInt("Input.LStickDeadzoneY", DEFAULT_DEADZONE);
-	deadzone[2] = configGetInt("Input.RStickDeadzoneX", DEFAULT_DEADZONE);
-	deadzone[3] = configGetInt("Input.RStickDeadzoneY", DEFAULT_DEADZONE_RY);
-
-	stickSens[0] = configGetFloat("Input.LStickScaleX", 1.f);
-	stickSens[1] = configGetFloat("Input.LStickScaleY", 1.f);
-	stickSens[2] = configGetFloat("Input.RStickScaleX", 1.f);
-	stickSens[3] = configGetFloat("Input.RStickScaleY", 1.f);
-
-	stickCButtons = configGetInt("Input.StickCButtons", 0);
-
-	if (configGetInt("Input.SwapSticks", 1)) {
+	if (swapSticks) {
 		// invert axis map
 		axisMap[0][0] = SDL_CONTROLLER_AXIS_RIGHTX;
 		axisMap[0][1] = SDL_CONTROLLER_AXIS_RIGHTY;
@@ -542,7 +493,7 @@ s32 inputInit(void)
 		axisMap[1][1] = SDL_CONTROLLER_AXIS_LEFTY;
 	}
 
-	const s32 overrideMask = (1 << configGetInt("Input.FakeGamepads", 0)) - 1;
+	const s32 overrideMask = (1 << fakeControllers) - 1;
 	if (overrideMask) {
 		connectedMask = overrideMask;
 	}
@@ -737,11 +688,12 @@ s32 inputControllerMask(void)
 
 s32 inputControllerGetSticksSwapped(void)
 {
-	return (axisMap[0][0] == SDL_CONTROLLER_AXIS_RIGHTX);
+	return swapSticks;
 }
 
 void inputControllerSetSticksSwapped(s32 swapped)
 {
+	swapSticks = swapped;
 	if (swapped) {
 		axisMap[0][0] = SDL_CONTROLLER_AXIS_RIGHTX;
 		axisMap[0][1] = SDL_CONTROLLER_AXIS_RIGHTY;
@@ -790,7 +742,6 @@ void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk)
 	if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS || bind >= INPUT_MAX_BINDS || ck >= CK_TOTAL_COUNT) {
 		return;
 	}
-
 
 	if (bind < 0) {
 		for (s32 i = 0; i < INPUT_MAX_BINDS; ++i) {
@@ -1018,4 +969,40 @@ void inputClearLastKey(void)
 s32 inputGetLastKey(void)
 {
 	return lastKey;
+}
+
+PD_CONSTRUCTOR static void inputConfigInit(void)
+{
+	configRegisterInt("Input.MouseEnabled", &mouseEnabled, 0, 1);
+	configRegisterInt("Input.MouseDefaultLocked", &mouseDefaultLocked, 0, 1);
+	configRegisterFloat("Input.MouseSpeedX", &mouseSensX, -10.f, 10.f);
+	configRegisterFloat("Input.MouseSpeedY", &mouseSensY, -10.f, 10.f);
+
+	configRegisterFloat("Input.RumbleScale", &rumbleScale, 0.f, 1.f);
+
+	configRegisterInt("Input.LStickDeadzoneX", &deadzone[0], 0, 32767);
+	configRegisterInt("Input.LStickDeadzoneY", &deadzone[1], 0, 32767);
+	configRegisterInt("Input.RStickDeadzoneX", &deadzone[2], 0, 32767);
+	configRegisterInt("Input.RStickDeadzoneY", &deadzone[3], 0, 32767);
+
+	configRegisterFloat("Input.LStickScaleX", &stickSens[0], -10.f, 10.f);
+	configRegisterFloat("Input.LStickScaleY", &stickSens[1], -10.f, 10.f);
+	configRegisterFloat("Input.RStickScaleX", &stickSens[2], -10.f, 10.f);
+	configRegisterFloat("Input.RStickScaleY", &stickSens[3], -10.f, 10.f);
+
+	configRegisterInt("Input.StickCButtons", &stickCButtons, 0, 1);
+	configRegisterInt("Input.SwapSticks", &swapSticks, 0, 1);
+
+	configRegisterInt("Input.FakeGamepads", &fakeControllers, 0, 4);
+	configRegisterInt("Input.FirstGamepadNum", &firstController, 0, 3);
+
+	char secname[] = "Input.Player1.Binds";
+	char keyname[256] = { 0 };
+	for (s32 c = 0; c < MAXCONTROLLERS; ++c) {
+		secname[12] = '1' + c;
+		for (u32 ck = 0; ck < CK_TOTAL_COUNT; ++ck) {
+			snprintf(keyname, sizeof(keyname), "%s.%s", secname, inputGetContKeyName(ck));
+			configRegisterString(keyname, bindStrs[c][ck], MAX_BIND_STR);
+		}
+	}
 }

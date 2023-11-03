@@ -167,7 +167,7 @@ void inputMouseEnable(s32 enabled);
 void inputUpdate(void);
 
 // call this before configSave()
-void inputSaveConfig(void);
+void inputSaveBinds(void);
 
 void inputSetDefaultKeyBinds(void);
 

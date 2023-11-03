@@ -18,6 +18,7 @@
 #include "system.h"
 
 u32 g_OsMemSize = 0;
+s32 g_OsMemSizeMb = 16;
 u8 g_Is4Mb = 0;
 s8 g_Resetting = false;
 OSSched g_Sched;
@@ -58,43 +59,18 @@ void bootCreateSched(void)
 
 static void gameLoadConfig(void)
 {
-	osMemSize = configGetIntClamped("Game.MemorySize", 16, 4, 2048) * 1024 * 1024;
-	g_PlayerCrosshairSway = configGetFloatClamped("Game.CrosshairSway", g_PlayerCrosshairSway, 0.f, 10.f);
-	g_PlayerDefaultFovY = configGetFloatClamped("Game.FovY", g_PlayerDefaultFovY, 5.f, 175.f);
-	g_PlayerMouseAimMode = configGetIntClamped("Game.MouseAimMode", g_PlayerMouseAimMode, 0, 1);
-	g_PlayerMouseAimSpeedX = configGetFloatClamped("Game.MouseAimSpeedX", g_PlayerMouseAimSpeedX, 0.f, 10.f);
-	g_PlayerMouseAimSpeedY = configGetFloatClamped("Game.MouseAimSpeedY", g_PlayerMouseAimSpeedY, 0.f, 10.f);
-	g_PlayerRadialMenuSpeed = configGetFloatClamped("Game.RadialMenuSpeed", g_PlayerRadialMenuSpeed, 0.f, 10.f);
-	g_PlayerFovAffectsZoom = configGetIntClamped("Game.FovAffectsZoom", g_PlayerFovAffectsZoom, 0, 1);
+	osMemSize = g_OsMemSizeMb * 1024 * 1024;
 	g_PlayerFovZoomMultiplier = g_PlayerFovAffectsZoom ? g_PlayerDefaultFovY / 60.0f : 1.0f;
-	g_PlayerClassicCrouch = configGetIntClamped("Game.ClassicCrouch", 0, 0, 1);
-	g_ViShakeIntensityMult = configGetFloatClamped("Game.ScreenShakeIntensity", 1.f, 0.f, 100.f);
-	const s32 center = configGetIntClamped("Game.CenterHUD", 0, 0, 1);
-	if (center) {
+	if (g_HudCenter) {
 		g_HudAlignModeL = G_ASPECT_CENTER_EXT;
 		g_HudAlignModeR = G_ASPECT_CENTER_EXT;
 	}
 }
 
-static void gameSaveConfig(void)
-{
-	configSetFloat("Game.FovY", g_PlayerDefaultFovY);
-	configSetInt("Game.CenterHUD", g_HudAlignModeL == G_ASPECT_CENTER_EXT);
-	configSetInt("Game.ClassicCrouch", g_PlayerClassicCrouch);
-	configSetInt("Game.MouseAimMode", g_PlayerMouseAimMode);
-	configSetFloat("Game.MouseAimSpeedX", g_PlayerMouseAimSpeedX);
-	configSetFloat("Game.MouseAimSpeedY", g_PlayerMouseAimSpeedY);
-	configSetFloat("Game.RadialMenuSpeed", g_PlayerRadialMenuSpeed);
-	configSetFloat("Game.CrosshairSway", g_PlayerCrosshairSway);
-	configSetFloat("Game.ScreenShakeIntensity", g_ViShakeIntensityMult);
-}
-
 static void cleanup(void)
 {
 	sysLogPrintf(LOG_NOTE, "shutdown");
-	inputSaveConfig();
-	videoSaveConfig();
-	gameSaveConfig();
+	inputSaveBinds();
 	configSave(CONFIG_PATH);
 	crashShutdown();
 	// TODO: actually shut down all subsystems
@@ -146,4 +122,24 @@ int main(int argc, const char **argv)
 	mainProc();
 
 	return 0;
+}
+
+PD_CONSTRUCTOR static void gameConfigInit(void)
+{
+	configRegisterInt("Game.MemorySize", &g_OsMemSizeMb, 4, 2048);
+
+	configRegisterFloat("Game.FovY", &g_PlayerDefaultFovY, 5.f, 175.f);
+	configRegisterInt("Game.FovAffectsZoom", &g_PlayerFovAffectsZoom, 0, 1);
+
+	configRegisterInt("Game.MouseAimMode", &g_PlayerMouseAimMode, 0, 1);
+	configRegisterFloat("Game.MouseAimSpeedX", &g_PlayerMouseAimSpeedX, 0.f, 10.f);
+	configRegisterFloat("Game.MouseAimSpeedY", &g_PlayerMouseAimSpeedY, 0.f, 10.f);
+
+	configRegisterFloat("Game.RadialMenuSpeed", &g_PlayerRadialMenuSpeed, 0.f, 10.f);
+	configRegisterFloat("Game.CrosshairSway", &g_PlayerCrosshairSway, 0.f, 10.f);
+	configRegisterFloat("Game.ScreenShakeIntensity", &g_ViShakeIntensityMult, 0.f, 10.f);
+
+	configRegisterInt("Game.ClassicCrouch", &g_PlayerClassicCrouch, 0, 1);
+
+	configRegisterInt("Game.CenterHUD", &g_HudCenter, 0, 1);
 }
