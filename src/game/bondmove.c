@@ -770,7 +770,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #ifndef PLATFORM_N64
 	if (allowmlook) {
 		inputMouseGetScaledDelta(&movedata.freelookdx, &movedata.freelookdy);
-		allowmcross = (g_PlayerMouseAimMode == MOUSEAIM_CLASSIC) &&
+		allowmcross = (PLAYER_EXTCFG().mouseaimmode == MOUSEAIM_CLASSIC) &&
 			(movedata.freelookdx || movedata.freelookdy || g_Vars.currentplayer->swivelpos[0] || g_Vars.currentplayer->swivelpos[1]);
 		if (movedata.invertpitch) {
 			movedata.freelookdy = -movedata.freelookdy;
@@ -1289,7 +1289,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							movedata.analoglean = 0.f;
 						}
 
-						if (g_PlayerMouseAimMode == MOUSEAIM_LOCKED || bgunGetWeaponNum(HAND_RIGHT) == WEAPON_HORIZONSCANNER) {
+						if (PLAYER_EXTCFG().mouseaimmode == MOUSEAIM_LOCKED || bgunGetWeaponNum(HAND_RIGHT) == WEAPON_HORIZONSCANNER) {
 							movedata.cannaturalpitch = movedata.cannaturalpitch || (movedata.freelookdy != 0.0f);
 							movedata.cannaturalturn = movedata.cannaturalturn  || (movedata.freelookdx != 0.0f);
 						}
@@ -1653,7 +1653,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #endif
 
 					// Handle C-button and analog crouch and uncrouch, if enabled
-					if (g_PlayerClassicCrouch && allowc1buttons) {
+					if (PLAYER_EXTCFG().classiccrouch && allowc1buttons) {
 						for (i = 0; i < numsamples; i++) {
 							if (!canmanualzoom && aimonhist[i]) {
 								bool goUp = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & (U_CBUTTONS));
@@ -1831,11 +1831,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 	}
 
 	if (g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED && !g_MainIsEndscreen) {
-#ifdef PLATFORM_N64
-		zoomfov = 60;
-#else
-		zoomfov = g_PlayerDefaultFovY;
-#endif
+		zoomfov = PLAYER_DEFAULT_FOV;
 
 		// FarSight in secondary function
 		if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_FARSIGHT
@@ -1844,15 +1840,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				&& g_Vars.currentplayer->autoeraserdist > 0) {
 			eraserfov = cam0f0b49b8(500.0f / g_Vars.currentplayer->autoeraserdist);
 
-#ifdef PLATFORM_N64
-			if (eraserfov > 60) {
-				eraserfov = 60;
+			if (eraserfov > PLAYER_DEFAULT_FOV) {
+				eraserfov = PLAYER_DEFAULT_FOV;
 			}
-#else
-			if (eraserfov > g_PlayerDefaultFovY) {
-				eraserfov = g_PlayerDefaultFovY;
-			}
-#endif
 
 			if (eraserfov < ADJUST_ZOOM_FOV(2)) {
 				eraserfov = ADJUST_ZOOM_FOV(2);
@@ -1886,15 +1876,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			zoomfov = currentPlayerGetGunZoomFov();
 		}
 
-#ifdef PLATFORM_N64
 		if (zoomfov <= 0) {
-			zoomfov = 60;
+			zoomfov = PLAYER_DEFAULT_FOV;
 		}
-#else
-		if (zoomfov <= 0) {
-			zoomfov = g_PlayerDefaultFovY;
-		}
-#endif
 
 		playerTweenFovY(zoomfov);
 		playerUpdateZoom();
@@ -2170,10 +2154,10 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #else
 			f32 xscale, yscale;
 			if (movedata.freelookdx || movedata.freelookdy) {
-				xscale = g_PlayerCrosshairSway * 0.20f;
-				yscale = g_PlayerCrosshairSway * 0.30f;
+				xscale = PLAYER_EXTCFG().crosshairsway * 0.20f;
+				yscale = PLAYER_EXTCFG().crosshairsway * 0.30f;
 			} else {
-				xscale = yscale = g_PlayerCrosshairSway;
+				xscale = yscale = PLAYER_EXTCFG().crosshairsway;
 			}
 			x = g_Vars.currentplayer->speedtheta * 0.3f * xscale + g_Vars.currentplayer->gunextraaimx;
 			y = -g_Vars.currentplayer->speedverta * 0.1f * yscale + g_Vars.currentplayer->gunextraaimy;
@@ -2188,8 +2172,8 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #ifndef PLATFORM_N64
 		if (allowmcross) {
 			// joystick is inactive, move crosshair using the mouse
-			const f32 xscale = g_PlayerMouseAimSpeedX * 320.f / (f32)videoGetWidth();
-			const f32 yscale = g_PlayerMouseAimSpeedY * 240.f / (f32)videoGetHeight();
+			const f32 xscale = PLAYER_EXTCFG().mouseaimspeedx * 320.f / (f32)videoGetWidth();
+			const f32 yscale = PLAYER_EXTCFG().mouseaimspeedy * 240.f / (f32)videoGetHeight();
 			f32 x = g_Vars.currentplayer->swivelpos[0] + movedata.freelookdx * xscale;
 			f32 y = g_Vars.currentplayer->swivelpos[1] + movedata.freelookdy * yscale;
 			x = (x < -1.f) ? -1.f : ((x > 1.f) ? 1.f : x);

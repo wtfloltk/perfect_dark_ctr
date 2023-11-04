@@ -6123,4 +6123,20 @@ struct xz {
 	f32 z;
 };
 
+#ifndef PLATFORM_N64
+
+struct extplayerconfig {
+	f32 fovy;
+	f32 fovzoommult;
+	s32 fovzoom;
+	s32 mouseaimmode;
+	f32 mouseaimspeedx;
+	f32 mouseaimspeedy;
+	s32 classiccrouch;
+	f32 radialmenuspeed;
+	f32 crosshairsway;
+};
+
+#endif
+
 #endif

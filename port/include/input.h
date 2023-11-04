@@ -95,17 +95,17 @@ s32 inputControllerConnected(s32 idx);
 // returns bitmask of connected controllers
 s32 inputControllerMask(void);
 
-s32 inputControllerGetSticksSwapped(void);
-void inputControllerSetSticksSwapped(s32 swapped);
+s32 inputControllerGetSticksSwapped(s32 cidx);
+void inputControllerSetSticksSwapped(s32 cidx, s32 swapped);
 
-s32 inputControllerGetDualAnalog(void);
-void inputControllerSetDualAnalog(s32 enable);
+s32 inputControllerGetDualAnalog(s32 cidx);
+void inputControllerSetDualAnalog(s32 cidx, s32 enable);
 
-f32 inputControllerGetAxisScale(s32 stick, s32 axis);
-void inputControllerSetAxisScale(s32 stick, s32 axis, f32 value);
+f32 inputControllerGetAxisScale(s32 cidx, s32 stick, s32 axis);
+void inputControllerSetAxisScale(s32 cidx, s32 stick, s32 axis, f32 value);
 
-f32 inputControllerGetAxisDeadzone(s32 stick, s32 axis);
-void inputControllerSetAxisDeadzone(s32 stick, s32 axis, f32 value);
+f32 inputControllerGetAxisDeadzone(s32 cidx, s32 stick, s32 axis);
+void inputControllerSetAxisDeadzone(s32 cidx, s32 stick, s32 axis, f32 value);
 
 // vk is a value from the virtkey enum above
 s32 inputKeyPressed(u32 vk);
@@ -134,8 +134,8 @@ const char *inputGetContKeyName(u32 ck);
 // strength is 0 .. 1; 0 strength turns it off
 void inputRumble(s32 idx, f32 strength, f32 time);
 
-f32 inputRumbleGetStrength(void);
-void inputRumbleSetStrength(f32 val);
+f32 inputRumbleGetStrength(s32 cidx);
+void inputRumbleSetStrength(s32 cidx, f32 val);
 
 // locks the mouse cursor in the window and makes it invisible if argument is true
 void inputLockMouse(s32 lock);

@@ -13,6 +13,7 @@
 #include "data.h"
 #include "types.h"
 #ifndef PLATFORM_N64
+#include "game/player.h"
 #include "input.h"
 #endif
 
@@ -80,8 +81,8 @@ void amTick(void)
 					struct activemenu *am = &g_AmMenus[g_AmIndex];
 					inputMouseGetAbsScaledDelta(&mdx, &mdy);
 					if (mdx || mdy) {
-						am->mousex += mdx * g_PlayerRadialMenuSpeed;
-						am->mousey += mdy * g_PlayerRadialMenuSpeed;
+						am->mousex += mdx * PLAYER_EXTCFG().radialmenuspeed;
+						am->mousey += mdy * PLAYER_EXTCFG().radialmenuspeed;
 						am->mousex = (am->mousex > 127.f) ? 127.f : (am->mousex < -128.f) ? -128.f : am->mousex;
 						am->mousey = (am->mousey > 127.f) ? 127.f : (am->mousey < -128.f) ? -128.f : am->mousey;
 					}

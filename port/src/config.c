@@ -124,7 +124,7 @@ void configRegisterString(const char *key, char *var, u32 maxstr)
 
 static void configSetFromString(const char *key, const char *val)
 {
-	struct configentry *cfg = configFindOrAddEntry(key);
+	struct configentry *cfg = configFindEntry(key);
 	if (!cfg) return;
 
 	s32 tmp_s32;

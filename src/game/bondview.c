@@ -21,6 +21,7 @@
 #include "types.h"
 #include "gbiex.h"
 #ifndef PLATFORM_N64
+#include "game/player.h"
 #include "video.h"
 #endif
 

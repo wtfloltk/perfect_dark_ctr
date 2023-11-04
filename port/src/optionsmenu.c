@@ -11,10 +11,85 @@
 #include "input.h"
 #include "config.h"
 
-static s32 g_BindsPlayer = 0;
+static s32 g_ExtMenuPlayer = 0;
+static struct menudialogdef *g_ExtNextDialog = NULL;
+
 static s32 g_BindIndex = 0;
 static u32 g_BindContKey = 0;
-static char g_BindsPlayerText[] = "Player 1 Bindings";
+
+static MenuItemHandlerResult menuhandlerSelectPlayer(s32 operation, struct menuitem *item, union handlerdata *data);
+
+struct menuitem g_ExtendedSelectPlayerMenuItems[] = {
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 1\n",
+		0,
+		menuhandlerSelectPlayer,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 2\n",
+		0,
+		menuhandlerSelectPlayer,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 3\n",
+		0,
+		menuhandlerSelectPlayer,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Player 4\n",
+		0,
+		menuhandlerSelectPlayer,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_213, // "Back"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+struct menudialogdef g_ExtendedSelectPlayerMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)"Select Player",
+	g_ExtendedSelectPlayerMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT,
+	NULL,
+};
+
+static MenuItemHandlerResult menuhandlerSelectPlayer(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		g_ExtMenuPlayer = item - g_ExtendedSelectPlayerMenuItems;
+		((char *)g_ExtNextDialog->title)[7] = g_ExtMenuPlayer + '1';
+		menuPushDialog(g_ExtNextDialog);
+	}
+
+	return 0;
+}
 
 static MenuItemHandlerResult menuhandlerMouseEnabled(s32 operation, struct menuitem *item, union handlerdata *data)
 {
@@ -33,9 +108,9 @@ static MenuItemHandlerResult menuhandlerMouseAimLock(s32 operation, struct menui
 {
 	switch (operation) {
 	case MENUOP_GET:
-		return g_PlayerMouseAimMode;
+		return g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimmode;
 	case MENUOP_SET:
-		g_PlayerMouseAimMode = data->checkbox.value;
+		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimmode = data->checkbox.value;
 		break;
 	}
 
@@ -107,16 +182,16 @@ static MenuItemHandlerResult menuhandlerMouseAimSpeedX(s32 operation, struct men
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		if (g_PlayerMouseAimSpeedX < 0.f) {
+		if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx < 0.f) {
 			data->slider.value = 0;
-		} else if (g_PlayerMouseAimSpeedX > 10.f) {
+		} else if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx > 10.f) {
 			data->slider.value = 100;
 		} else {
-			data->slider.value = g_PlayerMouseAimSpeedX * 10.f + 0.5f;
+			data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx * 10.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerMouseAimSpeedX = (f32)data->slider.value / 10.f;
+		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx = (f32)data->slider.value / 10.f;
 		break;
 	}
 
@@ -127,16 +202,16 @@ static MenuItemHandlerResult menuhandlerMouseAimSpeedY(s32 operation, struct men
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		if (g_PlayerMouseAimSpeedY < 0.f) {
+		if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy < 0.f) {
 			data->slider.value = 0;
-		} else if (g_PlayerMouseAimSpeedY > 10.f) {
+		} else if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy > 10.f) {
 			data->slider.value = 100;
 		} else {
-			data->slider.value = g_PlayerMouseAimSpeedY * 10.f + 0.5f;
+			data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy * 10.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerMouseAimSpeedY = (f32)data->slider.value / 10.f;
+		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy = (f32)data->slider.value / 10.f;
 		break;
 	}
 
@@ -147,22 +222,21 @@ static MenuItemHandlerResult menuhandlerRadialMenuSpeed(s32 operation, struct me
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		if (g_PlayerRadialMenuSpeed < 0.f) {
+		if (g_PlayerExtCfg[0].radialmenuspeed < 0.f) {
 			data->slider.value = 0;
-		} else if (g_PlayerRadialMenuSpeed> 10.f) {
+		} else if (g_PlayerExtCfg[0].radialmenuspeed > 10.f) {
 			data->slider.value = 100;
 		} else {
-			data->slider.value = g_PlayerRadialMenuSpeed * 10.f + 0.5f;
+			data->slider.value = g_PlayerExtCfg[0].radialmenuspeed * 10.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerRadialMenuSpeed = (f32)data->slider.value / 10.f;
+		g_PlayerExtCfg[0].radialmenuspeed = (f32)data->slider.value / 10.f;
 		break;
 	}
 
 	return 0;
 }
-
 
 struct menuitem g_ExtendedMouseMenuItems[] = {
 	{
@@ -368,10 +442,10 @@ static MenuItemHandlerResult menuhandlerStickSpeed(s32 operation, struct menuite
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = inputControllerGetAxisScale(stick, axis) * 10.f + 0.5f;
+		data->slider.value = inputControllerGetAxisScale(g_ExtMenuPlayer, stick, axis) * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		inputControllerSetAxisScale(stick, axis, (f32)data->slider.value / 10.f);
+		inputControllerSetAxisScale(g_ExtMenuPlayer, stick, axis, (f32)data->slider.value / 10.f);
 		break;
 	}
 
@@ -386,10 +460,10 @@ static MenuItemHandlerResult menuhandlerStickDeadzone(s32 operation, struct menu
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = inputControllerGetAxisDeadzone(stick, axis) * 32.f + 0.5f;
+		data->slider.value = inputControllerGetAxisDeadzone(g_ExtMenuPlayer, stick, axis) * 32.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		inputControllerSetAxisDeadzone(stick, axis, (f32)data->slider.value / 32.f);
+		inputControllerSetAxisDeadzone(g_ExtMenuPlayer, stick, axis, (f32)data->slider.value / 32.f);
 		break;
 	}
 
@@ -409,10 +483,10 @@ static MenuItemHandlerResult menuhandlerVibration(s32 operation, struct menuitem
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = inputRumbleGetStrength() * 10.f + 0.5f;
+		data->slider.value = inputRumbleGetStrength(g_ExtMenuPlayer) * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		inputRumbleSetStrength((f32)data->slider.value / 10.f);
+		inputRumbleSetStrength(g_ExtMenuPlayer, (f32)data->slider.value / 10.f);
 		break;
 	}
 
@@ -423,9 +497,9 @@ static MenuItemHandlerResult menuhandlerAnalogMovement(s32 operation, struct men
 {
 	switch (operation) {
 	case MENUOP_GET:
-		return inputControllerGetDualAnalog();
+		return inputControllerGetDualAnalog(g_ExtMenuPlayer);
 	case MENUOP_SET:
-		inputControllerSetDualAnalog(data->checkbox.value);
+		inputControllerSetDualAnalog(g_ExtMenuPlayer, data->checkbox.value);
 		break;
 	}
 
@@ -436,9 +510,9 @@ static MenuItemHandlerResult menuhandlerSwapSticks(s32 operation, struct menuite
 {
 	switch (operation) {
 	case MENUOP_GET:
-		return inputControllerGetSticksSwapped();
+		return inputControllerGetSticksSwapped(g_ExtMenuPlayer);
 	case MENUOP_SET:
-		inputControllerSetSticksSwapped(data->checkbox.value);
+		inputControllerSetSticksSwapped(g_ExtMenuPlayer, data->checkbox.value);
 		break;
 	}
 
@@ -497,9 +571,10 @@ struct menuitem g_ExtendedControllerMenuItems[] = {
 	{ MENUITEMTYPE_END },
 };
 
+static char g_ExtendedControllerMenuTitle[] = "Player 1 Controller Options";
 struct menudialogdef g_ExtendedControllerMenuDialog = {
 	MENUDIALOGTYPE_DEFAULT,
-	(uintptr_t)"Extended Controller Options",
+	(uintptr_t)g_ExtendedControllerMenuTitle,
 	g_ExtendedControllerMenuItems,
 	NULL,
 	MENUDIALOGFLAG_LITERAL_TEXT,
@@ -565,26 +640,21 @@ static MenuItemHandlerResult menuhandlerCenterHUD(s32 operation, struct menuitem
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerFieldOfView(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerScreenShake(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = g_PlayerDefaultFovY + 0.5f;
+		data->slider.value = g_ViShakeIntensityMult * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		if (data->slider.value >= 15) {
-			g_PlayerDefaultFovY = data->slider.value;
-			if (g_PlayerFovAffectsZoom) {
-				g_PlayerFovZoomMultiplier = g_PlayerDefaultFovY / 60.0f;
-			}
-		}
+		g_ViShakeIntensityMult = (f32)data->slider.value / 10.f;
 		break;
 	}
 
 	return 0;
 }
 
-struct menuitem g_ExtendedDisplayMenuItems[] = {
+struct menuitem g_ExtendedVideoMenuItems[] = {
 	{
 		MENUITEMTYPE_CHECKBOX,
 		0,
@@ -620,100 +690,6 @@ struct menuitem g_ExtendedDisplayMenuItems[] = {
 	{
 		MENUITEMTYPE_SLIDER,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Vert FOV",
-		170,
-		menuhandlerFieldOfView,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
-		L_OPTIONS_213, // "Back"
-		0,
-		NULL,
-	},
-	{ MENUITEMTYPE_END },
-};
-
-struct menudialogdef g_ExtendedDisplayMenuDialog = {
-	MENUDIALOGTYPE_DEFAULT,
-	(uintptr_t)"Extended Display Options",
-	g_ExtendedDisplayMenuItems,
-	NULL,
-	MENUDIALOGFLAG_LITERAL_TEXT,
-	NULL,
-};
-
-static MenuItemHandlerResult menuhandlerClassicCrouch(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	switch (operation) {
-	case MENUOP_GET:
-		return g_PlayerClassicCrouch;
-	case MENUOP_SET:
-		g_PlayerClassicCrouch = data->checkbox.value;
-		break;
-	}
-
-	return 0;
-}
-
-static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	switch (operation) {
-	case MENUOP_GETSLIDER:
-		data->slider.value = g_PlayerCrosshairSway * 10.f + 0.5f;
-		break;
-	case MENUOP_SET:
-		g_PlayerCrosshairSway = (f32)data->slider.value / 10.f;
-		break;
-	}
-
-	return 0;
-}
-
-static MenuItemHandlerResult menuhandlerScreenShake(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	switch (operation) {
-	case MENUOP_GETSLIDER:
-		data->slider.value = g_ViShakeIntensityMult * 10.f + 0.5f;
-		break;
-	case MENUOP_SET:
-		g_ViShakeIntensityMult = (f32)data->slider.value / 10.f;
-		break;
-	}
-
-	return 0;
-}
-
-struct menuitem g_ExtendedGameMenuItems[] = {
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Allow Classic Crouch",
-		0,
-		menuhandlerClassicCrouch,
-	},
-	{
-		MENUITEMTYPE_SLIDER,
-		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
-		(uintptr_t)"Crosshair Sway",
-		20,
-		menuhandlerCrosshairSway,
-	},
-	{
-		MENUITEMTYPE_SLIDER,
-		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Explosion Shake",
 		20,
@@ -738,9 +714,109 @@ struct menuitem g_ExtendedGameMenuItems[] = {
 	{ MENUITEMTYPE_END },
 };
 
+struct menudialogdef g_ExtendedVideoMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)"Extended Video Options",
+	g_ExtendedVideoMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT,
+	NULL,
+};
+
+static MenuItemHandlerResult menuhandlerFieldOfView(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].fovy + 0.5f;
+		break;
+	case MENUOP_SET:
+		if (data->slider.value >= 15) {
+			g_PlayerExtCfg[g_ExtMenuPlayer].fovy = data->slider.value;
+			if (g_PlayerExtCfg[g_ExtMenuPlayer].fovzoom) {
+				g_PlayerExtCfg[g_ExtMenuPlayer].fovzoommult = g_PlayerExtCfg[g_ExtMenuPlayer].fovy / 60.f;
+			}
+		}
+		break;
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerClassicCrouch(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return g_PlayerExtCfg[g_ExtMenuPlayer].classiccrouch;
+	case MENUOP_SET:
+		g_PlayerExtCfg[g_ExtMenuPlayer].classiccrouch = data->checkbox.value;
+		break;
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshairsway * 10.f + 0.5f;
+		break;
+	case MENUOP_SET:
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshairsway = (f32)data->slider.value / 10.f;
+		break;
+	}
+
+	return 0;
+}
+
+struct menuitem g_ExtendedGameMenuItems[] = {
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Allow Classic Crouch",
+		0,
+		menuhandlerClassicCrouch,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Vert FOV",
+		170,
+		menuhandlerFieldOfView,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"Crosshair Sway",
+		20,
+		menuhandlerCrosshairSway,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_213, // "Back"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+static char g_ExtendedGameMenuTitle[] = "Player 1 Game Options";
 struct menudialogdef g_ExtendedGameMenuDialog = {
 	MENUDIALOGTYPE_DEFAULT,
-	(uintptr_t)"Extended Game Options",
+	(uintptr_t)g_ExtendedGameMenuTitle,
 	g_ExtendedGameMenuItems,
 	NULL,
 	MENUDIALOGFLAG_LITERAL_TEXT,
@@ -891,7 +967,7 @@ static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *i
 
 	const s32 key = inputGetLastKey();
 	if (key && key != VK_ESCAPE) {
-		inputKeyBind(g_BindsPlayer, g_BindContKey, g_BindIndex, (key == VK_DELETE ? 0 : key));
+		inputKeyBind(g_ExtMenuPlayer, g_BindContKey, g_BindIndex, (key == VK_DELETE ? 0 : key));
 		menuPopDialog();
 	}
 
@@ -915,7 +991,7 @@ static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *ite
 		data->dropdown.value = INPUT_MAX_BINDS;
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		binds = inputKeyGetBinds(g_BindsPlayer, menuBinds[idx].ck);
+		binds = inputKeyGetBinds(g_ExtMenuPlayer, menuBinds[idx].ck);
 		if (binds && binds[data->dropdown.value]) {
 			strncpy(keyname, inputGetKeyName(binds[data->dropdown.value]), sizeof(keyname) - 1);
 			for (char *p = keyname; *p; ++p) {
@@ -947,97 +1023,51 @@ static MenuItemHandlerResult menuhandlerResetBinds(s32 operation, struct menuite
 	return 0;
 }
 
+static char g_ExtendedBindsMenuTitle[] = "Player 1 Bindings";
 struct menudialogdef g_ExtendedBindsMenuDialog = {
 	MENUDIALOGTYPE_DEFAULT,
-	(uintptr_t)g_BindsPlayerText,
+	(uintptr_t)g_ExtendedBindsMenuTitle,
 	g_ExtendedBindsMenuItems,
 	NULL,
 	MENUDIALOGFLAG_LITERAL_TEXT | MENUDIALOGFLAG_STARTSELECTS | MENUDIALOGFLAG_IGNOREBACK,
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerOpenBinds(s32 operation, struct menuitem *item, union handlerdata *data);
-
-struct menuitem g_ExtendedSelectBindsMenuItems[] = {
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Player 1\n",
-		0,
-		menuhandlerOpenBinds,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Player 2\n",
-		0,
-		menuhandlerOpenBinds,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Player 3\n",
-		0,
-		menuhandlerOpenBinds,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Player 4\n",
-		0,
-		menuhandlerOpenBinds,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
-		L_OPTIONS_213, // "Back"
-		0,
-		NULL,
-	},
-	{ MENUITEMTYPE_END },
-};
-
-static MenuItemHandlerResult menuhandlerOpenBinds(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerOpenControllerMenu(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		g_BindsPlayer = item - g_ExtendedSelectBindsMenuItems;
-		g_BindsPlayerText[7] = g_BindsPlayer + '1';
-		menuPushDialog(&g_ExtendedBindsMenuDialog);
+		g_ExtNextDialog = &g_ExtendedControllerMenuDialog;
+		menuPushDialog(&g_ExtendedSelectPlayerMenuDialog);
 	}
-
 	return 0;
 }
 
-struct menudialogdef g_ExtendedSelectBindsMenuDialog = {
-	MENUDIALOGTYPE_DEFAULT,
-	(uintptr_t)"Key Bindings",
-	g_ExtendedSelectBindsMenuItems,
-	NULL,
-	MENUDIALOGFLAG_LITERAL_TEXT,
-	NULL,
-};
+static MenuItemHandlerResult menuhandlerOpenGameMenu(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		g_ExtNextDialog = &g_ExtendedGameMenuDialog;
+		menuPushDialog(&g_ExtendedSelectPlayerMenuDialog);
+	}
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerOpenBindsMenu(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		g_ExtNextDialog = &g_ExtendedBindsMenuDialog;
+		menuPushDialog(&g_ExtendedSelectPlayerMenuDialog);
+	}
+	return 0;
+}
 
 struct menuitem g_ExtendedMenuItems[] = {
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
 		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Display\n",
+		(uintptr_t)"Video\n",
 		0,
-		(void *)&g_ExtendedDisplayMenuDialog,
+		(void *)&g_ExtendedVideoMenuDialog,
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,
@@ -1050,26 +1080,26 @@ struct menuitem g_ExtendedMenuItems[] = {
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
-		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_LITERAL_TEXT,
+		MENUITEMFLAG_LITERAL_TEXT,
 		(uintptr_t)"Controller\n",
 		0,
-		(void *)&g_ExtendedControllerMenuDialog,
+		menuhandlerOpenControllerMenu,
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
-		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_LITERAL_TEXT,
+		MENUITEMFLAG_LITERAL_TEXT,
 		(uintptr_t)"Game\n",
 		0,
-		(void *)&g_ExtendedGameMenuDialog,
+		menuhandlerOpenGameMenu,
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
-		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_LITERAL_TEXT,
+		MENUITEMFLAG_LITERAL_TEXT,
 		(uintptr_t)"Key Bindings\n",
 		0,
-		(void *)&g_ExtendedSelectBindsMenuDialog,
+		menuhandlerOpenBindsMenu,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,

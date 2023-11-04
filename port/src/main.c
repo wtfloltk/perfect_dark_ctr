@@ -16,6 +16,7 @@
 #include "config.h"
 #include "mod.h"
 #include "system.h"
+#include "utils.h"
 
 u32 g_OsMemSize = 0;
 s32 g_OsMemSizeMb = 16;
@@ -57,10 +58,15 @@ void bootCreateSched(void)
 	}
 }
 
-static void gameLoadConfig(void)
+static void gameInit(void)
 {
 	osMemSize = g_OsMemSizeMb * 1024 * 1024;
-	g_PlayerFovZoomMultiplier = g_PlayerFovAffectsZoom ? g_PlayerDefaultFovY / 60.0f : 1.0f;
+
+	for (s32 i = 0; i < MAX_PLAYERS; ++i) {
+		struct extplayerconfig *cfg = g_PlayerExtCfg + i;
+		cfg->fovzoommult = cfg->fovzoom ? cfg->fovy / 60.0f : 1.0f;
+	}
+
 	if (g_HudCenter) {
 		g_HudAlignModeL = G_ASPECT_CENTER_EXT;
 		g_HudAlignModeR = G_ASPECT_CENTER_EXT;
@@ -92,7 +98,7 @@ int main(int argc, const char **argv)
 	audioInit();
 	romdataInit();
 
-	gameLoadConfig();
+	gameInit();
 
 	if (fsGetModDir()) {
 		modConfigLoad(MOD_CONFIG_FNAME);
@@ -127,19 +133,17 @@ int main(int argc, const char **argv)
 PD_CONSTRUCTOR static void gameConfigInit(void)
 {
 	configRegisterInt("Game.MemorySize", &g_OsMemSizeMb, 4, 2048);
-
-	configRegisterFloat("Game.FovY", &g_PlayerDefaultFovY, 5.f, 175.f);
-	configRegisterInt("Game.FovAffectsZoom", &g_PlayerFovAffectsZoom, 0, 1);
-
-	configRegisterInt("Game.MouseAimMode", &g_PlayerMouseAimMode, 0, 1);
-	configRegisterFloat("Game.MouseAimSpeedX", &g_PlayerMouseAimSpeedX, 0.f, 10.f);
-	configRegisterFloat("Game.MouseAimSpeedY", &g_PlayerMouseAimSpeedY, 0.f, 10.f);
-
-	configRegisterFloat("Game.RadialMenuSpeed", &g_PlayerRadialMenuSpeed, 0.f, 10.f);
-	configRegisterFloat("Game.CrosshairSway", &g_PlayerCrosshairSway, 0.f, 10.f);
-	configRegisterFloat("Game.ScreenShakeIntensity", &g_ViShakeIntensityMult, 0.f, 10.f);
-
-	configRegisterInt("Game.ClassicCrouch", &g_PlayerClassicCrouch, 0, 1);
-
 	configRegisterInt("Game.CenterHUD", &g_HudCenter, 0, 1);
+	configRegisterFloat("Game.ScreenShakeIntensity", &g_ViShakeIntensityMult, 0.f, 10.f);
+	for (s32 j = 0; j < MAX_PLAYERS; ++j) {
+		const s32 i = j + 1;
+		configRegisterFloat(strFmt("Game.Player%d.FovY", i), &g_PlayerExtCfg[j].fovy, 5.f, 175.f);
+		configRegisterInt(strFmt("Game.Player%d.FovAffectsZoom", i), &g_PlayerExtCfg[j].fovzoom, 0, 1);
+		configRegisterInt(strFmt("Game.Player%d.MouseAimMode", i), &g_PlayerExtCfg[j].mouseaimmode, 0, 1);
+		configRegisterFloat(strFmt("Game.Player%d.MouseAimSpeedX", i), &g_PlayerExtCfg[j].mouseaimspeedx, 0.f, 10.f);
+		configRegisterFloat(strFmt("Game.Player%d.MouseAimSpeedY", i), &g_PlayerExtCfg[j].mouseaimspeedy, 0.f, 10.f);
+		configRegisterFloat(strFmt("Game.Player%d.RadialMenuSpeed", i), &g_PlayerExtCfg[j].radialmenuspeed, 0.f, 10.f);
+		configRegisterFloat(strFmt("Game.Player%d.CrosshairSway", i), &g_PlayerExtCfg[j].crosshairsway, 0.f, 10.f);
+		configRegisterInt(strFmt("Game.Player%d.ClassicCrouch", i), &g_PlayerExtCfg[j].classiccrouch, 0, 1);
+	}
 }

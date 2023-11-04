@@ -531,19 +531,12 @@ extern struct menudialogdef g_HangarListMenuDialog;
 
 #ifndef PLATFORM_N64
 
+extern struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS];
+
 extern struct weathercfg g_WeatherConfig[WEATHERCFG_MAX_STAGES];
 extern const struct weathercfg g_DefaultWeatherConfig;
 extern const struct weathercfg *g_CurWeatherConfig;
 
-extern f32 g_PlayerCrosshairSway;
-extern f32 g_PlayerDefaultFovY;
-extern s32 g_PlayerMouseAimMode;
-extern f32 g_PlayerMouseAimSpeedX;
-extern f32 g_PlayerMouseAimSpeedY;
-extern f32 g_PlayerRadialMenuSpeed;
-extern s32 g_PlayerFovAffectsZoom;
-extern f32 g_PlayerFovZoomMultiplier;
-extern s32 g_PlayerClassicCrouch;
 extern f32 g_ViShakeIntensityMult;
 extern u32 g_TexFilter2D;
 extern s32 g_HudCenter;
@@ -552,13 +545,17 @@ extern u32 g_HudAlignModeR;
 extern s32 g_PrevFrameFb;
 extern s32 g_PrevFrameCapTimer;
 
+#define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayernum]
+#define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)
+
 #define TEX_FILTER_2D g_TexFilter2D
-#define ADJUST_ZOOM_FOV(x) ((x) * g_PlayerFovZoomMultiplier)
+#define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
 
 #else // PLATFORM_N64
 
 #define TEX_FILTER_2D G_TF_BILERP
 #define ADJUST_ZOOM_FOV(x) (x)
+#define PLAYER_DEFAULT_FOV 60.f
 
 #endif // PLATFORM_N64
 
