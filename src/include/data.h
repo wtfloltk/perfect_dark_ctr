@@ -545,7 +545,7 @@ extern u32 g_HudAlignModeR;
 extern s32 g_PrevFrameFb;
 extern s32 g_PrevFrameCapTimer;
 
-#define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayernum]
+#define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
 #define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)
 
 #define TEX_FILTER_2D g_TexFilter2D
