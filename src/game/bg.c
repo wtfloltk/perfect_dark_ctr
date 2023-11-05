@@ -3659,9 +3659,23 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 		} else if (gdl->dma.cmd == G_VTX) {
 			ptr = var800a6470;
 			count = gdl->bytes[GFX_W0_BYTE(1)] & 0xf;
-			offset = (UNSEGADDR(gdl->words.w1) & 0xffffff);
 			numvertices = (((u32) gdl->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
+
+#ifdef PLATFORM_N64
+			offset = (UNSEGADDR(gdl->words.w1) & 0xffffff);
 			vtx = (Vtx *)((uintptr_t)vertices + offset);
+#else
+			if (gdl->words.w1 & 1) {
+				// segmented address
+				offset = (UNSEGADDR(gdl->words.w1) & 0xffffff);
+				vtx = (Vtx *)((uintptr_t)vertices + offset);
+			} else {
+				// linear address
+				offset = 0;
+				vtx = (Vtx *)gdl->words.w1;
+			}
+#endif
+
 			vtx -= count;
 
 			ptr[0] = vtx->x;
