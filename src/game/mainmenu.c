@@ -4308,8 +4308,7 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 					// if we already have it equipped
 					if (weaponnum == WEAPON_REMOTEMINE) {
 						bgunEquipWeapon2(HAND_LEFT, weaponnum);
-					}
-					else{
+					} else {
 						bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
 					}
 				}
