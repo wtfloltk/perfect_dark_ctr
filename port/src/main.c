@@ -35,6 +35,8 @@ u32 g_VmNumPageMisses = 0;
 u32 g_VmNumPageReplaces = 0;
 u8 g_VmShowStats = 0;
 
+s32 g_TickRateDiv = 1;
+
 extern s32 g_StageNum;
 
 s32 bootGetMemSize(void)
@@ -135,6 +137,7 @@ PD_CONSTRUCTOR static void gameConfigInit(void)
 	configRegisterInt("Game.MemorySize", &g_OsMemSizeMb, 4, 2048);
 	configRegisterInt("Game.CenterHUD", &g_HudCenter, 0, 1);
 	configRegisterFloat("Game.ScreenShakeIntensity", &g_ViShakeIntensityMult, 0.f, 10.f);
+	configRegisterInt("Game.TickRateDivisor", &g_TickRateDiv, 0, 10);
 	for (s32 j = 0; j < MAX_PLAYERS; ++j) {
 		const s32 i = j + 1;
 		configRegisterFloat(strFmt("Game.Player%d.FovY", i), &g_PlayerExtCfg[j].fovy, 5.f, 175.f);
