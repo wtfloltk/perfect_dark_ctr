@@ -714,7 +714,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #ifndef PLATFORM_N64
 	const bool allowmlook = (g_Vars.currentplayernum == 0) && (allowc1x || allowc1y);
 	bool allowmcross = false;
-	const f32 mlookscale = g_Vars.lvupdate240 ? (4.f / (f32)g_Vars.lvupdate240) : 0.25f;
+	const f32 mlookscale = g_Vars.lvupdate240 ? (4.f / (f32)g_Vars.lvupdate240) : 4.f;
 #endif
 
 	controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
