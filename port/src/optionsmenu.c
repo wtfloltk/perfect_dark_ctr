@@ -7,6 +7,7 @@
 #include "types.h"
 #include "game/mainmenu.h"
 #include "game/menu.h"
+#include "game/gamefile.h"
 #include "video.h"
 #include "input.h"
 #include "config.h"
@@ -1060,6 +1061,83 @@ static MenuItemHandlerResult menuhandlerOpenBindsMenu(s32 operation, struct menu
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerUnlockEverything(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		gamefileUnlockEverything();
+	}
+	return 0;
+}
+
+struct menuitem g_ConfirmUnlockMenuItems[] = {
+	{
+		MENUITEMTYPE_LABEL,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Are you sure?\n\nThis will overwrite any progress\nsaved to the current profile.\n",
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0x00000082,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_MARQUEE,
+		0,
+		MENUITEMFLAG_SMALLFONT | MENUITEMFLAG_MARQUEE_FADEBOTHSIDES | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Unlocks all cheats, weapons, missions, challenges and combat simulator items.\n",
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0x00000082,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CENTRE | MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_191, // "No"
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CENTRE | MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_190, // "Yes"
+		0,
+		menuhandlerUnlockEverything,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+struct menudialogdef g_ConfirmUnlockMenuDialog = {
+	MENUDIALOGTYPE_DANGER,
+	L_OPTIONS_188, // "Warning"
+	g_ConfirmUnlockMenuItems,
+	NULL,
+	0,
+	NULL,
+};
+
+static MenuItemHandlerResult menuhandlerUnlockEverythingPrompt(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		menuPushDialog(&g_ConfirmUnlockMenuDialog);
+	}
+	return 0;
+}
+
 struct menuitem g_ExtendedMenuItems[] = {
 	{
 		MENUITEMTYPE_SELECTABLE,
@@ -1100,6 +1178,14 @@ struct menuitem g_ExtendedMenuItems[] = {
 		(uintptr_t)"Key Bindings\n",
 		0,
 		menuhandlerOpenBindsMenu,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Unlock Everything\n",
+		0,
+		menuhandlerUnlockEverythingPrompt,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,
