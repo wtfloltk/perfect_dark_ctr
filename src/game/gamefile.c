@@ -569,6 +569,7 @@ void gamefileGetOverview(char *arg0, char *name, u8 *stage, u8 *difficulty, u32 
 }
 
 #ifndef PLATFORM_N64
+
 // Unlock all of the unlockables.
 // These hacks are taken from the original debug mode.
 void gamefileUnlockEverything(void)
@@ -620,4 +621,5 @@ void gamefileUnlockEverything(void)
 	gamefileSetFlag(GAMEFILEFLAG_CI_ECMMINE_DONE);
 	gamefileSetFlag(GAMEFILEFLAG_CI_UPLINK_DONE);
 }
+
 #endif
