@@ -4701,6 +4701,11 @@ enum weaponnum {
 #define MOUSEAIM_CLASSIC 0 // crosshair moves around the screen in aim mode
 #define MOUSEAIM_LOCKED 1  // crosshair locked to the center of the screen in aim mode
 
+#define CROUCHMODE_HOLD 0   // hold the crouch buttons to keep crouching
+#define CROUCHMODE_ANALOG 1 // analog crouch like on n64
+#define CROUCHMODE_TOGGLE 2 // press the crouch buttons to toggle stance
+#define CROUCHMODE_TOGGLE_ANALOG (CROUCHMODE_ANALOG | CROUCHMODE_TOGGLE)
+
 #endif
 
 #endif

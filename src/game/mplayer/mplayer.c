@@ -120,7 +120,7 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	.mouseaimspeedy = 0.7f, \
 	.radialmenuspeed = 4.f, \
 	.crosshairsway = 1.f, \
-	.classiccrouch = true, \
+	.crouchmode = CROUCHMODE_TOGGLE_ANALOG, \
 }
 
 struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS] = { 

@@ -6132,7 +6132,7 @@ struct extplayerconfig {
 	s32 mouseaimmode;
 	f32 mouseaimspeedx;
 	f32 mouseaimspeedy;
-	s32 classiccrouch;
+	s32 crouchmode;
 	f32 radialmenuspeed;
 	f32 crosshairsway;
 };

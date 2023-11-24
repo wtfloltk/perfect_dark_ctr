@@ -1565,31 +1565,43 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 						// Handle xbla-style crouch cycling
 						for (i = 0; i < numsamples; i++) {
-							s32 crouchsample = joyGetButtonsPressedOnSample(i, contpad1, 0xffffffff) & BUTTON_CROUCH_CYCLE;
-							if (crouchsample) {
-								if (g_Vars.currentplayer->crouchpos <= 0) {
-									g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
-								} else {
-									g_Vars.currentplayer->crouchpos--;
-								}
-							}
-
 							// handle 1964GEPD style crouch setting
-							crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_HALF_CROUCH;
-							if (crouchsample) {
-								if (g_Vars.currentplayer->crouchpos == CROUCHPOS_DUCK) {
-									g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
-								} else {
-									g_Vars.currentplayer->crouchpos = CROUCHPOS_DUCK;
+							s32 crouchsample;
+							if (PLAYER_EXTCFG().crouchmode & CROUCHMODE_TOGGLE) {
+								// press to toggle crouch position
+								crouchsample = joyGetButtonsPressedOnSample(i, contpad1, 0xffffffff) & BUTTON_CROUCH_CYCLE;
+								if (crouchsample) {
+									if (g_Vars.currentplayer->crouchpos <= 0) {
+										g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
+									} else {
+										g_Vars.currentplayer->crouchpos--;
+									}
 								}
-							}
-
-							crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_FULL_CROUCH;
-							if (crouchsample) {
-								if (g_Vars.currentplayer->crouchpos == CROUCHPOS_SQUAT) {
+								crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_HALF_CROUCH;
+								if (crouchsample) {
+									if (g_Vars.currentplayer->crouchpos == CROUCHPOS_DUCK) {
+										g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
+									} else {
+										g_Vars.currentplayer->crouchpos = CROUCHPOS_DUCK;
+									}
+								}
+								crouchsample = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons) & BUTTON_FULL_CROUCH;
+								if (crouchsample) {
+									if (g_Vars.currentplayer->crouchpos == CROUCHPOS_SQUAT) {
+										g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
+									} else {
+										g_Vars.currentplayer->crouchpos = CROUCHPOS_SQUAT;
+									}
+								}
+							} else if (PLAYER_EXTCFG().crouchmode == CROUCHMODE_HOLD) {
+								// hold to crouch
+								crouchsample = joyGetButtonsOnSample(i, contpad1, c1allowedbuttons) & (BUTTON_FULL_CROUCH | BUTTON_HALF_CROUCH);
+								if (!crouchsample) {
 									g_Vars.currentplayer->crouchpos = CROUCHPOS_STAND;
-								} else {
+								} else if (crouchsample & BUTTON_FULL_CROUCH) {
 									g_Vars.currentplayer->crouchpos = CROUCHPOS_SQUAT;
+								} else if (crouchsample & BUTTON_HALF_CROUCH) {
+									g_Vars.currentplayer->crouchpos = CROUCHPOS_DUCK;
 								}
 							}
 						}
@@ -1657,7 +1669,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #endif
 
 					// Handle C-button and analog crouch and uncrouch, if enabled
-					if (PLAYER_EXTCFG().classiccrouch && allowc1buttons) {
+					if ((PLAYER_EXTCFG().crouchmode & CROUCHMODE_ANALOG) && allowc1buttons) {
 						for (i = 0; i < numsamples; i++) {
 							if (!canmanualzoom && aimonhist[i]) {
 								bool goUp = joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & (U_CBUTTONS));

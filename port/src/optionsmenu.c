@@ -723,6 +723,31 @@ struct menudialogdef g_ExtendedVideoMenuDialog = {
 	NULL,
 };
 
+static MenuItemHandlerResult menuhandlerCrouchMode(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	static const char *opts[] = {
+		"Hold",
+		"Analog",
+		"Toggle",
+		"Toggle + Analog"
+	};
+
+	switch (operation) {
+	case MENUOP_GETOPTIONCOUNT:
+		data->dropdown.value = ARRAYCOUNT(opts);
+		break;
+	case MENUOP_GETOPTIONTEXT:
+		return (intptr_t)opts[data->dropdown.value];
+	case MENUOP_SET:
+		g_PlayerExtCfg[g_ExtMenuPlayer].crouchmode = data->dropdown.value;
+		break;
+	case MENUOP_GETSELECTEDINDEX:
+		data->dropdown.value = g_PlayerExtCfg[g_ExtMenuPlayer].crouchmode;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerFieldOfView(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
@@ -736,19 +761,6 @@ static MenuItemHandlerResult menuhandlerFieldOfView(s32 operation, struct menuit
 				g_PlayerExtCfg[g_ExtMenuPlayer].fovzoommult = g_PlayerExtCfg[g_ExtMenuPlayer].fovy / 60.f;
 			}
 		}
-		break;
-	}
-
-	return 0;
-}
-
-static MenuItemHandlerResult menuhandlerClassicCrouch(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	switch (operation) {
-	case MENUOP_GET:
-		return g_PlayerExtCfg[g_ExtMenuPlayer].classiccrouch;
-	case MENUOP_SET:
-		g_PlayerExtCfg[g_ExtMenuPlayer].classiccrouch = data->checkbox.value;
 		break;
 	}
 
@@ -771,12 +783,12 @@ static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menu
 
 struct menuitem g_ExtendedGameMenuItems[] = {
 	{
-		MENUITEMTYPE_CHECKBOX,
+		MENUITEMTYPE_DROPDOWN,
 		0,
 		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Allow Classic Crouch",
+		(uintptr_t)"Crouch Mode",
 		0,
-		menuhandlerClassicCrouch,
+		menuhandlerCrouchMode,
 	},
 	{
 		MENUITEMTYPE_SLIDER,
