@@ -724,6 +724,56 @@ struct menudialogdef g_ExtendedVideoMenuDialog = {
 	NULL,
 };
 
+static MenuItemHandlerResult menuhandlerDisableMpDeathMusic(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return g_MusicDisableMpDeath;
+	case MENUOP_SET:
+		g_MusicDisableMpDeath = data->checkbox.value;
+		break;
+	}
+
+	return 0;
+}
+
+struct menuitem g_ExtendedAudioMenuItems[] = {
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Disable MP Death Music",
+		0,
+		menuhandlerDisableMpDeathMusic,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_213, // "Back"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+struct menudialogdef g_ExtendedAudioMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)"Extended Audio Options",
+	g_ExtendedAudioMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT,
+	NULL,
+};
+
 static MenuItemHandlerResult menuhandlerCrouchMode(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
@@ -1106,6 +1156,14 @@ struct menuitem g_ExtendedMenuItems[] = {
 		(uintptr_t)"Video\n",
 		0,
 		(void *)&g_ExtendedVideoMenuDialog,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_OPENSDIALOG | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Audio\n",
+		0,
+		(void *)&g_ExtendedAudioMenuDialog,
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,
