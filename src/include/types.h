@@ -5072,8 +5072,8 @@ struct movedata {
 	/*0xa0*/ s32 analogpitch;
 	/*0xa4*/ s32 analogstrafe;
 	/*0xa8*/ s32 analogwalk;
-	/*0xac*/ s32 alt1tapcount;
 #ifndef PLATFORM_N64
+	/*0xac*/ s32 alt1tapcount;
 	/*    */ f32 freelookdx; // how much the mouse moved ...
 	/*    */ f32 freelookdy; // ... scaled by sensitivity
 	/*    */ f32 analoglean; // how much we're trying to lean
@@ -6135,6 +6135,7 @@ struct extplayerconfig {
 	s32 crouchmode;
 	f32 radialmenuspeed;
 	f32 crosshairsway;
+	s32 extcontrols;
 };
 
 #endif

@@ -694,6 +694,7 @@
 #define CONTROLMODE_22 5
 #define CONTROLMODE_23 6
 #define CONTROLMODE_24 7
+#define CONTROLMODE_PC 8 // "pc port" controls; enabled in the .ini file
 
 #define COUNTDOWNTIMERREASON_AI        0x01
 #define COUNTDOWNTIMERREASON_NOCONTROL 0x10

@@ -92,21 +92,32 @@ MenuItemHandlerResult menuhandlerControlStyleImpl(s32 operation, struct menuitem
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
-		data->list.value = 8;
+		data->list.value = 9;
 		break;
 	case MENUOP_GETOPTGROUPCOUNT:
-		data->list.value = 2;
+		data->list.value = 3;
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) langGet(g_ControlStyleOptions[data->list.value]);
+		if (data->list.value > 7) {
+			return (intptr_t) "Ext";
+		} else {
+			return (intptr_t) langGet(g_ControlStyleOptions[data->list.value]);
+		}
 	case MENUOP_GETOPTGROUPTEXT:
-		return (s32) langGet(categories[data->list.value]);
+		if (data->list.value > 1) {
+			return (intptr_t) "Port";
+		} else {
+			return (intptr_t) langGet(categories[data->list.value]);
+		}
 	case MENUOP_GETGROUPSTARTINDEX:
-		data->list.groupstartindex = data->list.value == 0 ? 0 : 4;
+		data->list.groupstartindex = data->list.value * 4;
 		break;
 	case MENUOP_SET:
 		optionsSetControlMode(mpindex, data->list.value);
 		g_Vars.modifiedfiles |= MODFILE_GAME;
+#ifndef PLATFORM_N64
+		g_PlayerExtCfg[mpindex & 3].extcontrols = (data->list.value == CONTROLMODE_PC);
+#endif
 		break;
 	case MENUOP_GETSELECTEDINDEX:
 		data->list.value = optionsGetControlMode(mpindex);

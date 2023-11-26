@@ -250,8 +250,9 @@ void bgunRumble(s32 handnum, s32 weaponnum)
 	bool contpad2hasrumble;
 	s32 contpadtouse1;
 	s32 contpadtouse2;
+	s32 controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
 
-	if (optionsGetControlMode(g_Vars.currentplayerstats->mpindex) >= CONTROLMODE_21) {
+	if (controlmode >= CONTROLMODE_21 && controlmode < CONTROLMODE_PC) {
 		contpad1hasrumble = pakGetType(g_Vars.currentplayernum) == PAKTYPE_RUMBLE;
 		contpad2hasrumble = pakGetType(g_Vars.currentplayernum + PLAYERCOUNT()) == PAKTYPE_RUMBLE;
 
@@ -11798,16 +11799,20 @@ s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromac
 
 void bgun0f0a8c50(void)
 {
+#ifndef PLATFORM_N64
 	switch (bgunGetWeaponNum(HAND_RIGHT)) {
 	case WEAPON_RCP120:
 	case WEAPON_LAPTOPGUN:
 	case WEAPON_DRAGON:
 	case WEAPON_REMOTEMINE:
-		return;
-	default:
-		if (g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary == false) {
-			g_Vars.currentplayer->gunctrl.invertgunfunc = false;
+		if (PLAYER_EXTCFG().extcontrols) {
+			return;
 		}
+		break;
+	}
+#endif
+	if (g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary == false) {
+		g_Vars.currentplayer->gunctrl.invertgunfunc = false;
 	}
 }
 

@@ -886,22 +886,25 @@ struct menudialogdef g_ExtendedBindKeyMenuDialog = {
 struct menubind {
 	u32 ck;
 	const char *name;
+	const char *n64name;
 };
 
 static const struct menubind menuBinds[] = {
-	{ CK_ZTRIG,  "Fire [ZT]\n" },
-	{ CK_LTRIG,  "Fire Mode [LT]\n" },
-	{ CK_RTRIG,  "Aim Mode [RT]\n" },
-	{ CK_A,      "Use / Accept [A]\n" },
-	{ CK_B,      "Use / Cancel [B]\n" },
-	{ CK_X,      "Reload [X]\n" },
-	{ CK_Y,      "Next Weapon [Y]\n" },
-	{ CK_DPAD_L, "Prev Weapon [DL]\n" },
-	{ CK_DPAD_D, "Radial Menu [DD]\n" },
-	{ CK_START,  "Pause Menu [ST]\n" },
-	{ CK_8000,   "Cycle Crouch [+]\n" },
-	{ CK_4000,   "Half Crouch [+]\n" },
-	{ CK_2000,   "Full Crouch [+]\n" },
+	{ CK_ZTRIG,  "Fire [ZT]\n",        "N64 Z Trigger\n" },
+	{ CK_LTRIG,  "Fire Mode [LT]\n",   "N64 L Trigger\n"},
+	{ CK_RTRIG,  "Aim Mode [RT]\n",    "N64 R Trigger\n" },
+	{ CK_A,      "Use / Accept [A]\n", "N64 A Button\n" },
+	{ CK_B,      "Use / Cancel [B]\n", "N64 B Button\n" },
+	{ CK_X,      "Reload [X]\n",       "N64 Ext X\n" },
+	{ CK_Y,      "Next Weapon [Y]\n",  "N64 Ext Y\n" },
+	{ CK_DPAD_U, "D-Pad Up [DU]\n",    "N64 D-Pad Up\n" },
+	{ CK_DPAD_R, "D-Pad Right [DR]\n", "N64 D-Pad Right\n" },
+	{ CK_DPAD_L, "Prev Weapon [DL]\n", "N64 D-Pad Left\n" },
+	{ CK_DPAD_D, "Radial Menu [DD]\n", "N64 D-Pad Down\n" },
+	{ CK_START,  "Pause Menu [ST]\n",  "N64 Start\n" },
+	{ CK_8000,   "Cycle Crouch [+]\n", "N64 Ext 8000\n" },
+	{ CK_4000,   "Half Crouch [+]\n",  "N64 Ext 4000\n" },
+	{ CK_2000,   "Full Crouch [+]\n",  "N64 Ext 2000\n" },
 };
 
 static const char *menutextBind(struct menuitem *item);
@@ -919,6 +922,8 @@ static MenuItemHandlerResult menuhandlerResetBinds(s32 operation, struct menuite
 	}
 
 struct menuitem g_ExtendedBindsMenuItems[] = {
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),
@@ -989,7 +994,9 @@ static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *i
 
 static const char *menutextBind(struct menuitem *item)
 {
-	return menuBinds[item - g_ExtendedBindsMenuItems].name;
+	return g_PlayerExtCfg[g_ExtMenuPlayer].extcontrols ?
+		menuBinds[item - g_ExtendedBindsMenuItems].name :
+		menuBinds[item - g_ExtendedBindsMenuItems].n64name;
 }
 
 static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *item, union handlerdata *data)
