@@ -234,7 +234,7 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 		{ CK_DPAD_R, SDL_CONTROLLER_BUTTON_DPAD_RIGHT    },
 	};
 
-	memset(binds, 0, sizeof(binds));
+	memset(binds[cidx], 0, sizeof(binds[cidx]));
 
 	const u32 (*kbbinds)[3];
 	const u32 (*joybinds)[2];
@@ -252,10 +252,12 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 		numjoybinds = sizeof(pcjoybinds) / sizeof(pcjoybinds[0]);
 	}
 
-	for (u32 i = 0; i < numkbbinds; ++i) {
-		for (s32 j = 1; j < 3; ++j) {
-			if (kbbinds[i][j]) {
-				inputKeyBind(0, kbbinds[i][0], j - 1, kbbinds[i][j]);
+	if (cidx == 0) {
+		for (u32 i = 0; i < numkbbinds; ++i) {
+			for (s32 j = 1; j < 3; ++j) {
+				if (kbbinds[i][j]) {
+					inputKeyBind(cidx, kbbinds[i][0], j - 1, kbbinds[i][j]);
+				}
 			}
 		}
 	}
