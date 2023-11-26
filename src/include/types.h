@@ -5510,6 +5510,9 @@ struct nbomb {
 	struct prop *ownerprop;
 	struct sndstate *audiohandle20;
 	struct sndstate *audiohandle24;
+#ifndef PLATFORM_N64
+	s32 spawnframe240; // spawned on this frame
+#endif
 };
 
 struct roomacousticdata {
