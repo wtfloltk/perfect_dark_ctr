@@ -909,7 +909,8 @@ static const struct menubind menuBinds[] = {
 
 static const char *menutextBind(struct menuitem *item);
 static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *item, union handlerdata *data);
-static MenuItemHandlerResult menuhandlerResetBinds(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerResetBindsPC(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerResetBindsN64(s32 operation, struct menuitem *item, union handlerdata *data);
 
 #define DEFINE_MENU_BIND() \
 	{ \
@@ -949,9 +950,17 @@ struct menuitem g_ExtendedBindsMenuItems[] = {
 		MENUITEMTYPE_SELECTABLE,
 		0,
 		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Reset to Defaults\n",
+		(uintptr_t)"Reset to PC Defaults\n",
 		0,
-		menuhandlerResetBinds,
+		menuhandlerResetBindsPC,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Reset to N64 Defaults\n",
+		0,
+		menuhandlerResetBindsN64,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,
@@ -1034,10 +1043,19 @@ static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerResetBinds(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerResetBindsPC(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		inputSetDefaultKeyBinds();
+		inputSetDefaultKeyBinds(g_ExtMenuPlayer, false);
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerResetBindsN64(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		inputSetDefaultKeyBinds(g_ExtMenuPlayer, true);
 	}
 
 	return 0;

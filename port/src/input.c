@@ -157,10 +157,10 @@ static const char *vkJoyNames[] = {
 
 static char vkNames[VK_TOTAL_COUNT][64];
 
-void inputSetDefaultKeyBinds(void)
+void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 {
 	// TODO: make VK constants for all these
-	static const u32 kbbinds[][3] = {
+	static const u32 pckbbinds[][3] = {
 		{ CK_B,             SDL_SCANCODE_E,      0                   },
 		{ CK_X,             SDL_SCANCODE_R,      0                   },
 		{ CK_RTRIG,         VK_MOUSE_RIGHT,      SDL_SCANCODE_Z      },
@@ -183,7 +183,7 @@ void inputSetDefaultKeyBinds(void)
 		{ CK_2000,          SDL_SCANCODE_LCTRL,  0                   }
 	};
 
-	static const u32 joybinds[][2] = {
+	static const u32 pcjoybinds[][2] = {
 		{ CK_A,      SDL_CONTROLLER_BUTTON_A             },
 		{ CK_X,      SDL_CONTROLLER_BUTTON_X             },
 		{ CK_Y,      SDL_CONTROLLER_BUTTON_Y             },
@@ -200,9 +200,59 @@ void inputSetDefaultKeyBinds(void)
 		{ CK_8000,   SDL_CONTROLLER_BUTTON_LEFTSTICK     },
 	};
 
+	static const u32 n64kbbinds[][3] = {
+		{ CK_A,          SDL_SCANCODE_Q,      0                  },
+		{ CK_B,          SDL_SCANCODE_E,      0                  },
+		{ CK_RTRIG,      VK_MOUSE_RIGHT,      SDL_SCANCODE_LALT  },
+		{ CK_LTRIG,      SDL_SCANCODE_F,      0                  },
+		{ CK_ZTRIG,      VK_MOUSE_LEFT,       SDL_SCANCODE_SPACE },
+		{ CK_START,      SDL_SCANCODE_RETURN, 0                  },
+		{ CK_C_D,        SDL_SCANCODE_S,      0                  },
+		{ CK_C_U,        SDL_SCANCODE_W,      0                  },
+		{ CK_C_R,        SDL_SCANCODE_D,      0                  },
+		{ CK_C_L,        SDL_SCANCODE_A,      0                  },
+		{ CK_DPAD_L,     SDL_SCANCODE_LEFT,   0                  },
+		{ CK_DPAD_R,     SDL_SCANCODE_RIGHT,  0                  },
+		{ CK_DPAD_D,     SDL_SCANCODE_DOWN,   0                  },
+		{ CK_DPAD_U,     SDL_SCANCODE_UP,     0                  },
+		{ CK_STICK_YNEG, SDL_SCANCODE_K,      0                  },
+		{ CK_STICK_YPOS, SDL_SCANCODE_I,      0                  },
+		{ CK_STICK_XNEG, SDL_SCANCODE_J,      0                  },
+		{ CK_STICK_XPOS, SDL_SCANCODE_L,      0                  },
+	};
+
+	static const u32 n64joybinds[][2] = {
+		{ CK_A,      SDL_CONTROLLER_BUTTON_A             },
+		{ CK_B,      SDL_CONTROLLER_BUTTON_B             },
+		{ CK_LTRIG,  SDL_CONTROLLER_BUTTON_LEFTSHOULDER  },
+		{ CK_RTRIG,  SDL_CONTROLLER_BUTTON_RIGHTSHOULDER },
+		{ CK_ZTRIG,  VK_JOY1_RTRIG - VK_JOY1_BEGIN       },
+		{ CK_START,  SDL_CONTROLLER_BUTTON_START         },
+		{ CK_DPAD_D, SDL_CONTROLLER_BUTTON_DPAD_DOWN     },
+		{ CK_DPAD_U, SDL_CONTROLLER_BUTTON_DPAD_UP       },
+		{ CK_DPAD_L, SDL_CONTROLLER_BUTTON_DPAD_LEFT     },
+		{ CK_DPAD_R, SDL_CONTROLLER_BUTTON_DPAD_RIGHT    },
+	};
+
 	memset(binds, 0, sizeof(binds));
 
-	for (u32 i = 0; i < sizeof(kbbinds) / sizeof(kbbinds[0]); ++i) {
+	const u32 (*kbbinds)[3];
+	const u32 (*joybinds)[2];
+	u32 numkbbinds;
+	u32 numjoybinds;
+	if (n64mode) {
+		kbbinds = n64kbbinds;
+		joybinds = n64joybinds;
+		numkbbinds = sizeof(n64kbbinds) / sizeof(n64kbbinds[0]);
+		numjoybinds = sizeof(n64joybinds) / sizeof(n64joybinds[0]);
+	} else {
+		kbbinds = pckbbinds;
+		joybinds = pcjoybinds;
+		numkbbinds = sizeof(pckbbinds) / sizeof(pckbbinds[0]);
+		numjoybinds = sizeof(pcjoybinds) / sizeof(pcjoybinds[0]);
+	}
+
+	for (u32 i = 0; i < numkbbinds; ++i) {
 		for (s32 j = 1; j < 3; ++j) {
 			if (kbbinds[i][j]) {
 				inputKeyBind(0, kbbinds[i][0], j - 1, kbbinds[i][j]);
@@ -210,10 +260,8 @@ void inputSetDefaultKeyBinds(void)
 		}
 	}
 
-	for (u32 i = 0; i < sizeof(joybinds) / sizeof(joybinds[0]); ++i) {
-		for (s32 j = 0; j < INPUT_MAX_CONTROLLERS; ++j) {
-			inputKeyBind(j, joybinds[i][0], -1, VK_JOY_BEGIN + j * INPUT_MAX_CONTROLLER_BUTTONS + joybinds[i][1]);
-		}
+	for (u32 i = 0; i < numjoybinds; ++i) {
+		inputKeyBind(cidx, joybinds[i][0], -1, VK_JOY_BEGIN + cidx * INPUT_MAX_CONTROLLER_BUTTONS + joybinds[i][1]);
 	}
 }
 
@@ -487,7 +535,9 @@ s32 inputInit(void)
 
 	inputInitKeyNames();
 
-	inputSetDefaultKeyBinds();
+	for (s32 i = 0; i < INPUT_MAX_CONTROLLERS; ++i) {
+		inputSetDefaultKeyBinds(i, 0);
+	}
 
 	inputLockMouse(mouseDefaultLocked);
 

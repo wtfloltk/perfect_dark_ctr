@@ -169,7 +169,7 @@ void inputUpdate(void);
 // call this before configSave()
 void inputSaveBinds(void);
 
-void inputSetDefaultKeyBinds(void);
+void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode);
 
 void inputClearLastKey(void);
 s32 inputGetLastKey(void);
