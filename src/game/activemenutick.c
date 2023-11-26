@@ -263,7 +263,7 @@ void amTick(void)
 					stayopen = false;
 				}
 
-#if VERSION >= VERSION_NTSC_1_0
+#if (VERSION >= VERSION_NTSC_1_0) && defined(PLATFORM_N64)
 				if (g_Vars.lvupdate240 == 0) {
 					stayopen = false;
 				}
