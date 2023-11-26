@@ -765,8 +765,8 @@ void eyespyProcessInput(bool allowbuttons)
 		shootpressed = c1buttons & Z_TRIG;
 #ifndef PLATFORM_N64
 		if (controlmode == CONTROLMODE_PC) {
-			exitpressed = (c1buttons | c2buttons) & (BUTTON_WPNBACK | BUTTON_RADIAL);
-			activatepressed = (c1buttons | c2buttons) & (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE);
+			exitpressed = c1buttons & (BUTTON_WPNBACK | BUTTON_RADIAL);
+			activatepressed = c1buttons & (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE);
 		} else
 #endif
 		{
