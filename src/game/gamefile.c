@@ -579,7 +579,7 @@ void gamefileUnlockEverything(void)
 	// unlock all challenges
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); ++i) {
 		for (j = 0; j < MAX_PLAYERS; ++j) {
-			g_MpChallenges[i].completions[j] = 0x0f;
+			g_MpChallenges[i].completions[j] = 0xff;
 		}
 	}
 	challengeDetermineUnlockedFeatures();
