@@ -311,6 +311,44 @@ static inline s32 inputControllerGetIndex(SDL_GameController *ctrl) {
 	return -1;
 }
 
+static inline void inputShutdownAllControllers(void)
+{
+	for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
+		if (pads[cidx]) {
+			SDL_GameControllerClose(pads[cidx]);
+			pads[cidx] = NULL;
+		}
+	}
+
+	connectedMask = 1; // always report first controller as connected
+}
+
+static inline void inputInitAllControllers(void)
+{
+	SDL_GameControllerUpdate();
+
+	const s32 numJoys = SDL_NumJoysticks();
+
+	connectedMask = 1; // always report first controller as connected
+
+	// if firstController is set to 1, keyboard will count as a separate controller on its own,
+	// so the first connected gamepad will go to player 2 instead of player 1
+	for (s32 jidx = 0, cidx = firstController; jidx < numJoys && cidx < INPUT_MAX_CONTROLLERS; ++jidx) {
+		if (SDL_IsGameController(jidx)) {
+			pads[cidx] = SDL_GameControllerOpen(jidx);
+			if (pads[cidx]) {
+				inputInitController(cidx);
+				++cidx;
+			}
+		}
+	}
+
+	const s32 overrideMask = (1 << fakeControllers) - 1;
+	if (overrideMask) {
+		connectedMask = overrideMask;
+	}
+}
+
 static int inputEventFilter(void *data, SDL_Event *event)
 {
 	switch (event->type) {
@@ -514,23 +552,7 @@ s32 inputInit(void)
 		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 	}
 
-	SDL_GameControllerUpdate();
-
-	const s32 numJoys = SDL_NumJoysticks();
-
-	connectedMask = 1; // always report first controller as connected
-
-	// if firstController is set to 1, keyboard will count as a separate controller on its own,
-	// so the first connected gamepad will go to player 2 instead of player 1
-	for (s32 jidx = 0, cidx = firstController; jidx < numJoys && cidx < INPUT_MAX_CONTROLLERS; ++jidx) {
-		if (SDL_IsGameController(jidx)) {
-			pads[cidx] = SDL_GameControllerOpen(jidx);
-			if (pads[cidx]) {
-				inputInitController(cidx);
-				++cidx;
-			}
-		}
-	}
+	inputInitAllControllers();
 
 	// since the main event loop is elsewhere, we can receive some events we need using a watcher
 	SDL_AddEventWatch(inputEventFilter, NULL);
@@ -547,11 +569,6 @@ s32 inputInit(void)
 	// NOTE: by default sticks get swapped for 1.2: "right stick" here means left stick on your controller
 	for (s32 i = 0; i < INPUT_MAX_CONTROLLERS; ++i) {
 		inputControllerSetSticksSwapped(i, padsCfg[i].swapSticks);
-	}
-
-	const s32 overrideMask = (1 << fakeControllers) - 1;
-	if (overrideMask) {
-		connectedMask = overrideMask;
 	}
 
 	inputLoadBinds();
@@ -793,6 +810,16 @@ f32 inputControllerGetAxisDeadzone(s32 cidx, s32 stick, s32 axis)
 void inputControllerSetAxisDeadzone(s32 cidx, s32 stick, s32 axis, f32 value)
 {
 	padsCfg[cidx].deadzone[stick * 2 + axis] = value * 32767.f;
+}
+
+void inputControllerSetFirstIndex(s32 cidx) {
+	firstController = cidx;
+	inputShutdownAllControllers();
+	inputInitAllControllers();
+}
+
+s32 inputControllerGetFirstIndex(void) {
+	return firstController;
 }
 
 void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk)

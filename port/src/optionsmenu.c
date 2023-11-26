@@ -520,6 +520,19 @@ static MenuItemHandlerResult menuhandlerSwapSticks(s32 operation, struct menuite
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerFirstController(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return (inputControllerGetFirstIndex() == g_ExtMenuPlayer);
+	case MENUOP_SET:
+		inputControllerSetFirstIndex(g_ExtMenuPlayer);
+		break;
+	}
+
+	return 0;
+}
+
 struct menuitem g_ExtendedControllerMenuItems[] = {
 	{
 		MENUITEMTYPE_CHECKBOX,
@@ -536,6 +549,14 @@ struct menuitem g_ExtendedControllerMenuItems[] = {
 		(uintptr_t)"Swap Sticks",
 		0,
 		menuhandlerSwapSticks,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Assign First Controller",
+		0,
+		menuhandlerFirstController,
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,

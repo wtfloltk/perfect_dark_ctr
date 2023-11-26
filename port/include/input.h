@@ -107,6 +107,9 @@ void inputControllerSetAxisScale(s32 cidx, s32 stick, s32 axis, f32 value);
 f32 inputControllerGetAxisDeadzone(s32 cidx, s32 stick, s32 axis);
 void inputControllerSetAxisDeadzone(s32 cidx, s32 stick, s32 axis, f32 value);
 
+void inputControllerSetFirstIndex(s32 cidx);
+s32 inputControllerGetFirstIndex(void);
+
 // vk is a value from the virtkey enum above
 s32 inputKeyPressed(u32 vk);
 
