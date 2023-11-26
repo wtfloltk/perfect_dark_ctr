@@ -1008,7 +1008,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 												amOpen();
 												g_Vars.currentplayer->invdowntime = -1;
 											} else {
-												g_Vars.currentplayer->invdowntime++;
+												g_Vars.currentplayer->invdowntime += g_Vars.lvupdate60;
 											}
 										}
 									}
@@ -1467,7 +1467,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 												amOpen();
 												g_Vars.currentplayer->invdowntime = -1;
 											} else {
-												g_Vars.currentplayer->invdowntime++;
+												g_Vars.currentplayer->invdowntime += g_Vars.lvupdate60;
 											}
 										}
 									}
