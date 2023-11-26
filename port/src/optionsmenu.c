@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <PR/ultratypes.h>
@@ -489,6 +490,12 @@ static MenuItemHandlerResult menuhandlerVibration(s32 operation, struct menuitem
 	case MENUOP_SET:
 		inputRumbleSetStrength(g_ExtMenuPlayer, (f32)data->slider.value / 10.f);
 		break;
+	case MENUOP_CHECKHIDDEN:
+	case MENUOP_CHECKDISABLED:
+		if (!inputRumbleSupported(g_ExtMenuPlayer)) {
+			return true;
+		}
+		break;
 	}
 
 	return 0;
@@ -520,13 +527,42 @@ static MenuItemHandlerResult menuhandlerSwapSticks(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerFirstController(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerController(s32 operation, struct menuitem *item, union handlerdata *data)
 {
+	static char ctrlname[35];
+	s32 ctrls[INPUT_MAX_CONNECTED_CONTROLLERS];
+	const s32 numCtrls = inputGetConnectedControllers(ctrls);
+	const s32 curCtrl = inputGetAssignedControllerId(g_ExtMenuPlayer);
+
 	switch (operation) {
-	case MENUOP_GET:
-		return (inputControllerGetFirstIndex() == g_ExtMenuPlayer);
+	case MENUOP_GETOPTIONCOUNT:
+		data->dropdown.value = numCtrls + 1; // first option is "None"
+		break;
+	case MENUOP_GETOPTIONTEXT:
+		if (data->dropdown.value) {
+			const s32 jid = ctrls[data->dropdown.value - 1];
+			const char *name = inputGetConnectedControllerName(jid);
+			strncpy(ctrlname, name, sizeof(ctrlname) - 1);
+			return (intptr_t)ctrlname;
+		} else {
+			return (intptr_t)"None";
+		}
 	case MENUOP_SET:
-		inputControllerSetFirstIndex(g_ExtMenuPlayer);
+		if (data->dropdown.value == 0) {
+			// unassign controller
+			inputAssignController(g_ExtMenuPlayer, -1);
+		} else if (data->dropdown.value <= numCtrls) {
+			inputAssignController(g_ExtMenuPlayer, ctrls[data->dropdown.value - 1]);
+		}
+		break;
+	case MENUOP_GETSELECTEDINDEX:
+		for (s32 i = 0; i < numCtrls; ++i) {
+			if (curCtrl == ctrls[i]) {
+				data->dropdown.value = i + 1;
+				return 0;
+			}
+		}
+		data->dropdown.value = 0;
 		break;
 	}
 
@@ -534,6 +570,14 @@ static MenuItemHandlerResult menuhandlerFirstController(s32 operation, struct me
 }
 
 struct menuitem g_ExtendedControllerMenuItems[] = {
+	{
+		MENUITEMTYPE_DROPDOWN,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Controller",
+		0,
+		menuhandlerController,
+	},
 	{
 		MENUITEMTYPE_CHECKBOX,
 		0,
@@ -549,14 +593,6 @@ struct menuitem g_ExtendedControllerMenuItems[] = {
 		(uintptr_t)"Swap Sticks",
 		0,
 		menuhandlerSwapSticks,
-	},
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Assign First Controller",
-		0,
-		menuhandlerFirstController,
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,

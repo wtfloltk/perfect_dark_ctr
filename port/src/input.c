@@ -32,7 +32,8 @@ static SDL_GameController *pads[INPUT_MAX_CONTROLLERS];
 	.sens = { 1.f, 1.f, 1.f, 1.f }, \
 	.deadzone = { DEFAULT_DEADZONE, DEFAULT_DEADZONE, DEFAULT_DEADZONE, DEFAULT_DEADZONE_RY }, \
 	.stickCButtons = 0, \
-	.swapSticks = 1 \
+	.swapSticks = 1, \
+	.deviceIndex = -1 \
 }
 
 static struct controllercfg {
@@ -43,6 +44,7 @@ static struct controllercfg {
 	s32 deadzone[4];
 	s32 stickCButtons;
 	s32 swapSticks;
+	s32 deviceIndex;
 } padsCfg[INPUT_MAX_CONTROLLERS] = {
 	CONTROLLERCFG_DEFAULT,
 	CONTROLLERCFG_DEFAULT,
@@ -56,6 +58,8 @@ static char bindStrs[MAXCONTROLLERS][CK_TOTAL_COUNT][MAX_BIND_STR];
 static s32 fakeControllers = 0;
 static s32 firstController = 0;
 static s32 connectedMask = 0;
+
+static s32 numJoysticks = 0;
 
 static s32 mouseEnabled = 1;
 static s32 mouseLocked = 0;
@@ -267,7 +271,21 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 	}
 }
 
-static inline void inputInitController(const s32 cidx)
+static inline s32 inputDeviceIndexFromId(const SDL_JoystickID id) {
+	for (s32 jidx = 0; jidx < numJoysticks; ++jidx) {
+		if (SDL_JoystickGetDeviceInstanceID(jidx) == id) {
+			return jidx;
+		}
+	}
+	return -1;
+}
+
+static inline SDL_JoystickID inputControllerGetId(SDL_GameController *ctrl)
+{
+	return SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(ctrl));
+}
+
+static inline void inputInitController(const s32 cidx, const s32 jidx)
 {
 #if SDL_VERSION_ATLEAST(2, 0, 18)
 	// SDL_GameControllerHasRumble() appeared in 2.0.18 even though SDL_GameControllerRumble() is in 2.0.9
@@ -286,21 +304,32 @@ static inline void inputInitController(const s32 cidx)
 	// make the LEDs on the controller indicate which player it's for
 	SDL_GameControllerSetPlayerIndex(pads[cidx], cidx);
 
+	// remember the joystick index
+	padsCfg[cidx].deviceIndex = jidx;
+
 	connectedMask |= (1 << cidx);
+
+	sysLogPrintf(LOG_NOTE, "input: assigned controller '%d: (%s)' (id %d) to player %d",
+		jidx, SDL_GameControllerName(pads[cidx]), inputControllerGetId(pads[cidx]), cidx);
 }
 
 static inline void inputCloseController(const s32 cidx)
 {
+	sysLogPrintf(LOG_NOTE, "input: removed controller '%d: (%s)' (id %d) from player %d",
+		padsCfg[cidx].deviceIndex, SDL_GameControllerName(pads[cidx]), inputControllerGetId(pads[cidx]), cidx);
+
 	SDL_GameControllerClose(pads[cidx]);
+
 	pads[cidx] = NULL;
 	padsCfg[cidx].rumbleOn = 0;
+
 	if (cidx) {
 		connectedMask &= ~(1 << cidx);
 	}
 }
 
-
-static inline s32 inputControllerGetIndex(SDL_GameController *ctrl) {
+static inline s32 inputControllerGetIndex(SDL_GameController *ctrl)
+{
 	if (ctrl) {
 		for (s32 i = 0; i < INPUT_MAX_CONTROLLERS; ++i) {
 			if (pads[i] == ctrl) {
@@ -311,11 +340,33 @@ static inline s32 inputControllerGetIndex(SDL_GameController *ctrl) {
 	return -1;
 }
 
-static inline void inputShutdownAllControllers(void)
+static inline s32 inputControllerGetIndexByDeviceIndex(const s32 jidx)
+{
+	for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
+		if (pads[cidx] && padsCfg[cidx].deviceIndex == jidx) {
+			return cidx;
+		}
+	}
+	return -1;
+}
+
+static inline s32 inputControllerGetIndexById(const SDL_JoystickID jid)
 {
 	for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
 		if (pads[cidx]) {
-			SDL_GameControllerClose(pads[cidx]);
+			if (inputControllerGetId(pads[cidx]) == jid) {
+				return cidx;
+			}
+		}
+	}
+	return -1;
+}
+
+static inline void inputCloseAllControllers(void)
+{
+	for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
+		if (pads[cidx]) {
+			inputCloseController(cidx);
 			pads[cidx] = NULL;
 		}
 	}
@@ -323,22 +374,50 @@ static inline void inputShutdownAllControllers(void)
 	connectedMask = 1; // always report first controller as connected
 }
 
+static inline s32 inputTryController(const s32 cidx, const s32 jidx)
+{
+	if (!pads[cidx]) {
+		pads[cidx] = SDL_GameControllerOpen(jidx);
+		if (pads[cidx]) {
+			inputInitController(cidx, jidx);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 static inline void inputInitAllControllers(void)
 {
 	SDL_GameControllerUpdate();
 
-	const s32 numJoys = SDL_NumJoysticks();
+	numJoysticks = SDL_NumJoysticks();
 
 	connectedMask = 1; // always report first controller as connected
 
-	// if firstController is set to 1, keyboard will count as a separate controller on its own,
-	// so the first connected gamepad will go to player 2 instead of player 1
-	for (s32 jidx = 0, cidx = firstController; jidx < numJoys && cidx < INPUT_MAX_CONTROLLERS; ++jidx) {
-		if (SDL_IsGameController(jidx)) {
-			pads[cidx] = SDL_GameControllerOpen(jidx);
-			if (pads[cidx]) {
-				inputInitController(cidx);
-				++cidx;
+	// first try to assign the controllers that we had last time
+	// we're still free to check by device index before any controller device events fire
+	for (s32 cidx = 0; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
+		const s32 jidx = padsCfg[cidx].deviceIndex;
+		if (jidx >= 0 && jidx < numJoysticks) {
+			if (SDL_IsGameController(jidx) && inputControllerGetIndexByDeviceIndex(jidx) < 0) {
+				// using the full assign function in case user sets same index for several players
+				if (inputTryController(cidx, jidx)) {
+					// success
+					continue;
+				}
+			}
+			// nothing was there, forget it
+			padsCfg[cidx].deviceIndex = -1;
+		}
+	}
+
+	// now try autofilling the rest, starting with firstController
+	for (s32 jidx = 0; jidx < numJoysticks; ++jidx) {
+		if (SDL_IsGameController(jidx) && inputControllerGetIndexByDeviceIndex(jidx) < 0) {
+			for (s32 cidx = firstController; cidx < INPUT_MAX_CONTROLLERS; ++cidx) {
+				if (inputTryController(cidx, jidx)) {
+					break;
+				}
 			}
 		}
 	}
@@ -357,7 +436,7 @@ static int inputEventFilter(void *data, SDL_Event *event)
 				if (!pads[i]) {
 					pads[i] = SDL_GameControllerOpen(event->cdevice.which);
 					if (pads[i]) {
-						inputInitController(i);
+						inputInitController(i, event->cdevice.which);
 					}
 					break;
 				}
@@ -369,9 +448,15 @@ static int inputEventFilter(void *data, SDL_Event *event)
 			const s32 idx = inputControllerGetIndex(ctrl);
 			if (idx >= 0) {
 				inputCloseController(idx);
+				padsCfg[idx].deviceIndex = -1;
 			}
 			break;
 		}
+
+		case SDL_JOYDEVICEADDED:
+		case SDL_JOYDEVICEREMOVED:
+			numJoysticks = SDL_NumJoysticks(); // joystick count has changed
+			break;
 
 		case SDL_MOUSEWHEEL:
 			mouseWheel = event->wheel.y;
@@ -812,14 +897,100 @@ void inputControllerSetAxisDeadzone(s32 cidx, s32 stick, s32 axis, f32 value)
 	padsCfg[cidx].deadzone[stick * 2 + axis] = value * 32767.f;
 }
 
-void inputControllerSetFirstIndex(s32 cidx) {
-	firstController = cidx;
-	inputShutdownAllControllers();
-	inputInitAllControllers();
+s32 inputGetConnectedControllers(s32 *out)
+{
+	s32 count = 0;
+
+	for (s32 jidx = 0; jidx < numJoysticks; ++jidx) {
+		if (SDL_IsGameController(jidx)) {
+			if (out && count < INPUT_MAX_CONNECTED_CONTROLLERS) {
+				out[count] = SDL_JoystickGetDeviceInstanceID(jidx);
+			}
+			++count;
+		}
+	}
+
+	return count;
 }
 
-s32 inputControllerGetFirstIndex(void) {
-	return firstController;
+s32 inputGetAssignedControllerId(s32 cidx)
+{
+	if (cidx < 0 || cidx >= INPUT_MAX_CONTROLLERS) {
+		return -1;
+	}
+
+	if (pads[cidx] == NULL) {
+		return -1;
+	}
+
+	return inputControllerGetId(pads[cidx]);
+}
+
+const char *inputGetConnectedControllerName(s32 id)
+{
+	static char fullName[256];
+
+	if (id < 0) {
+		return "Invalid";
+	}
+
+	const s32 jidx = inputDeviceIndexFromId(id);
+	if (jidx < 0) {
+		return "Invalid";
+	}
+
+	const char *name = SDL_GameControllerNameForIndex(jidx);
+	if (!name || !name[0]) {
+		name = "Unnamed Controller";
+	}
+
+	snprintf(fullName, sizeof(fullName), "%d: %s", jidx, name);
+
+	return fullName;
+}
+
+s32 inputAssignController(s32 cidx, s32 id)
+{
+	if (cidx < 0 || cidx >= INPUT_MAX_CONTROLLERS) {
+		return 0;
+	}
+
+	if (id < 0) {
+		// close current controller, if any
+		if (pads[cidx]) {
+			inputCloseController(cidx);
+			return 1;
+		}
+		return 0;
+	}
+
+	const s32 jidx = inputDeviceIndexFromId(id);
+	if (jidx < 0 || jidx >= SDL_NumJoysticks() || !SDL_IsGameController(jidx)) {
+		return 0;
+	}
+
+	// try to unassign any other instances of this controller
+	for (s32 i = 0; i < INPUT_MAX_CONTROLLERS; ++i) {
+		if (pads[i] && inputControllerGetId(pads[i]) == id) {
+			inputCloseController(i);
+			pads[i] = NULL;
+			padsCfg[i].deviceIndex = -1;
+		}
+	}
+
+	SDL_GameController *newpad = SDL_GameControllerOpen(jidx);
+	if (!newpad) {
+		return 0;
+	}
+
+	if (pads[cidx]) {
+		inputCloseController(cidx);
+	}
+
+	pads[cidx] = newpad;
+	inputInitController(cidx, id);
+
+	return 1;
 }
 
 void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk)
@@ -1081,6 +1252,7 @@ PD_CONSTRUCTOR static void inputConfigInit(void)
 		configRegisterFloat(strFmt("%s.RStickScaleY", secname), &padsCfg[c].sens[3], -10.f, 10.f);
 		configRegisterInt(strFmt("%s.StickCButtons", secname), &padsCfg[c].stickCButtons, 0, 1);
 		configRegisterInt(strFmt("%s.SwapSticks", secname), &padsCfg[c].swapSticks, 0, 1);
+		configRegisterInt(strFmt("%s.ControllerIndex", secname), &padsCfg[c].deviceIndex, -1, 0x7FFFFFFF);
 		secname[13] = '.';
 		for (u32 ck = 0; ck < CK_TOTAL_COUNT; ++ck) {
 			snprintf(keyname, sizeof(keyname), "%s.%s", secname, inputGetContKeyName(ck));
