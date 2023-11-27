@@ -680,19 +680,33 @@ static MenuItemHandlerResult menuhandlerTexFilter2D(s32 operation, struct menuit
 
 static MenuItemHandlerResult menuhandlerCenterHUD(s32 operation, struct menuitem *item, union handlerdata *data)
 {
+	static const char *opts[] = {
+		"None",
+		"4:3",
+		"Wide"
+	};
+
 	switch (operation) {
-	case MENUOP_GET:
-		return g_HudCenter;
+	case MENUOP_GETOPTIONCOUNT:
+		data->dropdown.value = ARRAYCOUNT(opts);
+		break;
+	case MENUOP_GETOPTIONTEXT:
+		return (intptr_t)opts[data->dropdown.value];
 	case MENUOP_SET:
 		g_HudCenter = data->checkbox.value;
-		if (g_HudCenter) {
+		if (g_HudCenter == HUDCENTER_NORMAL) {
 			g_HudAlignModeL = G_ASPECT_CENTER_EXT;
 			g_HudAlignModeR = G_ASPECT_CENTER_EXT;
-		} else {
+		} else if (g_HudCenter == HUDCENTER_WIDE) {
+			g_HudAlignModeL = G_ASPECT_LEFT_EXT | G_ASPECT_WIDE_EXT;
+			g_HudAlignModeR = G_ASPECT_RIGHT_EXT | G_ASPECT_WIDE_EXT;
+		}	else {
 			g_HudAlignModeL = G_ASPECT_LEFT_EXT;
 			g_HudAlignModeR = G_ASPECT_RIGHT_EXT;
 		}
 		break;
+	case MENUOP_GETSELECTEDINDEX:
+		data->dropdown.value = g_HudCenter;
 	}
 
 	return 0;
@@ -738,10 +752,10 @@ struct menuitem g_ExtendedVideoMenuItems[] = {
 		menuhandlerTexFilter2D,
 	},
 	{
-		MENUITEMTYPE_CHECKBOX,
+		MENUITEMTYPE_DROPDOWN,
 		0,
 		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Center HUD",
+		(uintptr_t)"HUD Centering",
 		0,
 		menuhandlerCenterHUD,
 	},

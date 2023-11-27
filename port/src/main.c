@@ -71,9 +71,12 @@ static void gameInit(void)
 		cfg->fovzoommult = cfg->fovzoom ? cfg->fovy / 60.0f : 1.0f;
 	}
 
-	if (g_HudCenter) {
+	if (g_HudCenter == HUDCENTER_NORMAL) {
 		g_HudAlignModeL = G_ASPECT_CENTER_EXT;
 		g_HudAlignModeR = G_ASPECT_CENTER_EXT;
+	} else if (g_HudCenter == HUDCENTER_WIDE) {
+		g_HudAlignModeL = G_ASPECT_LEFT_EXT | G_ASPECT_WIDE_EXT;
+		g_HudAlignModeR = G_ASPECT_RIGHT_EXT | G_ASPECT_WIDE_EXT;
 	}
 }
 
@@ -147,7 +150,7 @@ int main(int argc, const char **argv)
 PD_CONSTRUCTOR static void gameConfigInit(void)
 {
 	configRegisterInt("Game.MemorySize", &g_OsMemSizeMb, 4, 2048);
-	configRegisterInt("Game.CenterHUD", &g_HudCenter, 0, 1);
+	configRegisterInt("Game.CenterHUD", &g_HudCenter, 0, 2);
 	configRegisterFloat("Game.ScreenShakeIntensity", &g_ViShakeIntensityMult, 0.f, 10.f);
 	configRegisterInt("Game.TickRateDivisor", &g_TickRateDiv, 0, 10);
 	configRegisterInt("Game.SkipIntro", &g_SkipIntro, 0, 1);
