@@ -10,6 +10,9 @@
 #include "config.h"
 #include "utils.h"
 #include "system.h"
+#include "fs.h"
+
+#define CONTROLLERDB_FNAME "gamecontrollerdb.txt"
 
 #define MAX_BIND_STR 256
 
@@ -635,6 +638,15 @@ s32 inputInit(void)
 {
 	if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
 		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
+	}
+
+	// try to load controller db from an external file in the save folder
+	if (fsFileSize("$S/" CONTROLLERDB_FNAME)) {
+		const char *dbpath = fsFullPath("$S/" CONTROLLERDB_FNAME);
+		const s32 dbcount = SDL_GameControllerAddMappingsFromFile(dbpath);
+		if (dbcount >= 0) {
+			sysLogPrintf(LOG_NOTE, "input: added %d controller mappings from %s", dbcount, dbpath);
+		}
 	}
 
 	inputInitAllControllers();
