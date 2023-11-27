@@ -321,6 +321,9 @@ static inline void inputCloseController(const s32 cidx)
 	sysLogPrintf(LOG_NOTE, "input: removed controller '%d: (%s)' (id %d) from player %d",
 		padsCfg[cidx].deviceIndex, SDL_GameControllerName(pads[cidx]), inputControllerGetId(pads[cidx]), cidx);
 
+	// reset player LEDs
+	SDL_GameControllerSetPlayerIndex(pads[cidx], -1);
+
 	SDL_GameControllerClose(pads[cidx]);
 
 	pads[cidx] = NULL;
