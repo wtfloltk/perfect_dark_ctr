@@ -165,7 +165,7 @@ void viConfigureForLegal(void)
 }
 
 const s16 g_ViModeWidths[]  = {FBALLOC_WIDTH_LO,  FBALLOC_WIDTH_LO,  SCREEN_320 * 2};
-const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, (PAL ? FBALLOC_HEIGHT_PAL : FBALLOC_HEIGHT_LO) * 2};
+const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, (PAL ? 252 : 220) * 2};
 
 /**
  * Allocate the colour framebuffers for the given stage.

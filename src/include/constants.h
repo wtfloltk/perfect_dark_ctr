@@ -3625,8 +3625,6 @@
 #define SCREEN_320 320
 #define SCREEN_240 240
 
-#ifdef PLATFORM_N64
-
 // The framebuffer allocation sizes are mostly the same between versions.
 // Note that the height is the same regardless of lo/hi-res, but we use separate constants.
 // FBALLOC_HEIGHT (without the LO/HI suffix) is used when the game references this value
@@ -3653,36 +3651,6 @@
 #define SCREEN_HEIGHT_LO 220
 #define SCREEN_WIDTH_HI  640
 #define SCREEN_HEIGHT_HI 220
-#endif
-
-#define FBALLOC_HEIGHT_PAL 252
-
-#else
-
-// on PC we're using proper 320x240 as the base resolution to avoid aspect stretching
-// or 320x290 on PAL
-
-#define FBALLOC_WIDTH_LO  320
-#define FBALLOC_HEIGHT_LO 240
-#define FBALLOC_WIDTH_HI  640
-#define FBALLOC_HEIGHT_HI 240
-#define FBALLOC_HEIGHT    240
-
-#if VERSION == VERSION_PAL_FINAL
-#define SCREEN_WIDTH_LO  320
-#define SCREEN_HEIGHT_LO 290
-#define SCREEN_WIDTH_HI  448
-#define SCREEN_HEIGHT_HI 290
-#else
-#define SCREEN_WIDTH_LO  320
-#define SCREEN_HEIGHT_LO 240
-#define SCREEN_WIDTH_HI  640
-#define SCREEN_HEIGHT_HI 240
-#endif
-
-// 252 * ~1.09091 to match the 220 -> 240 transition
-#define FBALLOC_HEIGHT_PAL 275
-
 #endif
 
 #define SCREENRATIO_NORMAL 0
