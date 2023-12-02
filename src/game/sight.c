@@ -856,20 +856,21 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	struct textureconfig *tconfig = &g_TexGeCrosshairConfigs[0];
 	f32 spc4[2];
 	f32 spbc[2];
-	s32 x = sightGetAdjustedX(g_Vars.currentplayer->crosspos[0]);
+	s32 x = g_Vars.currentplayer->crosspos[0];
 	s32 y = g_Vars.currentplayer->crosspos[1];
 	s32 x1;
 	s32 x2;
 	s32 y1;
 	s32 y2;
+#ifdef PLATFORM_N64
+	const s32 halfw = (tconfig->width >> 1);
+#else
+	const s32 halfw = roundf((f32)(tconfig->width >> 1) * (SCREEN_ASPECT / videoGetAspect()));
+#endif
 
 	if (!sighton) {
 		return gdl;
 	}
-
-#ifndef PLATFORM_N64
-	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	gDPSetColorDither(gdl++, G_CD_DISABLE);
 	gDPSetTexturePersp(gdl++, G_TP_NONE);
@@ -884,9 +885,9 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	gDPSetPrimColor(gdl++, 0, 0, 0x00, 0x00, 0x00, 0x00);
 
-	x1 = x - (tconfig->width >> 1);
+	x1 = x - halfw;
 	y1 = y - (tconfig->height >> 1);
-	x2 = x + (tconfig->width >> 1);
+	x2 = x + halfw;
 	y2 = y + (tconfig->height >> 1);
 
 	gDPFillRectangle(gdl++, x1, y1, x2, y2);
@@ -894,7 +895,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	spc4[0] = x;
 	spc4[1] = y;
 
-	spbc[0] = (tconfig->width >> 1) * (f32)g_ScaleX;
+	spbc[0] = halfw * (f32)g_ScaleX;
 	spbc[1] = tconfig->height >> 1;
 
 	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
@@ -910,10 +911,6 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTextureConvert(gdl++, G_TC_FILT);
 	gDPSetTextureLUT(gdl++, G_TT_NONE);
-
-#ifndef PLATFORM_N64
-	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	return gdl;
 }
