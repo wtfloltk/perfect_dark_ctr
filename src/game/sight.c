@@ -19,6 +19,27 @@
 #include "lib/snd.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include <math.h>
+#include "video.h"
+
+static inline f32 sightGetScaleX(void)
+{
+	return (videoGetAspect() / (4.f / 3.f));
+}
+
+static inline s32 sightGetAdjustedX(const f32 x)
+{
+	const f32 cx = (x - (f32)(SCREEN_WIDTH_LO / 2)) * sightGetScaleX();
+	return roundf((f32)(SCREEN_WIDTH_LO / 2) + cx);
+}
+
+#else
+
+#define sightGetScaleX() 1.f
+#define sightGetAdjustedX(x) (x)
+
+#endif
 
 /**
  * Return true if the prop is considered friendly (blue sight).
@@ -440,6 +461,11 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 
 	gdl = textSetPrimColour(gdl, 0x00ff0028);
 
+#ifndef PLATFORM_N64
+	x = sightGetAdjustedX(x);
+	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
+
 	// Draw the lines that span most of the viewport
 	if (PLAYERCOUNT() == 1) {
 		gDPHudRectangle(gdl++, viewleft + 48, y, x - radius + 2, y);
@@ -471,6 +497,10 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 	gDPHudRectangle(gdl++, x + cornergap, y - radius, x + radius, y - radius);
 	gDPHudRectangle(gdl++, x - radius, y + radius, x - cornergap, y + radius);
 	gDPHudRectangle(gdl++, x + cornergap, y + radius, x + radius, y + radius);
+
+#ifndef PLATFORM_N64
+	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	gdl = text0f153838(gdl);
 
@@ -505,6 +535,11 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u3
 	static f32 ypos = 120;
 	static f32 xspeed = 0;
 	static f32 yspeed = 0;
+
+#ifndef PLATFORM_N64
+	x = sightGetAdjustedX(x);
+	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
 		dist = x - xpos;
@@ -612,6 +647,10 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u3
 	gDPHudRectangle(gdl++, boxx + cornergap, boxy + radius, boxx + radius, boxy + radius);
 
 	gdl = text0f153838(gdl);
+
+#ifndef PLATFORM_N64
+	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	return gdl;
 }
@@ -817,7 +856,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	struct textureconfig *tconfig = &g_TexGeCrosshairConfigs[0];
 	f32 spc4[2];
 	f32 spbc[2];
-	s32 x = g_Vars.currentplayer->crosspos[0];
+	s32 x = sightGetAdjustedX(g_Vars.currentplayer->crosspos[0]);
 	s32 y = g_Vars.currentplayer->crosspos[1];
 	s32 x1;
 	s32 x2;
@@ -827,6 +866,10 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	if (!sighton) {
 		return gdl;
 	}
+
+#ifndef PLATFORM_N64
+	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	gDPSetColorDither(gdl++, G_CD_DISABLE);
 	gDPSetTexturePersp(gdl++, G_TP_NONE);
@@ -867,6 +910,10 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTextureConvert(gdl++, G_TC_FILT);
 	gDPSetTextureLUT(gdl++, G_TT_NONE);
+
+#ifndef PLATFORM_N64
+	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	return gdl;
 }
@@ -991,6 +1038,11 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton)
 	if (!hasprop) {
 		g_Vars.currentplayer->sighttimer240 = 0;
 	}
+
+#ifndef PLATFORM_N64
+	x = sightGetAdjustedX(x);
+	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	gdl = func0f0d479c(gdl);
 
@@ -1144,6 +1196,10 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton)
 
 	gdl = func0f0d49c8(gdl);
 
+#ifndef PLATFORM_N64
+	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
+
 	return gdl;
 }
 
@@ -1240,6 +1296,10 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 			cornerheight = BOXBOTTOM - BOXTOP;
 		}
 
+#ifndef PLATFORM_N64
+		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
+
 		// Top left
 		gDPHudRectangle(gdl++, BOXLEFT + 1, BOXTOP, BOXLEFT + cornerwidth - 1, BOXTOP);
 		gDPHudRectangle(gdl++, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight - 1);
@@ -1276,6 +1336,11 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth, BOXBOTTOM, BOXRIGHT, BOXBOTTOM);
 		gDPHudRectangle(gdl++, BOXRIGHT, BOXBOTTOM - cornerheight, BOXRIGHT, BOXBOTTOM);
 
+
+#ifndef PLATFORM_N64
+		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
+
 		gdl = text0f153838(gdl);
 		gdl = text0f153780(gdl);
 	}
@@ -1308,6 +1373,11 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 	if (sightIsPropFriendly(NULL)) {
 		colour = 0x0000ff60;
 	}
+
+#ifndef PLATFORM_N64
+	x = sightGetAdjustedX(x);
+	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	vertices = gfxAllocateVertices(8);
 	colours = gfxAllocateColours(2);
@@ -1379,12 +1449,16 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 
 	gdl = text0f153838(gdl);
 
+#ifndef PLATFORM_N64
+	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
+
 	return gdl;
 }
 
 Gfx *sightDrawTarget(Gfx *gdl)
 {
-	s32 x = (s32)g_Vars.currentplayer->crosspos[0] / g_ScaleX;
+	s32 x = sightGetAdjustedX((s32)g_Vars.currentplayer->crosspos[0] / g_ScaleX);
 	s32 y = g_Vars.currentplayer->crosspos[1];
 
 	static u32 var80070f9c = 0x00ff00ff;
@@ -1395,6 +1469,10 @@ Gfx *sightDrawTarget(Gfx *gdl)
 
 	gdl = textSetPrimColour(gdl, 0x00ff0028);
 
+#ifndef PLATFORM_N64
+	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
+
 	gDPHudRectangle(gdl++, x + 2, y + 0, x + 6, y + 0);
 	gDPHudRectangle(gdl++, x + 2, y + 0, x + 4, y + 0);
 	gDPHudRectangle(gdl++, x - 6, y + 0, x - 2, y + 0);
@@ -1403,6 +1481,10 @@ Gfx *sightDrawTarget(Gfx *gdl)
 	gDPHudRectangle(gdl++, x + 0, y + 2, x + 0, y + 4);
 	gDPHudRectangle(gdl++, x + 0, y - 6, x + 0, y - 2);
 	gDPHudRectangle(gdl++, x + 0, y - 4, x + 0, y - 2);
+
+#ifndef PLATFORM_N64
+	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+#endif
 
 	gdl = text0f153838(gdl);
 
