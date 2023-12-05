@@ -97,7 +97,7 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 
 ### Linux
 
-1. Ensure you have gcc, g++ (both >=10) and 32-bit versions of SDL2 (>=2.0.12), libGL and ZLib installed on your system.
+1. Ensure you have gcc, g++ (version 10.0+) and 32-bit versions of SDL2 (version 2.0.12+), libGL and ZLib installed on your system.
    * On a 64-bit system you also need to have `gcc-multilib` and `g++-multilib` (or your distro's analogues) installed.
 2. Run the following command in the `perfect_dark` directory:
    * On a 64-bit system: ```make -f Makefile.port TARGET_PLATFORM=i686-linux```
