@@ -30,7 +30,7 @@ There are minor graphics- and gameplay-related issues, and possibly occasional c
 * fixes for a couple original bugs and crashes;
 * basic mod support, currently enough to load a few custom levels;
 * slightly expanded memory heap size;
-* experimental high framerate support (up to 200 FPS):
+* experimental high framerate support (up to 240 FPS):
   * set `Game.TickRateDivisor` to `0` in `pd.ini` to activate;
   * in practice the game will have issues running faster than ~165 FPS, so use VSync or `Video.FramerateLimit` to cap it.
 
