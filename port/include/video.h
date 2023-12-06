@@ -4,6 +4,9 @@
 #include <PR/ultratypes.h>
 #include <PR/gbi.h>
 
+// maximum framerate; if the game runs faster than this, things will break
+#define VIDEO_MAX_FPS 200
+
 s32 videoInit(void);
 void videoStartFrame(void);
 void videoSubmitCommands(Gfx *cmds);
