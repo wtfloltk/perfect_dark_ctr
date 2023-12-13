@@ -903,6 +903,33 @@ static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menu
 	return 0;
 }
 
+#define SIGHT_COLOUR_R 0;
+#define SIGHT_COLOUR_G 255;
+#define SIGHT_COLOUR_B 0;
+
+static u32 RGBAToINT(u32 r, u32 g, u32 b, u32 a)
+{
+	return (((r) & 0xff) << 24 | ((g) & 0xff) << 16 | ((b) & 0xff) << 8 | ((a) & 0xff));
+}
+
+static MenuItemHandlerResult menuhandlerCrosshairAlpha(s32 operation, struct menuitem* item, union handlerdata* data)
+{
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshairalpha;
+		break;
+	case MENUOP_SET:
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshairalpha = data->slider.value;
+		
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = RGBAToINT(SIGHT_COLOUR_R, SIGHT_COLOUR_G, SIGHT_COLOUR_B, g_PlayerExtCfg[g_ExtMenuPlayer].crosshairalpha);
+		
+		break;
+	}
+
+	return 0;
+}
+
+
 struct menuitem g_ExtendedGameMenuItems[] = {
 	{
 		MENUITEMTYPE_DROPDOWN,
@@ -927,6 +954,14 @@ struct menuitem g_ExtendedGameMenuItems[] = {
 		(uintptr_t)"Crosshair Sway",
 		20,
 		menuhandlerCrosshairSway,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"Crosshair Alpha",
+		255,
+		menuhandlerCrosshairAlpha,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,
