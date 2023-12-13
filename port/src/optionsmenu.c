@@ -903,9 +903,10 @@ static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menu
 	return 0;
 }
 
-#define SIGHT_COLOUR_R 0;
-#define SIGHT_COLOUR_G 255;
-#define SIGHT_COLOUR_B 0;
+// Stock sight RGB.
+#define SIGHT_COLOUR_R 0
+#define SIGHT_COLOUR_G 255
+#define SIGHT_COLOUR_B 0
 
 static u32 RGBAToINT(u32 r, u32 g, u32 b, u32 a)
 {
@@ -916,12 +917,11 @@ static MenuItemHandlerResult menuhandlerCrosshairAlpha(s32 operation, struct men
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshairalpha;
+		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFF;
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[g_ExtMenuPlayer].crosshairalpha = data->slider.value;
 		
-		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = RGBAToINT(SIGHT_COLOUR_R, SIGHT_COLOUR_G, SIGHT_COLOUR_B, g_PlayerExtCfg[g_ExtMenuPlayer].crosshairalpha);
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = RGBAToINT(SIGHT_COLOUR_R, SIGHT_COLOUR_G, SIGHT_COLOUR_B, data->slider.value);
 		
 		break;
 	}

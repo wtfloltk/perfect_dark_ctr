@@ -6139,7 +6139,6 @@ struct extplayerconfig {
 	f32 radialmenuspeed;
 	f32 crosshairsway;
 	s32 extcontrols;
-	u32 crosshairalpha;
 	u32 crosshaircolour;
 };
 
