@@ -903,32 +903,156 @@ static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menu
 	return 0;
 }
 
-// Stock sight RGB.
-#define SIGHT_COLOUR_R 0
-#define SIGHT_COLOUR_G 255
-#define SIGHT_COLOUR_B 0
-
-static u32 RGBAToINT(u32 r, u32 g, u32 b, u32 a)
-{
-	return (((r) & 0xff) << 24 | ((g) & 0xff) << 16 | ((b) & 0xff) << 8 | ((a) & 0xff));
-}
-
-static MenuItemHandlerResult menuhandlerCrosshairAlpha(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshair_R(s32 operation, struct menuitem* item, union handlerdata* data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
-		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFF;
+		data->slider.value = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour >> 24) & 0xFF;
 		break;
+
 	case MENUOP_SET:
-		
-		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = RGBAToINT(SIGHT_COLOUR_R, SIGHT_COLOUR_G, SIGHT_COLOUR_B, data->slider.value);
-		
+		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFFFF | data->slider.value << 24;
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
 		break;
 	}
 
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerCrosshair_G(s32 operation, struct menuitem* item, union handlerdata* data)
+{
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour >> 16) & 0xFF;
+		break;
+
+	case MENUOP_SET:
+		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFF00FFFF | data->slider.value << 16;
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
+		break;
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerCrosshair_B(s32 operation, struct menuitem* item, union handlerdata* data)
+{
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour >> 8) & 0xFF;
+		break;
+
+	case MENUOP_SET:
+		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFF00FF | data->slider.value << 8;
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
+		break;
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerCrosshair_A(s32 operation, struct menuitem* item, union handlerdata* data)
+{
+	switch (operation) {
+	case MENUOP_GETSLIDER:
+		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFF;
+		break;
+
+	case MENUOP_SET:
+		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFFFF00 | data->slider.value;
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
+		break;
+	}
+
+	return 0;
+}
+
+static MenuItemHandlerResult menuhandlerCrosshairColorPreview(s32 operation, struct menuitem* item, union handlerdata* data)
+{
+	if (operation == MENUOP_GETCOLOUR) {
+		data->label.colour1 = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour;
+		data->label.colour2 = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour;
+	}
+
+	return 0;
+}
+
+struct menuitem g_ExtendedGameCrosshairColourMenuItems[] = {
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"R",
+		255,
+		menuhandlerCrosshair_R,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"G",
+		255,
+		menuhandlerCrosshair_G,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"B",
+		255,
+		menuhandlerCrosshair_B,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
+		(uintptr_t)"Alpha",
+		255,
+		menuhandlerCrosshair_A,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_LABEL,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_LABEL_CUSTOMCOLOUR,
+		(uintptr_t)"PREVIEW\n",
+		0,
+		menuhandlerCrosshairColorPreview,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		NULL,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
+		L_OPTIONS_213, // "Back"
+		0,
+		NULL,
+	},
+	{ MENUITEMTYPE_END },
+};
+
+struct menudialogdef g_ExtendedGameCrosshairColourMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)"Crosshair Colour",
+	g_ExtendedGameCrosshairColourMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT,
+	NULL,
+};
 
 struct menuitem g_ExtendedGameMenuItems[] = {
 	{
@@ -956,12 +1080,12 @@ struct menuitem g_ExtendedGameMenuItems[] = {
 		menuhandlerCrosshairSway,
 	},
 	{
-		MENUITEMTYPE_SLIDER,
+		MENUITEMTYPE_SELECTABLE,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
-		(uintptr_t)"Crosshair Alpha",
-		255,
-		menuhandlerCrosshairAlpha,
+		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SELECTABLE_OPENSDIALOG,
+		(uintptr_t)"Crosshair Colour\n",
+		0,
+		(void*)&g_ExtendedGameCrosshairColourMenuDialog,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,
