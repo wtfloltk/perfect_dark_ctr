@@ -4379,7 +4379,11 @@ Gfx *menuitemRender(Gfx *gdl, struct menurendercontext *context)
 	case MENUITEMTYPE_CAROUSEL:    return menuitemCarouselRender(gdl, context);
 	case MENUITEMTYPE_MODEL:       return menuitemModelRender(gdl, context);
 	case MENUITEMTYPE_CONTROLLER:  return menuitemControllerRender(gdl, context);
+
+#ifndef PLATFORM_N64
 	case MENUITEMTYPE_COLORBOX:    return menuitemColorBoxRender(gdl, context);
+#endif
+
 	}
 
 	return gdl;
