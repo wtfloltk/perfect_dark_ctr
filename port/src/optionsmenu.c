@@ -971,7 +971,6 @@ static MenuItemHandlerResult menuhandlerCrosshairColorPreview(s32 operation, str
 {
 	if (operation == MENUOP_GETCOLOUR) {
 		data->label.colour1 = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour;
-		data->label.colour2 = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour;
 	}
 
 	return 0;
@@ -1019,10 +1018,10 @@ struct menuitem g_ExtendedGameCrosshairColourMenuItems[] = {
 		NULL,
 	},
 	{
-		MENUITEMTYPE_LABEL,
+		MENUITEMTYPE_COLORBOX,
 		0,
-		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_LABEL_CUSTOMCOLOUR | MENUITEMFLAG_SELECTABLE_CENTRE,
-		(uintptr_t)"PREVIEW\n",
+		0,
+		0,
 		0,
 		menuhandlerCrosshairColorPreview,
 	},
