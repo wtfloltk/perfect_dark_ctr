@@ -121,6 +121,7 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	.radialmenuspeed = 4.f, \
 	.crosshairsway = 1.f, \
 	.crouchmode = CROUCHMODE_TOGGLE_ANALOG, \
+	.extcontrols = true, \
 	.crosshaircolour = 0x00ff0028, \
 }
 
