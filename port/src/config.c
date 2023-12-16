@@ -50,7 +50,6 @@ static inline f32 configClampFloat(f32 val, f32 min, f32 max)
 	return (val < min) ? min : ((val > max) ? max : val);
 }
 
-
 static inline struct configentry *configFindEntry(const char *key)
 {
 	for (s32 i = 0; i < numSettings; ++i) {
@@ -150,21 +149,21 @@ static void configSetFromString(const char *key, const char *val)
 	u32 tmp_u32;
 	switch (cfg->type) {
 		case CFG_S32:
-			tmp_s32 = atoi(val);
+			tmp_s32 = strtol(val, NULL, 0);
 			if (cfg->min_s32 < cfg->max_s32) {
 				tmp_s32 = configClampInt(tmp_s32, cfg->min_s32, cfg->max_s32);
 			}
 			*(s32 *)cfg->ptr = tmp_s32;
 			break;
 		case CFG_F32:
-			tmp_f32 = atof(val);
+			tmp_f32 = strtof(val, NULL);
 			if (cfg->min_f32 < cfg->max_f32) {
 				tmp_f32 = configClampFloat(tmp_f32, cfg->min_f32, cfg->max_f32);
 			}
 			*(f32 *)cfg->ptr = tmp_f32;
 			break;
 		case CFG_U32:
-			tmp_u32 = atoll(val);
+			tmp_u32 = strtoul(val, NULL, 0);
 			if (cfg->min_u32 < cfg->max_u32) {
 				tmp_u32 = configClampUInt(tmp_u32, cfg->min_u32, cfg->max_u32);
 			}
@@ -197,7 +196,7 @@ static void configSaveEntry(struct configentry *cfg, FILE *f)
 			if (cfg->min_u32 < cfg->max_u32) {
 				*(u32*)cfg->ptr = configClampUInt(*(u32*)cfg->ptr, cfg->min_u32, cfg->max_u32);
 			}
-			fprintf(f, "%s=%u\n", cfg->key + cfg->seclen + 1, *(u32*)cfg->ptr);
+			fprintf(f, "%s=%u\n", cfg->key + cfg->seclen + 1, *(u32 *)cfg->ptr);
 			break;
 		case CFG_STR:
 			fprintf(f, "%s=%s\n", cfg->key + cfg->seclen + 1, (char *)cfg->ptr);
