@@ -1911,7 +1911,13 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 	if (func->flags & FUNCFLAG_NOMUZZLEFLASH) {
 		hand->flashon = false;
 	} else {
-		hand->flashon = true;
+		if ( func->type != INVENTORYFUNCTYPE_SHOOT_SINGLE) {
+			if (hand->shotstotake % 2 == 1) {
+				hand->flashon = true;
+			}
+		} else {
+			hand->flashon = true;
+		}
 	}
 
 	bgunStartSlide(handnum);
