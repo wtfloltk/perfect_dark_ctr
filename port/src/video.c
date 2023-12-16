@@ -21,6 +21,7 @@ static s32 vidWidth = 640;
 static s32 vidHeight = 480;
 static s32 vidFramebuffers = true;
 static s32 vidFullscreen = false;
+static s32 vidMaximize = false;
 static s32 vidVsync = 1;
 static s32 vidMSAA = 1;
 static s32 vidFramerateLimit = 0;
@@ -44,7 +45,7 @@ s32 videoInit(void)
 	gfx_framebuffers_enabled = (bool)vidFramebuffers;
 	gfx_msaa_level = vidMSAA;
 
-	gfx_init(wmAPI, renderingAPI, "PD", vidFullscreen, vidWidth, vidHeight, 100, 100);
+	gfx_init(wmAPI, renderingAPI, "PD", vidFullscreen, vidMaximize, vidWidth, vidHeight, 100, 100);
 
 	if (!wmAPI->set_swap_interval(vidVsync)) {
 		vidVsync = 0;
@@ -232,6 +233,7 @@ void videoFreeCachedTexture(const void *texptr)
 PD_CONSTRUCTOR static void videoConfigInit(void)
 {
 	configRegisterInt("Video.DefaultFullscreen", &vidFullscreen, 0, 1);
+	configRegisterInt("Video.DefaultMaximize", &vidMaximize, 0, 1);
 	configRegisterInt("Video.DefaultWidth", &vidWidth, 0, 32767);
 	configRegisterInt("Video.DefaultHeight", &vidHeight, 0, 32767);
 	configRegisterInt("Video.VSync", &vidVsync, -1, 10);

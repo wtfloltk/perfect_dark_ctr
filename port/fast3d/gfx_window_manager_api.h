@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 struct GfxWindowManagerAPI {
-    void (*init)(const char* game_name, const char* gfx_api_name, bool start_in_fullscreen, uint32_t width,
+    void (*init)(const char* game_name, const char* gfx_api_name, bool start_in_fullscreen, bool start_maximized, uint32_t width,
                  uint32_t height, int32_t posX, int32_t posY);
     void (*close)(void);
     void (*set_fullscreen_changed_callback)(void (*on_fullscreen_changed)(bool is_now_fullscreen));

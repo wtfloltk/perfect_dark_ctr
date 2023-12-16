@@ -84,7 +84,7 @@ static void gfx_sdl_get_active_window_refresh_rate(uint32_t* refresh_rate) {
     *refresh_rate = mode.refresh_rate;
 }
 
-static void gfx_sdl_init(const char* game_name, const char* gfx_api_name, bool start_in_fullscreen, uint32_t width,
+static void gfx_sdl_init(const char* game_name, const char* gfx_api_name, bool start_in_fullscreen, bool start_maximized, uint32_t width,
                          uint32_t height, int32_t posX, int32_t posY) {
     window_width = width;
     window_height = height;
@@ -110,7 +110,11 @@ static void gfx_sdl_init(const char* game_name, const char* gfx_api_name, bool s
         posY = 100;
     }
 
-    const Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
+    Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
+    if (start_maximized) {
+        flags |= SDL_WINDOW_MAXIMIZED;
+    }
+
     wnd = SDL_CreateWindow(title, posX, posY, window_width, window_height, flags);
     if (!wnd) {
         sysFatalError("Could not open SDL window:\n%s", SDL_GetError());

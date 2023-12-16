@@ -678,6 +678,19 @@ static MenuItemHandlerResult menuhandlerTexFilter2D(s32 operation, struct menuit
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerGeMuzzleFlashes(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return g_BgunGeMuzzleFlashes;
+	case MENUOP_SET:
+		g_BgunGeMuzzleFlashes = data->checkbox.value;
+		break;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerCenterHUD(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
@@ -750,6 +763,14 @@ struct menuitem g_ExtendedVideoMenuItems[] = {
 		(uintptr_t)"GUI Texture Filtering",
 		0,
 		menuhandlerTexFilter2D,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"GE64-style Muzzle Flashes",
+		0,
+		menuhandlerGeMuzzleFlashes,
 	},
 	{
 		MENUITEMTYPE_DROPDOWN,
