@@ -190,6 +190,10 @@ char var800700bc[][10] = {
 	{ 'x','x','x'                         }, // "xxx"
 };
 
+#ifndef PLATFORM_N64
+s32 g_BgunGeMuzzleFlashes = false;
+#endif
+
 #if !MATCHING || VERSION >= VERSION_NTSC_1_0
 void bgunRumble(s32 handnum, s32 weaponnum)
 {
@@ -1911,13 +1915,17 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 	if (func->flags & FUNCFLAG_NOMUZZLEFLASH) {
 		hand->flashon = false;
 	} else {
-		if ( func->type != INVENTORYFUNCTYPE_SHOOT_SINGLE) {
-			if (hand->shotstotake % 2 == 1) {
+#ifdef PLATFORM_N64
+		hand->flashon = true;
+#else
+		if (g_BgunGeMuzzleFlashes) {
+			if (func->type != INVENTORYFUNCTYPE_SHOOT_SINGLE && (hand->shotstotake & 1)) {
 				hand->flashon = true;
 			}
 		} else {
 			hand->flashon = true;
 		}
+#endif
 	}
 
 	bgunStartSlide(handnum);
