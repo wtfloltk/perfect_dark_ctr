@@ -148,6 +148,11 @@ s32 videoGetFullscreen(void)
 	return vidFullscreen;
 }
 
+s32 videoGetMaximizeWindow(void)
+{
+	return vidMaximize;
+}
+
 f32 videoGetAspect(void)
 {
 	return gfx_current_dimensions.aspect_ratio;
@@ -174,6 +179,14 @@ void videoSetFullscreen(s32 fs)
 	if (fs != vidFullscreen) {
 		vidFullscreen = !!fs;
 		wmAPI->set_fullscreen(vidFullscreen);
+	}
+}
+
+void videoSetMaximizeWindow(s32 fs)
+{
+	if (fs != vidMaximize) {
+		vidMaximize = !!fs;
+		wmAPI->set_maximize(vidMaximize);
 	}
 }
 

@@ -652,6 +652,19 @@ static MenuItemHandlerResult menuhandlerFullScreen(s32 operation, struct menuite
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerMaximizeWindow(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return videoGetMaximizeWindow();
+	case MENUOP_SET:
+		videoSetMaximizeWindow(data->checkbox.value);
+		break;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerTexFilter(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
@@ -747,6 +760,14 @@ struct menuitem g_ExtendedVideoMenuItems[] = {
 		(uintptr_t)"Full Screen",
 		0,
 		menuhandlerFullScreen,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Maximize Window",
+		0,
+		menuhandlerMaximizeWindow,
 	},
 	{
 		MENUITEMTYPE_CHECKBOX,
