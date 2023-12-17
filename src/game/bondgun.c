@@ -1919,7 +1919,7 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 		hand->flashon = true;
 #else
 		if (g_BgunGeMuzzleFlashes) {
-			if (func->type != INVENTORYFUNCTYPE_SHOOT_SINGLE && (hand->shotstotake & 1)) {
+			if (func->type == INVENTORYFUNCTYPE_SHOOT_SINGLE || (hand->shotstotake & 1)) {
 				hand->flashon = true;
 			}
 		} else {
