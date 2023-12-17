@@ -417,7 +417,8 @@ Gfx *htbRenderHud(Gfx *gdl)
 #endif
 
 #ifndef PLATFORM_N64
-		if (PLAYERCOUNT() == 1) {
+		const s32 playercount = PLAYERCOUNT();
+		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		}
 #endif

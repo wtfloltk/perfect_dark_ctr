@@ -12797,7 +12797,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	gdl = text0f153628(gdl);
 
 #ifndef PLATFORM_N64
-	if (playercount < 2) {
+	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 	}
 #endif
@@ -13051,7 +13051,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 
 #ifndef PLATFORM_N64
-		if (playercount < 2) {
+		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
 		}
 #endif
@@ -13091,7 +13091,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 
 #ifndef PLATFORM_N64
-		if (playercount < 2) {
+		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 		}
 #endif
