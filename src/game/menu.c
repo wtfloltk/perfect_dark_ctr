@@ -1178,6 +1178,9 @@ bool menuIsItemFocusable(struct menuitem *item, struct menudialog *dialog, s32 a
 	case MENUITEMTYPE_METER:
 	case MENUITEMTYPE_MARQUEE:
 	case MENUITEMTYPE_CONTROLLER:
+#ifndef PLATFORM_N64
+	case MENUITEMTYPE_COLORBOX:
+#endif
 		return false;
 	case MENUITEMTYPE_10:
 	case MENUITEMTYPE_14:
