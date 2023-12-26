@@ -116,14 +116,23 @@ else
 endif
 
 VERSION_HASH := $(shell git rev-parse --short HEAD)
+VERSION_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 VERSION_TARGET := $(TARGET_PLATFORM)
 VERSION_ROMID := $(ROMID)
+
+ifeq ($(VERSION_BRANCH),)
+  VERSION_BRANCH := port-custom
+endif
+ifeq ($(VERSION_BRANCH),HEAD)
+  VERSION_BRANCH := port-custom
+endif
 
 DEFINES := \
   VERSION=$(VERSION) \
   VERSION_HASH=\"$(VERSION_HASH)\" \
   VERSION_TARGET=\"$(VERSION_TARGET)\" \
   VERSION_ROMID=\"$(VERSION_ROMID)\" \
+  VERSION_BRANCH=\"$(VERSION_BRANCH)\" \
   MATCHING=0 \
   PAL=$(IS_PAL) \
   PIRACYCHECKS=0 \
