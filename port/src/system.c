@@ -46,7 +46,7 @@ void sysInit(void)
 	}
 
 #ifdef VERSION_HASH
-	sysLogPrintf(LOG_NOTE, "version: " VERSION_HASH " (" VERSION_TARGET ")");
+	sysLogPrintf(LOG_NOTE, "version: " VERSION_BRANCH " " VERSION_HASH " (" VERSION_TARGET ")");
 #endif
 
 	char timestr[256];
