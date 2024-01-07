@@ -10,7 +10,7 @@
 #include "system.h"
 #include "platform.h"
 
-#define CRASH_MAX_MSG 4096
+#define CRASH_MAX_MSG 8192
 #define CRASH_MAX_SYM 256
 #define CRASH_MAX_FRAMES 32
 #define CRASH_MSG(...) \

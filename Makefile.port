@@ -154,6 +154,13 @@ ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
   TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -static-libstdc++ -ldbghelp
   # on windows/mingw we need this to be built with a 32-bit compiler so it finds the correct libs
   TOOLCHAIN ?= i686-w64-mingw32-
+  # check if cv2pdb is present
+  ifeq ($(CV2PDB),)
+    CV2PDB := cv2pdb
+    ifeq (,$(shell which cv2pdb 2>/dev/null))
+      CV2PDB :=
+    endif
+  endif
 else # assume *nix
   TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
   TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lGL -lz -ldl
@@ -305,6 +312,9 @@ $(G_DIR)/tiles/%.h: $(A_DIR)/tiles/%.json
 
 $(BIN): $(O_FILES)
 	$(LD) $(COMMON_CFLAGS) $(OPT_LVL) -o $(BIN) $^ $(LDFLAGS)
+ifneq ($(CV2PDB),)
+	$(CV2PDB) $(BIN)
+endif
 
 $(B_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
