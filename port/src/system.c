@@ -103,11 +103,9 @@ u64 sysGetMicroseconds(void)
 	return ((u64)tv.tv_sec * USEC_IN_SEC + (u64)tv.tv_usec) - startTick;
 }
 
-void sysLogStartCrash(void)
+s32 sysLogIsOpen(void)
 {
-	if (!logPath[0]) {
-		sysLogSetPath(CRASHLOG_FNAME);
-	}
+	return (logPath[0] != '\0');
 }
 
 void sysLogPrintf(s32 level, const char *fmt, ...)

@@ -10,6 +10,7 @@
 #include "system.h"
 #include "platform.h"
 
+#define CRASH_LOG_FNAME "pd.crash.log"
 #define CRASH_MAX_MSG 8192
 #define CRASH_MAX_SYM 256
 #define CRASH_MAX_FRAMES 32
@@ -132,15 +133,21 @@ static long __stdcall crashHandler(PEXCEPTION_POINTERS exinfo)
 		return EXCEPTION_CONTINUE_EXECUTION;
 	}
 
-	// start writing to a crash log file
-	sysLogStartCrash();
-
 	sysLogPrintf(LOG_ERROR, "FATAL: Crashed: PC=%p CODE=0x%08lx", exinfo->ExceptionRecord->ExceptionAddress, exinfo->ExceptionRecord->ExceptionCode);
 
 	fflush(stderr);
 	fflush(stdout);
 
 	crashStackTrace(msg, exinfo);
+
+	// open log file for the crash dump if one hasn't been opened yet
+	if (!sysLogIsOpen()) {
+		FILE *f = fopen(CRASH_LOG_FNAME, "wb");
+		if (f) {
+			fprintf(f, "Crash!\n\n%s", msg);
+			fclose(f);
+		}
+	}
 
 	sysFatalError("Crash!\n\n%s", msg);
 
