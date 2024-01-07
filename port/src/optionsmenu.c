@@ -945,15 +945,17 @@ static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menu
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshair_R(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairR(s32 operation, struct menuitem* item, union handlerdata* data)
 {
+	u32 newColor;
+
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour >> 24) & 0xFF;
 		break;
 
 	case MENUOP_SET:
-		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFFFF | data->slider.value << 24;
+		newColor = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFFFF) | data->slider.value << 24;
 		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
 		break;
 	}
@@ -961,15 +963,17 @@ static MenuItemHandlerResult menuhandlerCrosshair_R(s32 operation, struct menuit
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshair_G(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairG(s32 operation, struct menuitem* item, union handlerdata* data)
 {
+	u32 newColor;
+
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour >> 16) & 0xFF;
 		break;
 
 	case MENUOP_SET:
-		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFF00FFFF | data->slider.value << 16;
+		newColor = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFF00FFFF) | data->slider.value << 16;
 		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
 		break;
 	}
@@ -977,15 +981,17 @@ static MenuItemHandlerResult menuhandlerCrosshair_G(s32 operation, struct menuit
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshair_B(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairB(s32 operation, struct menuitem* item, union handlerdata* data)
 {
+	u32 newColor;
+
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour >> 8) & 0xFF;
 		break;
 
 	case MENUOP_SET:
-		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFF00FF | data->slider.value << 8;
+		newColor = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFF00FF) | data->slider.value << 8;
 		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
 		break;
 	}
@@ -993,15 +999,17 @@ static MenuItemHandlerResult menuhandlerCrosshair_B(s32 operation, struct menuit
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshair_A(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairA(s32 operation, struct menuitem* item, union handlerdata* data)
 {
+	u32 newColor;
+
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFF;
 		break;
 
 	case MENUOP_SET:
-		u32 newColor = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFFFF00 | data->slider.value;
+		newColor = (g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour & 0xFFFFFF00) | data->slider.value;
 		g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour = newColor;
 		break;
 	}
@@ -1025,7 +1033,7 @@ struct menuitem g_ExtendedGameCrosshairColourMenuItems[] = {
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Red",
 		255,
-		menuhandlerCrosshair_R,
+		menuhandlerCrosshairR,
 	},
 	{
 		MENUITEMTYPE_SLIDER,
@@ -1033,7 +1041,7 @@ struct menuitem g_ExtendedGameCrosshairColourMenuItems[] = {
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Green",
 		255,
-		menuhandlerCrosshair_G,
+		menuhandlerCrosshairG,
 	},
 	{
 		MENUITEMTYPE_SLIDER,
@@ -1041,7 +1049,7 @@ struct menuitem g_ExtendedGameCrosshairColourMenuItems[] = {
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Blue",
 		255,
-		menuhandlerCrosshair_B,
+		menuhandlerCrosshairB,
 	},
 	{
 		MENUITEMTYPE_SLIDER,
@@ -1049,7 +1057,7 @@ struct menuitem g_ExtendedGameCrosshairColourMenuItems[] = {
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Alpha",
 		255,
-		menuhandlerCrosshair_A,
+		menuhandlerCrosshairA,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,
