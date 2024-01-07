@@ -24,6 +24,7 @@ u64 sysGetMicroseconds(void);
 
 void sysFatalError(const char *fmt, ...) __attribute__((noreturn));
 
+void sysLogStartCrash(void);
 void sysLogPrintf(s32 level, const char *fmt, ...);
 
 void sysGetExecutablePath(char *outPath, const u32 outLen);

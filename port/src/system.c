@@ -11,6 +11,7 @@
 #include "system.h"
 
 #define LOG_FNAME "pd.log"
+#define CRASHLOG_FNAME "pd.crash.log"
 #define USEC_IN_SEC 1000000ULL
 
 static u64 startTick = 0;
@@ -18,6 +19,24 @@ static char logPath[2048];
 
 static s32 sysArgc;
 static const char **sysArgv;
+
+static inline void sysLogSetPath(const char *fname)
+{
+	// figure out where the log is and clear it
+	// try working dir first
+	snprintf(logPath, sizeof(logPath), "./%s", fname);
+	FILE *f = fopen(logPath, "wb");
+	if (!f) {
+		// try home dir
+		sysGetHomePath(logPath, sizeof(logPath) - 1);
+		strncat(logPath, "/", sizeof(logPath) - 1);
+		strncat(logPath, fname, sizeof(logPath) - 1);
+		f = fopen(logPath, "wb");
+	}
+	if (f) {
+		fclose(f);
+	}
+}
 
 void sysInitArgs(s32 argc, const char **argv)
 {
@@ -30,19 +49,7 @@ void sysInit(void)
 	startTick = sysGetMicroseconds();
 
 	if (sysArgCheck("--log")) {
-		// figure out where the log is and clear it
-		// try working dir first
-		snprintf(logPath, sizeof(logPath), "./%s", LOG_FNAME);
-		FILE *f = fopen(logPath, "wb");
-		if (!f) {
-			// try home dir
-			sysGetHomePath(logPath, sizeof(logPath) - 1);
-			strncat(logPath, "/" LOG_FNAME, sizeof(logPath) - 1);
-			f = fopen(logPath, "wb");
-		}
-		if (f) {
-			fclose(f);
-		}
+		sysLogSetPath(LOG_FNAME);
 	}
 
 #ifdef VERSION_HASH
@@ -94,6 +101,13 @@ u64 sysGetMicroseconds(void)
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return ((u64)tv.tv_sec * USEC_IN_SEC + (u64)tv.tv_usec) - startTick;
+}
+
+void sysLogStartCrash(void)
+{
+	if (!logPath[0]) {
+		sysLogSetPath(CRASHLOG_FNAME);
+	}
 }
 
 void sysLogPrintf(s32 level, const char *fmt, ...)
