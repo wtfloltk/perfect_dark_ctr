@@ -76,7 +76,7 @@ endif
 
 # Set target platform to host platform if not specified.
 ifeq ($(TARGET_PLATFORM),)
-  TARGET_PLATFORM := $(HOST_PLATFORM)
+  TARGET_PLATFORM := arm
 endif
 
 ifeq (,$(findstring clean,$(MAKECMDGOALS)))
@@ -155,13 +155,13 @@ ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
   # on windows/mingw we need this to be built with a 32-bit compiler so it finds the correct libs
   TOOLCHAIN ?= i686-w64-mingw32-
 else # assume *nix
-  TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
-  TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lGL -lz -ldl
-  ifneq (,$(findstring arm,$(TARGET_PLATFORM))$(findstring aarch,$(TARGET_PLATFORM)))
+  #TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
+  #TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lGL -lz -ldl
+  #ifneq (,$(findstring arm,$(TARGET_PLATFORM))$(findstring aarch,$(TARGET_PLATFORM)))
     # linux on arm or aarch64
     # TODO: detect soft/hardfloat abi
-    TOOLCHAIN ?= arm-linux-gnueabihf-
-  endif
+    TOOLCHAIN ?= arm-none-eabi-
+  #endif
 endif
 
 # On x86_64 gcc add -m32 to CFLAGS if building a 32-bit executable.
