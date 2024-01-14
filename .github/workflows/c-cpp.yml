@@ -6,7 +6,6 @@ on:
 jobs:
   build: 
     runs-on: ubuntu-latest
-    container: devkitpro:latest
     steps:
        - name: Install dependencies
          run: |
