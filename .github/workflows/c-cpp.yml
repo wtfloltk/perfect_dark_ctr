@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          dkp-pacman -S 3ds-dev --noconfirm
+          dkp-pacman -Syu 3ds-dev --noconfirm
           git config --global --add safe.directory /__w/perfect_dark_ctr/perfect_dark_ctr
           sudo apt-get update
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev -y
