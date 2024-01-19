@@ -15,7 +15,7 @@ jobs:
           cd dlfcn-win32
           mkdir dlfcn
           cd dlfcn
-          cmake ..
+          cmake .. -DCMAKE_C_COMPILER=/opt/devkitpro/devkitARM/arm-none-eabi-gcc
           make
           make install
           cd ..
