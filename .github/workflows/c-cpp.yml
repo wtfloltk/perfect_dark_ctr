@@ -13,6 +13,7 @@ jobs:
         run: |
           dkp-pacman -Syu --noconfirm
           dkp-pacman -Sy 3ds-dev 3ds-portlibs --noconfirm
+          dkp-pacman -Sy 3ds-sdl 3ds-zlib --noconfirm
           git config --global --add safe.directory /__w/perfect_dark_ctr/perfect_dark_ctr
           sudo apt-get update
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev -y
@@ -21,7 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Build pd.elf
-        run: make -f Makefile.port.arm -k
+        run: make -f Makefile.port.arm 
       - name: protect
         run: zip -P notallowed -r -e arm.zip build/ 
       - name: Upload artifact
