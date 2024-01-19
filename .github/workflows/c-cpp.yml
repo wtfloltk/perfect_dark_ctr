@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Build pd.elf
-        run: make -f Makefile.port.arm
+        run: make -f Makefile.port.arm -k
       - name: protect
         run: zip -P notallowed -r -e arm.zip build/ 
       - name: Upload artifact
