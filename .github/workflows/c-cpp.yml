@@ -11,11 +11,13 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev dlfcn -y
           git clone --recursive https://github.com/dlfcn-win32/dlfcn-win32.git
           cd dlfcn-win32
           mkdir dlfcn
           cd dlfcn
-          cmake .. -DCMAKE_C_COMPILER=/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
+          cmake .. 
           make
           make install
           cd ..
@@ -24,8 +26,6 @@ jobs:
           dkp-pacman -Sy 3ds-dev 3ds-portlibs --noconfirm
           dkp-pacman -Sy 3ds-sdl 3ds-zlib 3ds-dlfcn --noconfirm
           git config --global --add safe.directory /__w/perfect_dark_ctr/perfect_dark_ctr
-          sudo apt-get update
-          sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev dlfcn -y
           wget "http://ia600508.us.archive.org/view_archive.php?archive=/14/items/perfect-dark-n64_/Perfect%20Dark%20%28USA%29%20%28Rev%201%29.zip&file=Perfect%20Dark%20%28USA%29%20%28Rev%201%29.z64"
           mv *Perfect*.z64 pd.ntsc-final.z64
       - name: Checkout repository
