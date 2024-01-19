@@ -12,7 +12,7 @@ jobs:
           git config --global --add safe.directory /__w/perfect_dark_ctr/perfect_dark_ctr
           sudo apt-get update
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev -y
-          wget https://archive.org/download/perfect-dark-n64_/Perfect%20Dark%20%28USA%29%20%28Rev%201%29.zip/Perfect%20Dark%20%28USA%29%20%28Rev%201%29.z64
+          echo :\/\/
           mv Perfect*.z64 pd.ntsc-final.z64
        - name: checkout
          uses: actions/checkout@v4         
@@ -37,7 +37,7 @@ jobs:
           git config --global --add safe.directory /__w/perfect_dark_ctr/perfect_dark_ctr
           sudo apt-get update
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev -y
-          wget https://archive.org/download/perfect-dark-n64_/Perfect%20Dark%20%28USA%29%20%28Rev%201%29.zip/Perfect%20Dark%20%28USA%29%20%28Rev%201%29.z64
+          echo :\/\/
           mv Perfect*.z64 pd.ntsc-final.z64
       - name: Checkout repository
         uses: actions/checkout@v3
