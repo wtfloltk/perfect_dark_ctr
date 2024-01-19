@@ -4,28 +4,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  build: 
-    runs-on: ubuntu-latest
-    steps:
-       - name: Install dependencies
-         run: |
-          git config --global --add safe.directory /__w/perfect_dark_ctr/perfect_dark_ctr
-          sudo apt-get update
-          sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev -y
-          echo :\/\/
-          mv Perfect*.z64 pd.ntsc-final.z64
-       - name: checkout
-         uses: actions/checkout@v4         
-       - name: make
-         run: make
-       - name: protect
-         run: zip -P notallowed -r -e linux.zip build/        
-       - name: Upload artifact
-         uses: actions/upload-artifact@v3
-         with:
-           name: pd
-           path: build/
-           retention-days: 0
         
   build-arm-none:
     runs-on: windows-latest
