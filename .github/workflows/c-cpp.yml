@@ -21,6 +21,8 @@ jobs:
           make
           cd ..
           cmake .
+          chmod +x configure
+          ./configure
           make
           make install
           cd ..
