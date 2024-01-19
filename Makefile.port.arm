@@ -160,7 +160,7 @@ else # assume *nix
   #ifneq (,$(findstring arm,$(TARGET_PLATFORM))$(findstring aarch,$(TARGET_PLATFORM)))
     # linux on arm or aarch64
     # TODO: detect soft/hardfloat abi
-    TOOLCHAIN ?= /opt/devkitpro/devkitarm/bin/arm-none-eabi-
+    TOOLCHAIN ?= /opt/devkitpro/devkitARM/bin/arm-none-eabi-
   #endif
 endif
 
