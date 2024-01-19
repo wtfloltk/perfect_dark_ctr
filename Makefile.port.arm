@@ -167,7 +167,7 @@ endif
 # On x86_64 gcc add -m32 to CFLAGS if building a 32-bit executable.
 ifneq (,$(findstring x86_64,$(HOST_PLATFORM))$(findstring x86_64,$(TOOLCHAIN)))
   ifneq (1,$(TARGET_64BIT))
-    TARGET_CFLAGS += -m32
+    TARGET_CFLAGS += -mbe32
   endif
 endif
 
